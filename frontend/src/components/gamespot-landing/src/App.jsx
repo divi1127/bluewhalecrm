@@ -40,7 +40,7 @@ import couponImg from './images/coupon.png'
 const CRM_LOGIN_URL = import.meta.env.VITE_CRM_URL || '/login'
 
 // Backend API — landing forms (contact enquiry + party booking) post here
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
+const API_URL = import.meta.env.VITE_API_URL || 'https://bluewhalecrm.onrender.com/api'
 
 const navLinks = [
   { href: '#overview', label: 'Overview' },
