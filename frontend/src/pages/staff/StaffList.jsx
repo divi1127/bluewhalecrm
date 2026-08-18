@@ -92,7 +92,7 @@ const StaffList = () => {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-2">
         <h2 className="text-lg font-bold text-ocean-900">Staff Master</h2>
         {canCreate && (
           <button onClick={() => setShowForm((s) => !s)} className="btn-accent">
@@ -123,7 +123,7 @@ const StaffList = () => {
       )}
 
       {canCreate && showForm && (
-        <form onSubmit={handleCreate} className="card grid grid-cols-2 gap-3">
+        <form onSubmit={handleCreate} className="card grid grid-cols-1 gap-3 sm:grid-cols-2">
           <div>
             <label className="label">Name</label>
             <input className="input-field" required value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />

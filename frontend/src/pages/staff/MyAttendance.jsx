@@ -174,7 +174,7 @@ const MyAttendance = () => {
                 Out: <strong className="text-ocean-900">{fmtTime(today?.checkOut)}</strong>
               </span>
             </div>
-            <div className="ml-auto flex gap-2">
+            <div className="ml-auto flex flex-wrap gap-2">
               <button
                 onClick={() => handleAction("checkin")}
                 disabled={busy || !!today?.checkIn}

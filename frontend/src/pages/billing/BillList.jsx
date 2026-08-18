@@ -85,9 +85,9 @@ const BillList = () => {
           </PrintSheet>
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
             <div className="max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-2xl bg-white p-6">
-              <div className="mb-4 flex items-center justify-between">
+              <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <h3 className="text-lg font-bold text-ocean-900">Bill {bill?.billNumber}</h3>
-                <div className="flex gap-2">
+                <div className="flex flex-wrap gap-2">
                   <button onClick={() => window.print()} className="btn-primary">
                     <Printer size={16} /> Print Invoice & {tags.length} Wrist Tag{tags.length === 1 ? "" : "s"}
                   </button>

@@ -99,32 +99,34 @@ const Bookings = () => {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <h2 className="text-lg font-bold text-ocean-900">Party / Event Bookings</h2>
-        <div className="flex bg-ocean-50 rounded-lg p-1 border border-ocean-100">
-          {[
-            { v: "", label: "All Bookings" },
-            { v: "online", label: "Online" },
-            { v: "staff", label: "Staff" },
-          ].map((o) => (
-            <button
-              key={o.v || "all"}
-              onClick={() => setSource(o.v)}
-              className={`px-4 py-2 text-sm font-semibold rounded-md transition-all duration-200 ${source === o.v ? "bg-white text-ocean-900 shadow-sm border border-ocean-200" : "text-ocean-500 hover:text-ocean-700 hover:bg-ocean-100/50"}`}
-            >
-              {o.label}
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="flex flex-wrap bg-ocean-50 rounded-lg p-1 border border-ocean-100">
+            {[
+              { v: "", label: "All Bookings" },
+              { v: "online", label: "Online" },
+              { v: "staff", label: "Staff" },
+            ].map((o) => (
+              <button
+                key={o.v || "all"}
+                onClick={() => setSource(o.v)}
+                className={`px-4 py-2 text-sm font-semibold rounded-md transition-all duration-200 ${source === o.v ? "bg-white text-ocean-900 shadow-sm border border-ocean-200" : "text-ocean-500 hover:text-ocean-700 hover:bg-ocean-100/50"}`}
+              >
+                {o.label}
+              </button>
+            ))}
+          </div>
+          {canCreate && (
+            <button onClick={() => setShowForm((s) => !s)} className="btn-accent">
+              <Plus size={16} /> New Booking
             </button>
-          ))}
+          )}
         </div>
-        {canCreate && (
-          <button onClick={() => setShowForm((s) => !s)} className="btn-accent">
-            <Plus size={16} /> New Booking
-          </button>
-        )}
       </div>
 
       {canCreate && showForm && (
-        <form onSubmit={handleCreate} className="card grid grid-cols-2 gap-3">
+        <form onSubmit={handleCreate} className="card grid grid-cols-1 gap-3 sm:grid-cols-2">
           <div>
             <label className="label">Customer Name</label>
             <input className="input-field" required value={form.customerName} onChange={(e) => setForm({ ...form, customerName: e.target.value })} />

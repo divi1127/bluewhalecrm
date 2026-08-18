@@ -82,9 +82,9 @@ const TVDisplay = () => {
   const hasExpired = expiredEntries.length > 0;
 
   return (
-    <div className="relative min-h-screen bg-ocean-950 p-8 text-white">
+    <div className="relative min-h-screen bg-ocean-950 p-4 text-white sm:p-8">
       {/* Header */}
-      <div className="mb-8 flex items-center justify-between">
+      <div className="mb-8 flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-3">
           <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-teal-500">
             <Waves size={26} />
@@ -102,7 +102,7 @@ const TVDisplay = () => {
 
       {/* Global Expired Alert Banner */}
       {hasExpired && (
-        <div className="mb-6 flex items-center gap-3 rounded-2xl border border-red-500 bg-red-500/10 px-6 py-4 animate-pulse">
+        <div className="mb-6 flex flex-wrap items-center gap-3 rounded-2xl border border-red-500 bg-red-500/10 px-4 py-4 animate-pulse sm:px-6">
           <AlertTriangle className="text-red-400 shrink-0" size={28} />
           <div>
             <p className="text-lg font-bold text-red-300">⚠ Time Expired — Action Required!</p>
@@ -119,7 +119,7 @@ const TVDisplay = () => {
           <p className="text-ocean-600 mt-2">Scanned entries will appear here in real time</p>
         </div>
       ) : (
-        <div className="grid grid-cols-2 gap-5 md:grid-cols-3 lg:grid-cols-4">
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
           {entries.map((entry) => {
             const remaining = formatRemaining(entry.expiryTime);
             const isExpired = remaining.expired;

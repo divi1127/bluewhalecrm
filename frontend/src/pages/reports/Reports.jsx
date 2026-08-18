@@ -136,7 +136,7 @@ const Reports = () => {
 
           {activeTab === "customers" && (
             <>
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
                 <div className="rounded-lg bg-teal-50 px-4 py-3">
                   <p className="text-xs font-semibold uppercase text-teal-500">New</p>
                   <p className="text-xl font-bold text-ocean-900">{data.newCount}</p>
@@ -177,7 +177,7 @@ const Reports = () => {
 
           {activeTab === "entries" && (
             <>
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
                 <div className="rounded-lg bg-teal-50 px-4 py-3">
                   <p className="text-xs font-semibold uppercase text-teal-500">Total Entries</p>
                   <p className="text-xl font-bold text-ocean-900">{data.totalEntries}</p>
@@ -201,7 +201,8 @@ const Reports = () => {
           {activeTab === "coupons" &&
             (Array.isArray(data) ? (
               data.length ? (
-                <table className="w-full text-left text-sm">
+                <div className="overflow-x-auto">
+                  <table className="w-full min-w-[520px] text-left text-sm">
                   <thead>
                     <tr className="border-b border-ocean-100 text-xs font-semibold uppercase text-ocean-500">
                       <th className="py-2">Partner</th>
@@ -223,6 +224,7 @@ const Reports = () => {
                     ))}
                   </tbody>
                 </table>
+                </div>
               ) : (
                 <p className="flex items-center gap-2 py-6 text-center text-sm text-ocean-400">
                   <Inbox size={16} /> No coupon campaigns yet.

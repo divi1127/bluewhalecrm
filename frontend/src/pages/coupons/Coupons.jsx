@@ -167,7 +167,7 @@ const Coupons = () => {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-2">
         <h2 className="text-lg font-bold text-ocean-900">Outside Partner Coupons</h2>
         {canCreate && (
           <button onClick={() => { setEditingId(null); setForm(emptyForm); setShowForm((s) => !s); }} className="btn-accent">
@@ -177,7 +177,7 @@ const Coupons = () => {
       </div>
 
       {(canCreate || canEdit) && showForm && (
-        <form onSubmit={handleSubmit} className="card grid grid-cols-2 gap-3">
+        <form onSubmit={handleSubmit} className="card grid grid-cols-1 gap-3 sm:grid-cols-2">
           <div>
             <label className="label">Partner Name</label>
             <input className="input-field" required value={form.partnerName} onChange={(e) => setForm({ ...form, partnerName: e.target.value })} />
@@ -270,8 +270,8 @@ const Coupons = () => {
           </PrintSheet>
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
             <div className="flex max-h-[80vh] w-full max-w-3xl flex-col rounded-2xl bg-white p-6">
-              <div className="flex items-start justify-between">
-                <div>
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                <div className="min-w-0">
                   <h3 className="mb-1 text-lg font-bold text-ocean-900">
                     {codesModal.coupon.partnerName} — Generated Codes
                   </h3>
@@ -279,7 +279,7 @@ const Coupons = () => {
                     Select coupons to print. Each A4 sheet holds 2 coupons — print, cut along the dashed line.
                   </p>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex flex-wrap items-center gap-2">
                   <button onClick={selectAll} className="btn-secondary py-1.5 text-xs">
                     <CheckSquare size={13} /> Select All
                   </button>
@@ -315,7 +315,7 @@ const Coupons = () => {
                 ))}
               </div>
 
-              <div className="mt-2 flex items-center gap-2 border-t border-ocean-100 pt-4">
+              <div className="mt-2 flex flex-wrap items-center gap-2 border-t border-ocean-100 pt-4">
                 <label className="label mb-0 mr-1 whitespace-nowrap">Copies per code</label>
                 <input type="number" min="1" className="input-field w-24" value={count} onChange={(e) => setCount(e.target.value)} />
                 <button onClick={() => handleGenerateCodes(codesModal.coupon)} className="btn-secondary">

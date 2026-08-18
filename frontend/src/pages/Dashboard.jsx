@@ -124,7 +124,7 @@ const Dashboard = () => {
           <p className="text-xs text-ocean-400">Auto-refreshes every 30 seconds</p>
         </div>
         <div className="flex flex-wrap items-center gap-3">
-          <div className="flex rounded-lg border border-ocean-100 bg-white p-1">
+          <div className="flex flex-wrap rounded-lg border border-ocean-100 bg-white p-1">
             {PERIODS.map((p) => (
               <button
                 key={p.key}

@@ -175,7 +175,7 @@ const NewBill = () => {
         {/* ON-SCREEN PREVIEW — Bill on top, tags stacked below */}
         <div className="mx-auto max-w-3xl space-y-4">
           {/* Header bar */}
-          <div className="card flex items-center justify-between">
+          <div className="card flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <h2 className="flex items-center gap-2 text-lg font-bold text-ocean-900">
                 <CheckCircle2 size={20} className="text-teal-500" /> Bill & Wrist Tags Generated
@@ -184,7 +184,7 @@ const NewBill = () => {
                 {bill.billNumber} · {tags.length} wrist tag(s) · {totalPersons} person(s)
               </p>
             </div>
-            <div className="flex gap-3">
+            <div className="flex flex-wrap gap-3">
               <button onClick={() => window.print()} className="btn-primary">
                 <Printer size={16} /> Print Bill & Wrist Tags
               </button>
@@ -241,7 +241,7 @@ const NewBill = () => {
         </p>
 
         <div className="mb-5 rounded-xl border border-ocean-100 bg-ocean-50/40 p-4">
-          <div className="mb-3 flex items-center justify-between">
+          <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
             <h3 className="flex items-center gap-2 text-sm font-bold uppercase tracking-wide text-ocean-700">
               {customer ? <UserCheck size={16} className="text-teal-500" /> : <UserPlus size={16} className="text-teal-500" />}
               Customer Registration
@@ -261,7 +261,7 @@ const NewBill = () => {
             </p>
           )}
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div className="col-span-2">
               <label className="label">Customer Name *</label>
               <input
@@ -338,7 +338,7 @@ const NewBill = () => {
             </select>
           </div>
 
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
             <div>
               <label className="label">Adults</label>
               <input type="number" min={0} className="input-field" value={adults} onChange={(e) => setAdults(e.target.value)} />
@@ -376,8 +376,8 @@ const NewBill = () => {
 
           <div>
             <label className="label">Coupon Code (optional)</label>
-            <div className="flex gap-2">
-              <input className="input-field" value={couponCode} onChange={(e) => setCouponCode(e.target.value.toUpperCase())} placeholder="e.g. KUM-3F9A2B" />
+            <div className="flex flex-wrap gap-2">
+              <input className="input-field min-w-[140px] flex-1" value={couponCode} onChange={(e) => setCouponCode(e.target.value.toUpperCase())} placeholder="e.g. KUM-3F9A2B" />
               <button
                 type="button"
                 onClick={() => setScannerOpen(true)}

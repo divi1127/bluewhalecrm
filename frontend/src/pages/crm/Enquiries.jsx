@@ -104,9 +104,9 @@ const Enquiries = () => {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-2">
         <h2 className="text-lg font-bold text-ocean-900">Enquiries</h2>
-        <div className="flex items-center gap-1">
+        <div className="flex flex-wrap items-center gap-1">
           {["", "new", "contacted", "closed"].map((st) => (
             <button
               key={st || "all"}

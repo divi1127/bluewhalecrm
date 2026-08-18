@@ -244,7 +244,7 @@ const Control = () => {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-2">
         <h2 className="text-lg font-bold text-ocean-900">Control — Users & Access</h2>
         <button
           onClick={() => { resetForm(); setShowForm((s) => !s); }}
@@ -260,7 +260,7 @@ const Control = () => {
         </div>
       )}
 
-      <div className="flex gap-2">
+      <div className="flex flex-wrap gap-2">
         <button
           onClick={() => setTab("users")}
           className={`flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-bold transition ${tab === "users" ? "bg-ocean-700 text-white" : "bg-white text-ocean-600 ring-1 ring-ocean-100"}`}
@@ -276,7 +276,7 @@ const Control = () => {
       </div>
 
       {showForm && (
-        <form onSubmit={handleSubmit} className="card grid grid-cols-2 gap-3">
+        <form onSubmit={handleSubmit} className="card grid grid-cols-1 gap-3 sm:grid-cols-2">
           <div>
             <label className="label">Full Name</label>
             <input className="input-field" required value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />

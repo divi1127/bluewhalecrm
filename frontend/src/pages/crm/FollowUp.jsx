@@ -195,9 +195,9 @@ const FollowUp = () => {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-2">
         <h2 className="text-lg font-bold text-ocean-900">Follow-up List</h2>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <button onClick={copyNumbers} className="btn-secondary">
             <MessageCircle size={16} /> Copy Numbers
           </button>
@@ -211,7 +211,7 @@ const FollowUp = () => {
       </p>
 
       {stats && (
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-5">
           <StatCard label="To Follow Up" value={stats.total} icon={Users} accent="coral" />
           <StatCard label="Pending Contact" value={stats.pending} icon={CalendarClock} accent="ocean" />
           <StatCard label="VIPs Dormant" value={stats.byType.vip} icon={Mail} accent="amber" />

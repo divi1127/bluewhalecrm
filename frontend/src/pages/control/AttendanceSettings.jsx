@@ -294,7 +294,7 @@ const AttendanceSettings = () => {
         </div>
       </div>
 
-      <div className="flex justify-end gap-3">
+      <div className="flex flex-wrap justify-end gap-3">
         {!canEdit ? (
           <div className="flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm font-semibold text-amber-700">
             <ShieldAlert size={15} className="mt-0.5 shrink-0" />

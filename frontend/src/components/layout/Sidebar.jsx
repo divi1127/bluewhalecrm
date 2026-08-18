@@ -18,6 +18,7 @@ import {
   Fingerprint,
   ScanFace,
   Wallet,
+  X,
 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 
@@ -43,7 +44,7 @@ const navItems = [
   { to: "/control", label: "Control", icon: ShieldCheck, roles: ["super_admin"], module: "users" },
 ];
 
-const Sidebar = () => {
+const Sidebar = ({ open, onClose }) => {
   const { user, can } = useAuth();
 
   const visibleItems = navItems.filter(
@@ -53,15 +54,26 @@ const Sidebar = () => {
   );
 
   return (
-    <aside className="flex h-screen w-64 flex-col border-r border-ocean-100 bg-ocean-900 text-sand-100">
+    <aside
+      className={`fixed inset-y-0 left-0 z-40 flex w-64 flex-col border-r border-ocean-100 bg-ocean-900 text-sand-100 transition-transform duration-200 lg:relative lg:inset-auto lg:h-auto lg:translate-x-0 ${
+        open ? "translate-x-0" : "-translate-x-full"
+      }`}
+    >
       <div className="flex items-center gap-2 px-6 py-6">
         <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-teal-500">
           <Waves size={20} className="text-white" />
         </div>
-        <div>
+        <div className="flex-1">
           <p className="font-display text-lg font-bold leading-tight text-white">BlueWhale</p>
           <p className="text-[11px] uppercase tracking-wider text-ocean-300">Park Manager</p>
         </div>
+        <button
+          onClick={onClose}
+          aria-label="Close menu"
+          className="rounded-lg p-1.5 text-ocean-300 transition hover:bg-ocean-800 hover:text-white lg:hidden"
+        >
+          <X size={20} />
+        </button>
       </div>
 
       <nav className="flex-1 space-y-1 overflow-y-auto px-3 pb-6">
@@ -70,6 +82,7 @@ const Sidebar = () => {
             key={to}
             to={to}
             end={to === "/dashboard"}
+            onClick={onClose}
             className={({ isActive }) =>
               `flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition ${
                 isActive
