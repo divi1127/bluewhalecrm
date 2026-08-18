@@ -30,7 +30,7 @@ const Login = () => {
       {/* Left side: Image */}
       <div className="relative hidden w-1/2 lg:block">
         <img 
-          src="/images/login-bg.png" 
+          src="https://i.pinimg.com/1200x/aa/1d/ef/aa1def172582b58230c81be9dd4b83ab.jpg" 
           alt="Gaming Arcade" 
           className="absolute inset-0 h-full w-full object-cover" 
         />
