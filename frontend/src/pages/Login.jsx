@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Waves, LogIn, ScanFace } from "lucide-react";
+import { Waves, LogIn, ScanFace, Eye, EyeOff } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 
 const homeByRole = (role) =>
@@ -13,6 +13,7 @@ const Login = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -64,14 +65,24 @@ const Login = () => {
             </div>
             <div>
               <label className="label text-ocean-200">Password</label>
-              <input
-                type="password"
-                required
-                className="input-field bg-ocean-950/50 border-ocean-700 text-white placeholder-ocean-500 focus:border-teal-500 focus:ring-teal-500/20"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
-              />
+              <div className="relative">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  required
+                  className="input-field bg-ocean-950/50 border-ocean-700 text-white placeholder-ocean-500 focus:border-teal-500 focus:ring-teal-500/20 pr-11"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((s) => !s)}
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-ocean-400 transition hover:text-teal-400"
+                >
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
             </div>
 
             {error && <p className="text-sm font-medium text-coral-500">{error}</p>}
