@@ -743,20 +743,69 @@ function Contact() {
 }
 
 function Footer() {
+  const quickLinks = [
+    { href: '#overview', label: 'Overview' },
+    { href: '#gallery', label: 'Gallery' },
+    { href: '#pricing', label: 'Pricing' },
+    { href: '#booking', label: 'Party Booking' },
+    { href: '#contact', label: 'Contact Us' },
+  ]
   return (
     <footer className="border-t border-white/5 bg-night-900/60">
-      <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
-        <div className="flex flex-col items-center justify-between gap-4 text-center sm:flex-row sm:text-left">
-          <div className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-brand-500 to-accent-500"><Gamepad2 size={16} className="text-white" /></div>
-            <span className="font-display font-bold text-white">bluewhale</span>
+      <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6">
+        <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="flex flex-col items-center gap-3 text-center sm:items-start sm:text-left">
+            <div className="flex items-center gap-2">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-brand-500 to-accent-500"><Gamepad2 size={16} className="text-white" /></div>
+              <span className="font-display font-bold text-white">bluewhale</span>
+            </div>
+            <p className="text-sm text-slate-500">{venue.description}</p>
           </div>
-          <p className="max-w-md text-sm text-slate-500">Indoor & outdoor games, kids activities, great food and an awesome time — all under one roof.</p>
-          <div className="flex items-center gap-2 text-xs text-slate-500">
-            <MapPin size={13} /> {venue.address}
+
+          <div className="text-center sm:text-left">
+            <h4 className="font-display text-sm font-bold uppercase tracking-wider text-white">Quick Links</h4>
+            <ul className="mt-4 space-y-2.5">
+              {quickLinks.map((l) => (
+                <li key={l.href}>
+                  <a href={l.href} className="text-sm text-slate-500 transition hover:text-brand-400">{l.label}</a>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div className="text-center sm:text-left">
+            <h4 className="font-display text-sm font-bold uppercase tracking-wider text-white">Contact</h4>
+            <ul className="mt-4 space-y-2.5">
+              <li className="flex items-start justify-center gap-2 text-sm text-slate-500 sm:justify-start">
+                <MapPin size={14} className="mt-0.5 shrink-0" /> {venue.address}
+              </li>
+              <li>
+                <a href={`tel:${venue.phone.replace(/\s/g, '')}`} className="flex items-center justify-center gap-2 text-sm text-slate-500 transition hover:text-brand-400 sm:justify-start">
+                  <Phone size={14} className="shrink-0" /> {venue.phone}
+                </a>
+              </li>
+              <li>
+                <a href={`mailto:${venue.email}`} className="flex items-center justify-center gap-2 text-sm text-slate-500 transition hover:text-brand-400 sm:justify-start">
+                  <Mail size={14} className="shrink-0" /> {venue.email}
+                </a>
+              </li>
+            </ul>
+          </div>
+
+          <div className="text-center sm:text-left">
+            <h4 className="font-display text-sm font-bold uppercase tracking-wider text-white">Opening Hours</h4>
+            <ul className="mt-4 space-y-2.5">
+              {venue.hours.map((h) => (
+                <li key={h.days} className="flex items-start justify-center gap-2 text-sm text-slate-500 sm:justify-start">
+                  <Clock size={14} className="mt-0.5 shrink-0" />
+                  <span><span className="text-slate-400">{h.days}:</span> {h.time}</span>
+                </li>
+              ))}
+            </ul>
+            <a href="#booking" className="l-btn-outline mt-5 inline-flex items-center gap-1.5 px-3 py-1.5 text-xs"><CalendarDays size={13} /> Book a Slot</a>
           </div>
         </div>
-        <p className="mt-8 text-center text-xs text-slate-600">© 2026 bluewhale. Contact enquiries and party bookings are saved to the park CRM.</p>
+        <p className="mt-10 text-center text-xs text-slate-600">© 2026 bluewhale. Contact enquiries and party bookings are saved to the park CRM.</p>
       </div>
     </footer>
   )
