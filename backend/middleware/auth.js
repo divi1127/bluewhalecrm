@@ -66,4 +66,48 @@ const requirePermission = (moduleKey, action) => (req, res, next) => {
   next();
 };
 
-module.exports = { protect, authorize, requirePermission, hasPermission };
+// Combined role + permission gate, e.g. access("entry", "create", "super_admin", "admin", "entry_staff")
+// - super_admin always passes.
+// - User with explicit object permissions: the grant decides, even if their role
+//   is not in the whitelist (so Control > module access works for any user).
+// - User without explicit permissions (empty or legacy array): falls back to the
+//   role whitelist; legacy arrays may also grant view-only access.
+const access = (moduleKey, action, ...roles) => (req, res, next) => {
+  if (!req.user) {
+    res.status(401);
+    throw new Error("Not authorized, no token provided");
+  }
+  const user = req.user;
+  if (user.role === "super_admin") return next();
+
+  const perms = user.permissions;
+  const explicit =
+    perms && !Array.isArray(perms) && Object.keys(perms).length > 0;
+
+  if (explicit) {
+    if (perms[moduleKey] && perms[moduleKey][action]) return next();
+    res.status(403);
+    throw new Error(`You do not have permission to ${action} this module`);
+  }
+
+  const roleOk = roles.includes(user.role);
+  if (roleOk) return next();
+
+  // Legacy array permissions could only ever widen view access for whitelisted
+  // roles, so keep them working for non-whitelisted roles too.
+  if (
+    action === "view" &&
+    Array.isArray(perms) &&
+    perms.length > 0 &&
+    perms.includes(moduleKey)
+  ) {
+    return next();
+  }
+
+  res.status(403);
+  throw new Error(
+    `Role '${user.role}' is not permitted to access this resource`
+  );
+};
+
+module.exports = { protect, authorize, requirePermission, hasPermission, access };

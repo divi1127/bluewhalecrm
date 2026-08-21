@@ -59,6 +59,9 @@ const AttendanceSettings = () => {
     enforcedOn: ["login", "checkin", "checkout"],
     gps: "recorded",
     allowedLeaves: 2,
+    shiftStart: "09:00",
+    graceMinutes: 10,
+    latesPerDeduction: 3,
   });
 
   useEffect(() => {
@@ -71,6 +74,9 @@ const AttendanceSettings = () => {
           enforcedOn: s.faceVerification?.enforcedOn || ["login", "checkin", "checkout"],
           gps: s.gps?.enforcement || "recorded",
           allowedLeaves: s.salary?.allowedLeavesPerMonth ?? 2,
+          shiftStart: s.salary?.shiftStart || "09:00",
+          graceMinutes: s.salary?.graceMinutes ?? 10,
+          latesPerDeduction: s.salary?.latesPerDeduction ?? 3,
         });
         setLoaded(true);
       })
@@ -97,7 +103,12 @@ const AttendanceSettings = () => {
       const { data } = await api.put("/settings/attendance", {
         faceVerification: { method: form.method, enforcedOn: form.enforcedOn },
         gps: { enforcement: form.gps },
-        salary: { allowedLeavesPerMonth: form.allowedLeaves },
+        salary: {
+          allowedLeavesPerMonth: form.allowedLeaves,
+          shiftStart: form.shiftStart,
+          graceMinutes: form.graceMinutes,
+          latesPerDeduction: form.latesPerDeduction,
+        },
       });
       const s = data.data;
       setForm({
@@ -105,6 +116,9 @@ const AttendanceSettings = () => {
         enforcedOn: s.faceVerification?.enforcedOn || form.enforcedOn,
         gps: s.gps?.enforcement || form.gps,
         allowedLeaves: s.salary?.allowedLeavesPerMonth ?? form.allowedLeaves,
+        shiftStart: s.salary?.shiftStart || form.shiftStart,
+        graceMinutes: s.salary?.graceMinutes ?? form.graceMinutes,
+        latesPerDeduction: s.salary?.latesPerDeduction ?? form.latesPerDeduction,
       });
       flash("Attendance enforcement settings saved");
     } catch (err) {
@@ -262,6 +276,54 @@ const AttendanceSettings = () => {
           </div>
           <p className="pb-2 text-xs text-ocean-400">
             e.g. 3 leaves in a month with {form.allowedLeaves} allowed → 1 day's salary deducted.
+          </p>
+        </div>
+      </div>
+
+      {/* ── Shift & late policy ── */}
+      <div className="card">
+        <h3 className="mb-1 flex items-center gap-2 font-bold text-ocean-900">
+          <CalendarClock size={18} className="text-teal-500" /> Shift & late policy
+        </h3>
+        <p className="mb-3 text-xs text-ocean-500">
+          Check-ins after the shift start (plus grace minutes) are marked late. Every N late days in a
+          month deducts one day's salary — set 0 to disable the deduction.
+        </p>
+        <div className="flex flex-wrap items-end gap-3">
+          <div className="w-36">
+            <label className="label">Shift start</label>
+            <input
+              type="time"
+              className="input-field"
+              value={form.shiftStart}
+              onChange={(e) => setForm((f) => ({ ...f, shiftStart: e.target.value }))}
+            />
+          </div>
+          <div className="w-36">
+            <label className="label">Grace minutes</label>
+            <input
+              type="number"
+              min="0"
+              max="120"
+              className="input-field"
+              value={form.graceMinutes}
+              onChange={(e) => setForm((f) => ({ ...f, graceMinutes: Math.max(0, Number(e.target.value) || 0) }))}
+            />
+          </div>
+          <div className="w-44">
+            <label className="label">Late days per deduction</label>
+            <input
+              type="number"
+              min="0"
+              max="31"
+              className="input-field"
+              value={form.latesPerDeduction}
+              onChange={(e) => setForm((f) => ({ ...f, latesPerDeduction: Math.max(0, Number(e.target.value) || 0) }))}
+            />
+          </div>
+          <p className="pb-2 text-xs text-ocean-400">
+            e.g. shift {form.shiftStart} + {form.graceMinutes} min grace — checking in later is marked
+            Late. {form.latesPerDeduction > 0 ? `${form.latesPerDeduction} late days = 1 day's pay deducted.` : "Late deduction is off."}
           </p>
         </div>
       </div>

@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useCallback } from "react";
+import React, { createContext, useContext, useState, useCallback, useEffect, useRef } from "react";
 import api from "../api/axios";
 
 const AuthContext = createContext(null);
@@ -10,6 +10,29 @@ export const AuthProvider = ({ children }) => {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const userRef = useRef(user);
+  userRef.current = user;
+
+  const applyUser = (data) => {
+    localStorage.setItem("bw_user", JSON.stringify(data));
+    setUser(data);
+  };
+
+  // Re-fetch the logged-in user (fresh role + module permissions) and update the
+  // stored session. Keeps the sidebar in sync when an admin changes access while
+  // the user is logged in — no logout needed.
+  const refreshUser = useCallback(async () => {
+    if (!localStorage.getItem("bw_token")) return;
+    try {
+      const { data } = await api.get("/auth/me");
+      if (data?.data) {
+        const current = userRef.current;
+        applyUser({ ...current, ...data.data, token: undefined });
+      }
+    } catch {
+      // network hiccup or expired token — the axios interceptor handles 401s
+    }
+  }, []);
 
   const login = useCallback(async (email, password) => {
     setLoading(true);
@@ -17,8 +40,7 @@ export const AuthProvider = ({ children }) => {
     try {
       const { data } = await api.post("/auth/login", { email, password });
       localStorage.setItem("bw_token", data.data.token);
-      localStorage.setItem("bw_user", JSON.stringify(data.data));
-      setUser(data.data);
+      applyUser(data.data);
       return data.data;
     } catch (err) {
       setError(err.response?.data?.message || "Login failed");
@@ -41,8 +63,7 @@ export const AuthProvider = ({ children }) => {
     try {
       const { data } = await api.post("/auth/face-login", { descriptor, gps });
       localStorage.setItem("bw_token", data.data.token);
-      localStorage.setItem("bw_user", JSON.stringify(data.data));
-      setUser(data.data);
+      applyUser(data.data);
       return data.data;
     } catch (err) {
       setError(err.response?.data?.message || "Face login failed");
@@ -51,6 +72,19 @@ export const AuthProvider = ({ children }) => {
       setLoading(false);
     }
   }, []);
+
+  // Poll for permission/role changes and refresh when the tab regains focus,
+  // so access granted in Control shows up without logging out.
+  useEffect(() => {
+    if (!user) return undefined;
+    const interval = setInterval(refreshUser, 15000);
+    const onFocus = () => refreshUser();
+    window.addEventListener("focus", onFocus);
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener("focus", onFocus);
+    };
+  }, [user?._id, refreshUser]);
 
   // Permission check: can(user, module, action) where action is view|create|edit|delete.
   // Mirrors backend middleware/auth.js hasPermission().
@@ -69,7 +103,7 @@ export const AuthProvider = ({ children }) => {
   );
 
   return (
-    <AuthContext.Provider value={{ user, login, faceLogin, logout, loading, error, can }}>
+    <AuthContext.Provider value={{ user, login, faceLogin, logout, loading, error, can, refreshUser }}>
       {children}
     </AuthContext.Provider>
   );

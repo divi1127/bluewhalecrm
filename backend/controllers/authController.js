@@ -159,6 +159,7 @@ const faceLogin = asyncHandler(async (req, res) => {
 
   // Auto check-in attendance + re-login block
   const Attendance = require("../models/Attendance");
+  const { computeLateMinutes } = require("./attendanceController");
   const date = new Date().toISOString().slice(0, 10);
   let record = await Attendance.findOne({ staff: best._id, date });
 
@@ -176,6 +177,7 @@ const faceLogin = asyncHandler(async (req, res) => {
       date,
       checkIn: new Date(),
       status: "present",
+      lateMinutes: await computeLateMinutes(new Date()),
       gps: gps
         ? { lat: gps.lat, lng: gps.lng, accuracy: gps.accuracy, capturedAt: new Date() }
         : undefined,
@@ -183,6 +185,7 @@ const faceLogin = asyncHandler(async (req, res) => {
   } else if (!record.checkIn) {
     record.checkIn = new Date();
     record.status = "present";
+    record.lateMinutes = await computeLateMinutes(new Date());
     if (gps) record.gps = { lat: gps.lat, lng: gps.lng, accuracy: gps.accuracy, capturedAt: new Date() };
     await record.save();
   } else if (record.checkOut && record.allowReLogin) {

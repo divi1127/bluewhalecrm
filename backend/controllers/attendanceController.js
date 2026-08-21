@@ -3,8 +3,23 @@ const Attendance = require("../models/Attendance");
 const AttendanceSetting = require("../models/AttendanceSetting");
 const Staff = require("../models/Staff");
 const User = require("../models/User");
+const { computeSalaryBreakdown } = require("../utils/salary");
 
 const todayStr = () => new Date().toISOString().slice(0, 10);
+
+// Minutes between a check-in time and the configured shift start (beyond grace).
+// Returns 0 when the staff member is on time or no shift is configured.
+const computeLateMinutes = async (now) => {
+  const settings = await AttendanceSetting.getSingleton();
+  const shiftStart = settings.salary?.shiftStart;
+  if (!shiftStart || !/^\d{1,2}:\d{2}$/.test(shiftStart)) return 0;
+  const [h, m] = shiftStart.split(":").map(Number);
+  const shift = new Date(now);
+  shift.setHours(h, m, 0, 0);
+  const grace = (settings.salary?.graceMinutes ?? 0) * 60 * 1000;
+  const lateMs = now.getTime() - shift.getTime() - grace;
+  return lateMs > 0 ? Math.floor(lateMs / 60000) : 0;
+};
 
 // Validates a check-in/out payload against the enforcement settings.
 // Returns the sanitized { facePhoto, gps } to store, or throws 400.
@@ -60,6 +75,7 @@ const ownStaffId = async (req, res) => {
 const checkIn = asyncHandler(async (req, res) => {
   const { staffId, date = todayStr() } = req.body;
   const enforced = await enforceSettings(req, res, "checkin", req.body);
+  const lateMinutes = date === todayStr() ? await computeLateMinutes(new Date()) : 0;
   let record = await Attendance.findOne({ staff: staffId, date });
   if (record && record.checkIn) {
     res.status(400);
@@ -71,12 +87,14 @@ const checkIn = asyncHandler(async (req, res) => {
       date,
       checkIn: new Date(),
       status: "present",
+      lateMinutes,
       facePhoto: enforced.facePhoto,
       gps: enforced.gps,
     });
   } else {
     record.checkIn = new Date();
     record.status = "present";
+    record.lateMinutes = lateMinutes;
     record.facePhoto = enforced.facePhoto || record.facePhoto;
     record.gps = enforced.gps || record.gps;
     await record.save();
@@ -108,6 +126,7 @@ const selfCheckIn = asyncHandler(async (req, res) => {
   const staffId = await ownStaffId(req, res);
   const date = todayStr();
   const enforced = await enforceSettings(req, res, "checkin", req.body);
+  const lateMinutes = await computeLateMinutes(new Date());
   let record = await Attendance.findOne({ staff: staffId, date });
   if (record && record.checkIn) {
     res.status(400);
@@ -119,12 +138,14 @@ const selfCheckIn = asyncHandler(async (req, res) => {
       date,
       checkIn: new Date(),
       status: "present",
+      lateMinutes,
       facePhoto: enforced.facePhoto,
       gps: enforced.gps,
     });
   } else {
     record.checkIn = new Date();
     record.status = "present";
+    record.lateMinutes = lateMinutes;
     record.facePhoto = enforced.facePhoto || record.facePhoto;
     record.gps = enforced.gps || record.gps;
     await record.save();
@@ -200,6 +221,49 @@ const getAttendance = asyncHandler(async (req, res) => {
   res.json({ success: true, data: records });
 });
 
+// @desc  Per-person attendance totals for a date range (daily/weekly/monthly/yearly/custom)
+// @route GET /api/attendance/summary?from=&to=&staffId=
+const getAttendanceSummary = asyncHandler(async (req, res) => {
+  const { from, to, staffId } = req.query;
+  const query = {};
+  if (staffId) query.staff = staffId;
+  if (from || to) {
+    query.date = {};
+    if (from) query.date.$gte = from;
+    if (to) query.date.$lte = to;
+  }
+  const records = await Attendance.find(query).populate("staff", "name designation staffId");
+
+  const byStaff = new Map();
+  for (const r of records) {
+    const key = String(r.staff?._id || r.staff);
+    if (!byStaff.has(key)) {
+      byStaff.set(key, {
+        staff: r.staff
+          ? { _id: r.staff._id, staffId: r.staff.staffId, name: r.staff.name, designation: r.staff.designation }
+          : null,
+        totalRecords: 0,
+        presentDays: 0,
+        absentDays: 0,
+        halfDays: 0,
+        leaveDays: 0,
+        lateDays: 0,
+        totalOvertimeHours: 0,
+      });
+    }
+    const s = byStaff.get(key);
+    s.totalRecords += 1;
+    if (r.status === "present") s.presentDays += 1;
+    else if (r.status === "absent") s.absentDays += 1;
+    else if (r.status === "half-day") s.halfDays += 1;
+    else if (r.status === "leave") s.leaveDays += 1;
+    if ((r.lateMinutes || 0) > 0) s.lateDays += 1;
+    s.totalOvertimeHours += r.overtimeHours || 0;
+  }
+
+  res.json({ success: true, data: [...byStaff.values()] });
+});
+
 // @desc  Compute monthly salary for a staff member based on attendance.
 //        Leave policy: the first `allowedLeavesPerMonth` (default 2) leaves are paid;
 //        any leave beyond that deducts one day's salary for each extra day.
@@ -219,47 +283,9 @@ const computeMonthlySalary = asyncHandler(async (req, res) => {
   }
 
   const records = await Attendance.find({ staff: staffId, date: { $regex: `^${month}` } });
-
-  const presentDays = records.filter((r) => r.status === "present").length;
-  const halfDays = records.filter((r) => r.status === "half-day").length;
-  const leaveDays = records.filter((r) => r.status === "leave").length;
-  const absentDays = records.filter((r) => r.status === "absent").length;
-  const totalOvertimeHours = records.reduce((sum, r) => sum + (r.overtimeHours || 0), 0);
-
   const settings = await AttendanceSetting.getSingleton();
-  const allowedLeaves = settings.salary?.allowedLeavesPerMonth ?? 2;
-
-  // First N leaves are paid; the rest are unpaid and deduct one day's salary each.
-  const paidLeaves = Math.min(leaveDays, allowedLeaves);
-  const unpaidLeaveDays = Math.max(leaveDays - allowedLeaves, 0);
-
-  const daysInMonth = new Date(Number(month.split("-")[0]), Number(month.split("-")[1]), 0).getDate();
-  const perDaySalary = staff.salaryType === "monthly" ? staff.salaryAmount / daysInMonth : staff.salaryAmount;
-
-  const effectiveDays = presentDays + halfDays * 0.5 + paidLeaves;
-  const overtimePay = totalOvertimeHours * (perDaySalary / 8); // assume 8-hr workday for OT rate
-  const deduction = unpaidLeaveDays * perDaySalary;
-  const grossSalary = effectiveDays * perDaySalary + overtimePay;
-
-  res.json({
-    success: true,
-    data: {
-      staff: { _id: staff._id, name: staff.name, designation: staff.designation },
-      month,
-      presentDays,
-      halfDays,
-      leaveDays,
-      absentDays,
-      totalOvertimeHours,
-      allowedLeaves,
-      paidLeaves,
-      unpaidLeaveDays,
-      deduction: Math.round(deduction * 100) / 100,
-      perDaySalary: Math.round(perDaySalary * 100) / 100,
-      overtimePay: Math.round(overtimePay * 100) / 100,
-      grossSalary: Math.round(grossSalary * 100) / 100,
-    },
-  });
+  const breakdown = computeSalaryBreakdown(staff, records, settings, month);
+  res.json({ success: true, data: breakdown });
 });
 
 // @desc  Super admin grants permission for a staff member to face-login again after checkout
@@ -279,4 +305,4 @@ const grantReLogin = asyncHandler(async (req, res) => {
   res.json({ success: true, message: "Re-login permission granted", data: record });
 });
 
-module.exports = { checkIn, checkOut, markStatus, getAttendance, computeMonthlySalary, selfCheckIn, selfCheckOut, selfStatus, grantReLogin };
+module.exports = { checkIn, checkOut, markStatus, getAttendance, getAttendanceSummary, computeMonthlySalary, selfCheckIn, selfCheckOut, selfStatus, grantReLogin, computeLateMinutes };

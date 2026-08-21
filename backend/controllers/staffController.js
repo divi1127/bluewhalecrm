@@ -1,6 +1,9 @@
 const asyncHandler = require("../utils/asyncHandler");
 const Staff = require("../models/Staff");
 const User = require("../models/User");
+const Attendance = require("../models/Attendance");
+const AttendanceSetting = require("../models/AttendanceSetting");
+const { computeSalaryBreakdown } = require("../utils/salary");
 
 const nextStaffId = async () => {
   const last = await Staff.findOne({}, { staffId: 1 }).sort({ staffId: -1 });
@@ -130,4 +133,48 @@ const clearFace = asyncHandler(async (req, res) => {
   res.json({ success: true, data: { _id: staff._id, name: staff.name, faceRegistered: false } });
 });
 
-module.exports = { getStaff, getStaffMember, createStaff, updateStaff, deactivateStaff, registerFace, clearFace };
+// @desc  Per-staff monthly attendance totals + salary computed from those days
+// @route GET /api/staff/monthly-summary?month=YYYY-MM
+const monthlySummary = asyncHandler(async (req, res) => {
+  const month = req.query.month || new Date().toISOString().slice(0, 7);
+  if (!/^\d{4}-\d{2}$/.test(month)) {
+    res.status(400);
+    throw new Error("month query param must be in YYYY-MM format");
+  }
+
+  const staffList = await Staff.find({ active: true }).sort({ name: 1 });
+  const settings = await AttendanceSetting.getSingleton();
+  const records = await Attendance.find({ date: { $regex: `^${month}` } });
+
+  const byStaff = new Map();
+  for (const r of records) {
+    const key = String(r.staff);
+    if (!byStaff.has(key)) byStaff.set(key, []);
+    byStaff.get(key).push(r);
+  }
+
+  const rows = staffList.map((staff) => {
+    const breakdown = computeSalaryBreakdown(
+      staff,
+      byStaff.get(String(staff._id)) || [],
+      settings,
+      month
+    );
+    return {
+      staffId: staff.staffId,
+      name: staff.name,
+      designation: staff.designation,
+      presentDays: breakdown.presentDays,
+      halfDays: breakdown.halfDays,
+      leaveDays: breakdown.leaveDays,
+      absentDays: breakdown.absentDays,
+      lateDays: breakdown.lateDays,
+      totalOvertimeHours: breakdown.totalOvertimeHours,
+      netSalary: breakdown.netSalary,
+    };
+  });
+
+  res.json({ success: true, data: { month, rows } });
+});
+
+module.exports = { getStaff, getStaffMember, createStaff, updateStaff, deactivateStaff, registerFace, clearFace, monthlySummary };

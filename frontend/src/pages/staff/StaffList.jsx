@@ -7,6 +7,8 @@ import { useAuth } from "../../context/AuthContext";
 import api from "../../api/axios";
 
 const emptyForm = { name: "", phone: "", designation: "", dob: "", joiningDate: "", salaryType: "monthly", salaryAmount: "" };
+const thisMonth = () => new Date().toISOString().slice(0, 7);
+const fmtMoney = (n) => `₹${Number(n || 0).toLocaleString("en-IN", { maximumFractionDigits: 2 })}`;
 
 const StaffList = () => {
   const { can } = useAuth();
@@ -17,13 +19,27 @@ const StaffList = () => {
   const [faceTarget, setFaceTarget] = useState(null);
   const [savingFace, setSavingFace] = useState(false);
   const [faceMsg, setFaceMsg] = useState(null);
+  const [month, setMonth] = useState(thisMonth());
+  const [monthly, setMonthly] = useState({}); // staffId -> monthly totals
 
   const canCreate = can("staff", "create");
 
   const load = () => api.get("/staff").then(({ data }) => setStaff(data.data));
 
+  const loadMonthly = (m = month) =>
+    api
+      .get("/staff/monthly-summary", { params: { month: m } })
+      .then(({ data }) => {
+        const map = {};
+        for (const row of data.data.rows) map[row.staffId] = row;
+        setMonthly(map);
+      })
+      .catch(() => setMonthly({}));
+
   useEffect(() => {
     load();
+    loadMonthly();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleCreate = async (e) => {
@@ -72,6 +88,30 @@ const StaffList = () => {
     { key: "joiningDate", label: "Joined", render: (row) => new Date(row.joiningDate).toLocaleDateString("en-IN") },
     { key: "active", label: "Status", render: (row) => <Badge color={row.active ? "green" : "gray"}>{row.active ? "Active" : "Inactive"}</Badge> },
     {
+      key: "presentDays",
+      label: `Present (${month})`,
+      render: (row) => {
+        const m = monthly[row.staffId];
+        if (!m) return <span className="text-ocean-300">—</span>;
+        return (
+          <span className="text-sm">
+            <span className="font-bold text-emerald-600">{m.presentDays}</span>
+            <span className="text-xs text-ocean-400"> / {m.presentDays + m.halfDays + m.leaveDays + m.absentDays} marked</span>
+            {m.lateDays > 0 && <span className="ml-1 text-xs font-semibold text-amber-600">· {m.lateDays} late</span>}
+          </span>
+        );
+      },
+    },
+    {
+      key: "netSalary",
+      label: `Salary (${month})`,
+      render: (row) => {
+        const m = monthly[row.staffId];
+        if (!m) return <span className="text-ocean-300">—</span>;
+        return <span className="font-semibold text-teal-600">{fmtMoney(m.netSalary)}</span>;
+      },
+    },
+    {
       key: "face",
       label: "Face Login",
       render: (row) => (
@@ -94,11 +134,25 @@ const StaffList = () => {
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <h2 className="text-lg font-bold text-ocean-900">Staff Master</h2>
-        {canCreate && (
-          <button onClick={() => setShowForm((s) => !s)} className="btn-accent">
-            <Plus size={16} /> New Staff
-          </button>
-        )}
+        <div className="flex items-end gap-3">
+          <div>
+            <label className="label">Monthly totals for</label>
+            <input
+              type="month"
+              className="input-field"
+              value={month}
+              onChange={(e) => {
+                setMonth(e.target.value || thisMonth());
+                if (e.target.value) loadMonthly(e.target.value);
+              }}
+            />
+          </div>
+          {canCreate && (
+            <button onClick={() => setShowForm((s) => !s)} className="btn-accent">
+              <Plus size={16} /> New Staff
+            </button>
+          )}
+        </div>
       </div>
 
       {createdLogin && (

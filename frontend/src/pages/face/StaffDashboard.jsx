@@ -39,7 +39,8 @@ const ROLE_ACTIONS = {
   ],
   hr_manager: [
     { to: "/staff", icon: UserCog, label: "Staff Master", desc: "Manage staff records and faces" },
-    { to: "/staff/attendance", icon: Wallet, label: "Attendance & Salary", desc: "Mark attendance and compute salaries" },
+    { to: "/staff/attendance", icon: CalendarClock, label: "Attendance", desc: "Mark and review attendance" },
+    { to: "/salary", icon: Wallet, label: "Salary", desc: "Monthly payroll from attendance" },
   ],
 };
 

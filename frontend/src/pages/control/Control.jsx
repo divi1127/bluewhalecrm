@@ -16,6 +16,7 @@ const MODULES = [
   { key: "packages", label: "Packages" },
   { key: "staff", label: "Staff Master" },
   { key: "attendance", label: "Attendance" },
+  { key: "salary", label: "Salary" },
   { key: "reports", label: "Reports" },
   { key: "settings", label: "Attendance Settings" },
   { key: "users", label: "Users & Access" },

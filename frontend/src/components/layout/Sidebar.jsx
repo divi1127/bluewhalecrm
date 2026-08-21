@@ -18,6 +18,7 @@ import {
   Fingerprint,
   ScanFace,
   Wallet,
+  IndianRupee,
   X,
 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
@@ -38,7 +39,8 @@ const navItems = [
   { to: "/packages", label: "Packages", icon: Package, roles: ["super_admin", "admin"], module: "packages" },
   { to: "/attendance/my", label: "My Attendance", icon: CalendarClock, roles: ["admin", "billing_staff", "cashier", "entry_staff", "hr_manager"], module: "attendance" },
   { to: "/staff", label: "Staff Master", icon: UserCog, roles: ["super_admin", "admin", "hr_manager"], module: "staff" },
-  { to: "/staff/attendance", label: "Attendance & Salary", icon: UserCog, roles: ["super_admin", "admin", "hr_manager"], module: "attendance" },
+  { to: "/staff/attendance", label: "Attendance", icon: CalendarClock, roles: ["super_admin", "admin", "hr_manager"], module: "attendance" },
+  { to: "/salary", label: "Salary", icon: IndianRupee, roles: ["super_admin", "admin", "hr_manager"], module: "salary" },
   { to: "/control/attendance-settings", label: "Attendance Enforcement", icon: Fingerprint, roles: ["super_admin", "admin"], module: "settings" },
   { to: "/reports", label: "Reports", icon: BarChart3, roles: ["super_admin", "admin"], module: "reports" },
   { to: "/control", label: "Control", icon: ShieldCheck, roles: ["super_admin"], module: "users" },
@@ -47,11 +49,22 @@ const navItems = [
 const Sidebar = ({ open, onClose }) => {
   const { user, can } = useAuth();
 
-  const visibleItems = navItems.filter(
-    (item) =>
-      (!item.roles || item.roles.includes(user?.role)) &&
-      (!item.module || can(item.module, "view"))
-  );
+  // Mirrors backend middleware/auth.js access():
+  // - Users with an explicit permission object see exactly the modules granted
+  //   in Control (a grant works even when their role isn't in the default list).
+  // - Users without explicit permissions fall back to their role's defaults.
+  const hasExplicitPerms =
+    user?.permissions &&
+    !Array.isArray(user.permissions) &&
+    Object.keys(user.permissions).length > 0;
+
+  const visibleItems = navItems.filter((item) => {
+    const roleOk = !item.roles || item.roles.includes(user?.role);
+    if (hasExplicitPerms) {
+      return item.module ? can(item.module, "view") : roleOk;
+    }
+    return roleOk;
+  });
 
   return (
     <aside

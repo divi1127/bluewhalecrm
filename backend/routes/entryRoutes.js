@@ -5,7 +5,7 @@ const {
   getActiveEntries,
   getTagStatus,
 } = require("../controllers/entryController");
-const { protect, authorize, requirePermission } = require("../middleware/auth");
+const { protect, access } = require("../middleware/auth");
 
 const router = express.Router();
 
@@ -14,7 +14,7 @@ router.get("/active", getActiveEntries);
 router.get("/status/:tagId", getTagStatus);
 
 router.use(protect);
-router.post("/scan", authorize("super_admin", "admin", "entry_staff"), requirePermission("entry", "create"), scanEntry);
-router.post("/exit", authorize("super_admin", "admin", "entry_staff"), requirePermission("entry", "create"), markExit);
+router.post("/scan", access("entry", "create", "super_admin", "admin", "entry_staff"), scanEntry);
+router.post("/exit", access("entry", "create", "super_admin", "admin", "entry_staff"), markExit);
 
 module.exports = router;

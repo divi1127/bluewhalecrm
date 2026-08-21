@@ -12,6 +12,7 @@ const attendanceSchema = new mongoose.Schema(
       default: "present",
     },
     overtimeHours: { type: Number, default: 0 },
+    lateMinutes: { type: Number, default: 0 }, // minutes checked in after shift start + grace
     notes: { type: String },
     facePhoto: { type: String }, // base64 data-URL captured at check-in/out
     gps: {

@@ -7,16 +7,16 @@ const {
   bookingsReport,
   staffReport,
 } = require("../controllers/reportController");
-const { protect, authorize, requirePermission } = require("../middleware/auth");
+const { protect, access } = require("../middleware/auth");
 
 const router = express.Router();
 
-router.use(protect, authorize("super_admin", "admin"));
-router.get("/sales", requirePermission("reports", "view"), salesReport);
-router.get("/customers", requirePermission("reports", "view"), customersReport);
-router.get("/entries", requirePermission("reports", "view"), entriesReport);
-router.get("/coupons", requirePermission("reports", "view"), couponsReport);
-router.get("/bookings", requirePermission("reports", "view"), bookingsReport);
-router.get("/staff", requirePermission("reports", "view"), staffReport);
+router.use(protect);
+router.get("/sales", access("reports", "view", "super_admin", "admin"), salesReport);
+router.get("/customers", access("reports", "view", "super_admin", "admin"), customersReport);
+router.get("/entries", access("reports", "view", "super_admin", "admin"), entriesReport);
+router.get("/coupons", access("reports", "view", "super_admin", "admin"), couponsReport);
+router.get("/bookings", access("reports", "view", "super_admin", "admin"), bookingsReport);
+router.get("/staff", access("reports", "view", "super_admin", "admin"), staffReport);
 
 module.exports = router;

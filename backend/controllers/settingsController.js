@@ -25,8 +25,19 @@ const updateAttendanceSettings = asyncHandler(async (req, res) => {
 
   if (gps && gps.enforcement) settings.gps.enforcement = gps.enforcement;
 
-  if (salary && salary.allowedLeavesPerMonth !== undefined) {
-    settings.salary.allowedLeavesPerMonth = Math.max(0, Math.floor(Number(salary.allowedLeavesPerMonth) || 0));
+  if (salary) {
+    if (salary.allowedLeavesPerMonth !== undefined) {
+      settings.salary.allowedLeavesPerMonth = Math.max(0, Math.floor(Number(salary.allowedLeavesPerMonth) || 0));
+    }
+    if (salary.shiftStart !== undefined && /^\d{1,2}:\d{2}$/.test(String(salary.shiftStart))) {
+      settings.salary.shiftStart = salary.shiftStart;
+    }
+    if (salary.graceMinutes !== undefined) {
+      settings.salary.graceMinutes = Math.max(0, Math.floor(Number(salary.graceMinutes) || 0));
+    }
+    if (salary.latesPerDeduction !== undefined) {
+      settings.salary.latesPerDeduction = Math.max(0, Math.floor(Number(salary.latesPerDeduction) || 0));
+    }
   }
 
   await settings.save();

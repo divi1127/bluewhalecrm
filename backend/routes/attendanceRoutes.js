@@ -4,25 +4,27 @@ const {
   checkOut,
   markStatus,
   getAttendance,
+  getAttendanceSummary,
   computeMonthlySalary,
   selfCheckIn,
   selfCheckOut,
   selfStatus,
   grantReLogin,
 } = require("../controllers/attendanceController");
-const { protect, authorize, requirePermission } = require("../middleware/auth");
+const { protect, access, authorize, requirePermission } = require("../middleware/auth");
 
 const router = express.Router();
 
 router.use(protect);
 router.get("/", requirePermission("attendance", "view"), getAttendance);
+router.get("/summary", requirePermission("attendance", "view"), getAttendanceSummary);
 router.get("/me", requirePermission("attendance", "view"), selfStatus);
-router.get("/salary/:staffId", authorize("super_admin", "admin", "hr_manager"), requirePermission("attendance", "view"), computeMonthlySalary);
+router.get("/salary/:staffId", access("attendance", "view", "super_admin", "admin", "hr_manager"), computeMonthlySalary);
 router.post("/me/checkin", requirePermission("attendance", "create"), selfCheckIn);
 router.post("/me/checkout", requirePermission("attendance", "create"), selfCheckOut);
-router.post("/checkin", authorize("super_admin", "admin", "hr_manager"), requirePermission("attendance", "create"), checkIn);
-router.post("/checkout", authorize("super_admin", "admin", "hr_manager"), requirePermission("attendance", "create"), checkOut);
-router.post("/mark", authorize("super_admin", "admin", "hr_manager"), requirePermission("attendance", "create"), markStatus);
+router.post("/checkin", access("attendance", "create", "super_admin", "admin", "hr_manager"), checkIn);
+router.post("/checkout", access("attendance", "create", "super_admin", "admin", "hr_manager"), checkOut);
+router.post("/mark", access("attendance", "create", "super_admin", "admin", "hr_manager"), markStatus);
 router.patch("/grant-relogin", authorize("super_admin"), grantReLogin);
 
 module.exports = router;

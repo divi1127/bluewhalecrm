@@ -23,6 +23,7 @@ import Bookings from "./pages/bookings/Bookings";
 import Packages from "./pages/packages/Packages";
 import StaffList from "./pages/staff/StaffList";
 import Attendance from "./pages/staff/Attendance";
+import Salary from "./pages/staff/Salary";
 import MyAttendance from "./pages/staff/MyAttendance";
 import Reports from "./pages/reports/Reports";
 import Control from "./pages/control/Control";
@@ -196,8 +197,18 @@ function App() {
         path="/staff/attendance"
         element={
           <ProtectedRoute roles={hrRoles} module="attendance">
-            <Layout title="Attendance & Salary">
+            <Layout title="Attendance">
               <Attendance />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/salary"
+        element={
+          <ProtectedRoute roles={hrRoles} module="salary">
+            <Layout title="Salary">
+              <Salary />
             </Layout>
           </ProtectedRoute>
         }
