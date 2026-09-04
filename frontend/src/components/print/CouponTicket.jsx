@@ -1,4 +1,5 @@
-import { Waves, Percent, IndianRupee, CalendarDays, ScanLine, Sparkles } from "lucide-react";
+import { Percent, IndianRupee, CalendarDays, ScanLine, Sparkles } from "lucide-react";
+import logoImg from "../../assets/logo.jpeg";
 
 // Vivid color themes that cycle per coupon so prints are colorful
 const THEMES = [
@@ -101,7 +102,7 @@ const CouponTicket = ({
       {/* TOP ROW: Brand + Status */}
       <div className="relative flex items-center justify-between px-5 pt-4 pb-2">
         <div className="flex items-center gap-2 text-white">
-          <Waves size={compact ? 15 : 18} style={{ color: theme.accent }} />
+          <img src={logoImg} alt="BlueWhale" className="rounded object-cover" style={{ width: compact ? 15 : 18, height: compact ? 15 : 18 }} />
           <div>
             <p
               className="font-display font-extrabold leading-tight tracking-wide"

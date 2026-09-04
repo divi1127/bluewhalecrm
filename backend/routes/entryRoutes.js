@@ -4,6 +4,8 @@ const {
   markExit,
   getActiveEntries,
   getTagStatus,
+  searchCustomerForExtension,
+  extendSession,
 } = require("../controllers/entryController");
 const { protect, access } = require("../middleware/auth");
 
@@ -16,5 +18,7 @@ router.get("/status/:tagId", getTagStatus);
 router.use(protect);
 router.post("/scan", access("entry", "create", "super_admin", "admin", "entry_staff"), scanEntry);
 router.post("/exit", access("entry", "create", "super_admin", "admin", "entry_staff"), markExit);
+router.get("/extend-search", access("entry", "view", "super_admin", "admin", "entry_staff"), searchCustomerForExtension);
+router.post("/extend", access("entry", "edit", "super_admin", "admin", "entry_staff"), extendSession);
 
 module.exports = router;

@@ -1,5 +1,6 @@
 import React from "react";
-import { Waves, Ticket, Clock, ShieldCheck } from "lucide-react";
+import { Ticket, Clock, ShieldCheck } from "lucide-react";
+import logoImg from "../../assets/logo.jpeg";
 import { formatDuration } from "../../utils/format";
 
 const statusMeta = {
@@ -63,7 +64,7 @@ const WristTag = ({
         style={{ background: "linear-gradient(90deg, #0b2431 0%, #0f4c75 60%, #14b8a6 100%)" }}
       >
         <div className="flex items-center gap-2">
-          <Waves size={15} className="text-teal-300" />
+          <img src={logoImg} alt="BlueWhale" className="h-4 w-4 rounded object-cover" />
           <span className="font-display text-sm font-black tracking-widest">BLUEWHALE</span>
           <span className="text-[9px] font-semibold uppercase tracking-[0.25em] text-teal-200 opacity-80">
             Wrist Band

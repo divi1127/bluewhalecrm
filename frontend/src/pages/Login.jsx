@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Waves, LogIn, ScanFace, Eye, EyeOff } from "lucide-react";
+import { LogIn, ScanFace, Eye, EyeOff } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
+import logoImg from "../assets/logo.jpeg";
 
 const homeByRole = (role) =>
   role === "cashier" ? "/cashier-dashboard"
@@ -45,9 +46,7 @@ const Login = () => {
       <div className="flex w-full items-center justify-center lg:w-1/2 px-4 sm:px-12 lg:px-24">
         <div className="w-full max-w-sm">
           <div className="mb-10 flex flex-col items-center text-center">
-            <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-teal-400 to-teal-600 shadow-xl shadow-teal-500/20">
-              <Waves size={32} className="text-white" />
-            </div>
+            <img src={logoImg} alt="BlueWhale" className="mb-4 h-16 w-16 rounded-2xl object-cover shadow-xl shadow-teal-500/20" />
             <h1 className="font-display text-3xl font-bold text-white">BlueWhale</h1>
             <p className="text-sm text-ocean-300 mt-2">Welcome back! Please login to your account.</p>
           </div>

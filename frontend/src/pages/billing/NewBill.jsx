@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Search, Receipt, Printer, CheckCircle2, UserPlus, UserCheck, StickyNote, MessageCircle, ScanLine, BadgePercent, AlertCircle, ShieldAlert } from "lucide-react";
+import { Search, Receipt, Printer, CheckCircle2, UserPlus, UserCheck, StickyNote, MessageCircle, ScanLine, BadgePercent, AlertCircle, ShieldAlert, Clock, Timer, UserSearch } from "lucide-react";
 import api from "../../api/axios";
 import { useAuth } from "../../context/AuthContext";
 import WristTag from "../../components/print/WristTag";
@@ -8,6 +8,7 @@ import PrintSheet from "../../components/print/PrintSheet";
 import QrScanner from "../../components/common/QrScanner";
 import { formatDuration } from "../../utils/format";
 
+const SOCKS_PRICE = 50;
 const emptyForm = { name: "", mobile: "", whatsapp: "", address: "", notes: "" };
 
 const NewBill = () => {
@@ -20,6 +21,7 @@ const NewBill = () => {
   const [adults, setAdults] = useState(1);
   const [children, setChildren] = useState(0);
   const [below5, setBelow5] = useState(0);
+  const [socks, setSocks] = useState(true);
   const [couponCode, setCouponCode] = useState("");
   const [scannerOpen, setScannerOpen] = useState(false);
   const [couponCheck, setCouponCheck] = useState(null); // { checking, error, offer }
@@ -27,6 +29,15 @@ const NewBill = () => {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
   const [result, setResult] = useState(null); // { bill, wristTags, customer }
+
+  // Extension timing state
+  const [extSearchQuery, setExtSearchQuery] = useState("");
+  const [extResults, setExtResults] = useState([]);
+  const [extSearching, setExtSearching] = useState(false);
+  const [extMinutes, setExtMinutes] = useState(30);
+  const [extLoading, setExtLoading] = useState(false);
+  const [extMessage, setExtMessage] = useState(null); // { type: 'success'|'error', text }
+  const [showExtension, setShowExtension] = useState(false);
 
   const canCreate = can("billing", "create");
 
@@ -49,7 +60,8 @@ const NewBill = () => {
   const totalPersons = adultCount + childCount + below5Count;
   const adultChildAmount = selectedPackage ? (adultCount + childCount) * selectedPackage.price : 0;
   const below5Amount = selectedPackage ? below5Count * (selectedPackage.below5Price || 0) : 0;
-  const baseAmount = adultChildAmount + below5Amount;
+  const socksAmount = socks ? totalPersons * SOCKS_PRICE : 0;
+  const baseAmount = adultChildAmount + below5Amount + socksAmount;
 
   const handleScanCoupon = (code) => {
     setCouponCode(String(code).trim().toUpperCase());
@@ -70,6 +82,36 @@ const NewBill = () => {
       setCouponCheck({ checking: false, error: null, offer: data.data });
     } catch (err) {
       setCouponCheck({ checking: false, error: err.response?.data?.message || "Invalid coupon", offer: null });
+    }
+  };
+
+  // Extension timing functions
+  const handleExtSearch = async () => {
+    if (!extSearchQuery.trim() || extSearchQuery.trim().length < 2) return;
+    setExtSearching(true);
+    setExtMessage(null);
+    try {
+      const { data } = await api.get("/entry/extend-search", { params: { q: extSearchQuery.trim() } });
+      setExtResults(data.data || []);
+    } catch (err) {
+      setExtMessage({ type: "error", text: err.response?.data?.message || "Search failed" });
+    } finally {
+      setExtSearching(false);
+    }
+  };
+
+  const handleExtend = async (tagId) => {
+    setExtLoading(true);
+    setExtMessage(null);
+    try {
+      const { data } = await api.post("/entry/extend", { tagId, additionalMinutes: Number(extMinutes) });
+      setExtMessage({ type: "success", text: data.message });
+      // Refresh search results
+      handleExtSearch();
+    } catch (err) {
+      setExtMessage({ type: "error", text: err.response?.data?.message || "Extension failed" });
+    } finally {
+      setExtLoading(false);
     }
   };
 
@@ -105,6 +147,7 @@ const NewBill = () => {
     setAdults(1);
     setChildren(0);
     setBelow5(0);
+    setSocks(true);
     setCouponCode("");
     setCouponCheck(null);
     setPaymentMode("cash");
@@ -127,6 +170,8 @@ const NewBill = () => {
         adults,
         children,
         below5,
+        socks,
+        socksPrice: SOCKS_PRICE,
         paymentMode,
         couponCode: couponCode || undefined,
       };
@@ -353,6 +398,28 @@ const NewBill = () => {
             </div>
           </div>
 
+          {/* Socks toggle */}
+          <div className="flex items-center justify-between rounded-xl border border-ocean-100 bg-ocean-50/40 px-4 py-3">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-teal-100 text-teal-600">
+                <span className="text-lg">🧦</span>
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-ocean-800">Socks</p>
+                <p className="text-xs text-ocean-400">₹{SOCKS_PRICE} per person · Required for all guests</p>
+              </div>
+            </div>
+            <label className="relative inline-flex cursor-pointer items-center">
+              <input
+                type="checkbox"
+                checked={socks}
+                onChange={(e) => setSocks(e.target.checked)}
+                className="peer sr-only"
+              />
+              <div className="h-6 w-11 rounded-full bg-ocean-200 after:absolute after:left-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:bg-white after:transition-all peer-checked:bg-teal-500 peer-checked:after:translate-x-full"></div>
+            </label>
+          </div>
+
           {/* Below-5 auto-detect notice */}
           {below5Count > 0 && selectedPackage && (
             <div className="flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm">
@@ -486,6 +553,12 @@ const NewBill = () => {
                   <span className="font-semibold">₹{below5Amount}</span>
                 </div>
               )}
+              {socks && totalPersons > 0 && (
+                <div className="mt-1 flex items-center justify-between">
+                  <span>🧦 Socks × {totalPersons} @ ₹{SOCKS_PRICE} each</span>
+                  <span className="font-semibold">₹{socksAmount}</span>
+                </div>
+              )}
               {couponCheck?.offer && (
                 <div className="mt-1 flex items-center justify-between text-coral-600">
                   <span>Coupon discount</span>
@@ -499,7 +572,7 @@ const NewBill = () => {
                 </span>
               </div>
               <p className="mt-2 text-xs text-ocean-400">
-                {adultCount} adult(s) + {childCount} child(ren) + {below5Count} below-5 = {totalPersons} wrist tag{totalPersons === 1 ? "" : "s"}
+                {adultCount} adult(s) + {childCount} child(ren) + {below5Count} below-5 = {totalPersons} wrist tag{totalPersons === 1 ? "" : "s"}{socks ? ` + ${totalPersons} socks` : ""}
               </p>
             </div>
           )}
@@ -520,6 +593,102 @@ const NewBill = () => {
       </div>
 
       {scannerOpen && <QrScanner onScan={handleScanCoupon} onClose={() => setScannerOpen(false)} />}
+
+      {/* EXTENSION TIMING SECTION */}
+      <div className="mt-6 card">
+        <button
+          type="button"
+          onClick={() => setShowExtension(!showExtension)}
+          className="flex w-full items-center justify-between"
+        >
+          <h3 className="flex items-center gap-2 text-sm font-bold text-ocean-900">
+            <Timer size={18} className="text-amber-500" /> Extend Session Time
+          </h3>
+          <span className="text-xs text-ocean-400">{showExtension ? '▲ Collapse' : '▼ Expand'}</span>
+        </button>
+
+        {showExtension && (
+          <div className="mt-4 space-y-4">
+            <p className="text-xs text-ocean-400">
+              Search for a customer by name or mobile number to find their active wrist tags and extend session time.
+            </p>
+
+            <div className="flex gap-2">
+              <div className="relative flex-1">
+                <UserSearch size={14} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-ocean-400" />
+                <input
+                  className="input-field !pl-9"
+                  placeholder="Search by name or mobile number..."
+                  value={extSearchQuery}
+                  onChange={(e) => setExtSearchQuery(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && handleExtSearch()}
+                />
+              </div>
+              <button type="button" onClick={handleExtSearch} disabled={extSearching || extSearchQuery.trim().length < 2} className="btn-secondary shrink-0">
+                {extSearching ? "Searching..." : "Search"}
+              </button>
+            </div>
+
+            {extMessage && (
+              <div className={`rounded-lg px-3 py-2 text-sm font-semibold ${
+                extMessage.type === "success" ? "bg-teal-50 text-teal-700" : "bg-coral-50 text-coral-600"
+              }`}>
+                {extMessage.text}
+              </div>
+            )}
+
+            {extResults.length > 0 && (
+              <div className="space-y-3">
+                <div className="flex items-center gap-2">
+                  <label className="label mb-0">Extend by:</label>
+                  <select
+                    className="input-field w-auto"
+                    value={extMinutes}
+                    onChange={(e) => setExtMinutes(e.target.value)}
+                  >
+                    <option value={15}>15 min</option>
+                    <option value={30}>30 min</option>
+                    <option value={45}>45 min</option>
+                    <option value={60}>60 min</option>
+                    <option value={90}>90 min</option>
+                    <option value={120}>2 hours</option>
+                  </select>
+                </div>
+
+                {extResults.map((tag) => {
+                  const remaining = new Date(tag.expiryTime) - new Date();
+                  const mins = Math.max(0, Math.floor(remaining / 60000));
+                  return (
+                    <div key={tag._id} className="flex items-center justify-between rounded-xl border border-ocean-100 bg-white p-3">
+                      <div>
+                        <p className="text-sm font-bold text-ocean-900">{tag.customer?.name}</p>
+                        <p className="text-xs text-ocean-400">{tag.package?.name} · {tag.tagId}</p>
+                        <p className="text-xs text-ocean-500 flex items-center gap-1 mt-0.5">
+                          <Clock size={11} />
+                          {mins > 0 ? `${mins} min remaining` : "Expired"}
+                          {' · Expires ' + new Date(tag.expiryTime).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" })}
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => handleExtend(tag.tagId)}
+                        disabled={extLoading}
+                        className="btn-accent shrink-0 text-xs px-3 py-1.5"
+                      >
+                        {extLoading ? "Extending..." : `+${extMinutes} min`}
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+
+            {!extSearching && extResults.length === 0 && extSearchQuery.trim().length >= 2 && (
+              <p className="text-center text-sm text-ocean-400 py-4">No active sessions found for this customer.</p>
+            )}
+          </div>
+        )}
+      </div>
     </div>
   );
 };

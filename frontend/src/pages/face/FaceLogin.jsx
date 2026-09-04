@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { ScanFace, RefreshCw, ArrowLeft, Waves, MapPin, MapPinOff } from "lucide-react";
+import { ScanFace, RefreshCw, ArrowLeft, MapPin, MapPinOff } from "lucide-react";
+import logoImg from "../../assets/logo.jpeg";
 import { useAuth } from "../../context/AuthContext";
 import { loadFaceApi, startCamera, stopCamera, captureDescriptor } from "../../utils/face";
 
@@ -95,9 +96,7 @@ const FaceLogin = () => {
     <div className="flex min-h-screen flex-col bg-ocean-950 text-sand-100">
       <header className="flex items-center justify-between px-6 py-4">
         <div className="flex items-center gap-2.5">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-teal-500">
-            <Waves size={18} className="text-white" />
-          </div>
+          <img src={logoImg} alt="BlueWhale" className="h-9 w-9 rounded-xl object-cover" />
           <span className="font-display text-lg font-bold text-white">BlueWhale</span>
           <span className="ml-2 rounded-full bg-ocean-800 px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-wider text-teal-400">
             Staff Register

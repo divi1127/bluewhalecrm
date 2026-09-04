@@ -1,11 +1,13 @@
 export const venue = {
-  name: 'bluewhale',
-  tagline: "bluewhale's favourite game zone",
+  name: 'Bluewhale Trampoline & Adventure Park',
+  tagline: "Bluewhale's favourite adventure park",
   description:
-    'bluewhale is a full-service entertainment venue with indoor games, outdoor adventures, kids activities and a food & snack court — all under one roof. Book a slot, grab a hand tag and play.',
-  address: '42, MG Road, Indiranagar, Bengaluru',
-  phone: '+91 90000 12345',
-  email: 'hello@gamespot.in',
+    'Bluewhale Trampoline & Adventure Park is a full-service entertainment venue with indoor trampoline zones, outdoor adventure activities, kids activities and a food & snack court — all under one roof. Book a slot, grab a hand tag and play.',
+  address: '24/7, Lakshmi Nagar, Melakkal Main Road, Thuvariman, Madurai - 625019',
+  phone: '+91 9361979291',
+  whatsapp: '919361979291',
+  email: 'hello@bluewhale.in',
+  googleMapsUrl: 'https://maps.app.goo.gl/WAkp1k5UeDQCdrqW8',
   hours: [
     { days: 'Mon – Fri', time: '11 AM to 11 PM' },
     { days: 'Sat – Sun', time: '10 AM to 1 AM' },

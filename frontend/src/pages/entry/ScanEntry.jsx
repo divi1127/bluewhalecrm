@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { ScanLine, CheckCircle2, XCircle, LogOut, LogIn, Undo2, MapPin, Users, Clock } from "lucide-react";
+import { ScanLine, CheckCircle2, XCircle, LogOut, LogIn, Undo2, MapPin, Users, Clock, Camera } from "lucide-react";
 import api from "../../api/axios";
+import QrScanner from "../../components/common/QrScanner";
 
 // Extract tag ID and zone from verification URL
 const extractTagInfo = (raw) => {
@@ -36,6 +37,7 @@ const ScanEntry = () => {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
   const [activeGuests, setActiveGuests] = useState([]);
+  const [scannerOpen, setScannerOpen] = useState(false);
 
   // Fetch active guests inside the park
   const loadActiveGuests = async () => {
@@ -81,6 +83,16 @@ const ScanEntry = () => {
     setResult(null);
     setError(null);
     setTagId("");
+  };
+
+  const handleCameraScan = (decodedText) => {
+    setTagId(decodedText);
+    setScannerOpen(false);
+    // Auto-submit after scanning
+    setTimeout(() => {
+      const form = document.querySelector("form");
+      if (form) form.requestSubmit();
+    }, 100);
   };
 
   const isExit = mode === "exit";
@@ -162,10 +174,19 @@ const ScanEntry = () => {
             value={tagId}
             onChange={(e) => setTagId(e.target.value.toUpperCase())}
           />
+          <button
+            type="button"
+            onClick={() => setScannerOpen(true)}
+            className="btn-secondary shrink-0 px-3"
+            title="Scan QR with camera"
+          >
+            <Camera size={16} className="text-teal-500" />
+          </button>
           <button type="submit" disabled={loading || !tagId} className={`btn-accent shrink-0 ${isExit ? "!bg-coral-500" : ""}`}>
             {loading ? "Checking..." : isExit ? "Check Out" : "Verify"}
           </button>
         </form>
+        <p className="mt-2 text-xs text-ocean-400">Type tag ID or tap the camera button to scan QR code</p>
       </div>
 
       {/* SCAN RESULTS */}
@@ -252,6 +273,8 @@ const ScanEntry = () => {
           </div>
         )}
       </div>
+
+      {scannerOpen && <QrScanner onScan={handleCameraScan} onClose={() => setScannerOpen(false)} />}
     </div>
   );
 };

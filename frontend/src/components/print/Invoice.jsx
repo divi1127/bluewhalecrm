@@ -1,4 +1,5 @@
-import { Waves, MapPin, Phone } from "lucide-react";
+import { MapPin, Phone } from "lucide-react";
+import logoImg from "../../assets/logo.jpeg";
 import { formatDuration } from "../../utils/format";
 
 const paymentLabels = { cash: "Cash", card: "Card", upi: "UPI", wallet: "Wallet" };
@@ -10,18 +11,18 @@ const Invoice = ({ bill, pkg, customer, wristTag, wristTags }) => {
   const tags = wristTags && wristTags.length ? wristTags : wristTag ? [wristTag] : [];
   const below5Count = Number(bill.below5 || 0);
   const below5Amount = below5Count * Number(pkg?.below5Price || 0);
+  const socksAmount = bill.socksAmount || 0;
+  const socksCount = bill.socks ? guests : 0;
 
   return (
     <div className="w-[620px] overflow-hidden rounded-2xl bg-white shadow-lg ring-1 ring-ocean-100">
       <div className="flex items-center justify-between bg-gradient-to-r from-ocean-900 via-ocean-700 to-teal-600 px-6 py-5 text-white">
         <div className="flex items-center gap-3">
-          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-white/10 ring-1 ring-white/20">
-            <Waves size={24} className="text-teal-300" />
-          </div>
+          <img src={logoImg} alt="BlueWhale" className="h-11 w-11 rounded-xl object-cover ring-1 ring-white/20" />
           <div>
             <p className="font-display text-xl font-extrabold tracking-wide">BLUEWHALE</p>
             <p className="text-[10px] font-semibold uppercase tracking-[0.25em] text-teal-200">
-              Park Management & Billing
+              Trampoline & Adventure Park
             </p>
           </div>
         </div>
@@ -35,12 +36,12 @@ const Invoice = ({ bill, pkg, customer, wristTag, wristTags }) => {
       <div className="grid grid-cols-2 gap-6 px-6 pt-5 text-sm">
         <div>
           <p className="label">From</p>
-          <p className="font-bold text-ocean-900">BlueWhale Adventure Park</p>
+          <p className="font-bold text-ocean-900">BlueWhale Trampoline & Adventure Park</p>
           <p className="mt-1 flex items-center gap-1.5 text-ocean-500">
-            <MapPin size={13} /> Waterfront Road, Marina Promenade
+            <MapPin size={13} /> 24/7, Lakshmi Nagar, Melakkal Main Road, Thuvariman, Madurai - 625019
           </p>
           <p className="mt-1 flex items-center gap-1.5 text-ocean-500">
-            <Phone size={13} /> +91 98765 43210
+            <Phone size={13} /> +91 9361979291
           </p>
         </div>
         <div>
@@ -73,7 +74,7 @@ const Invoice = ({ bill, pkg, customer, wristTag, wristTags }) => {
               </td>
               <td className="px-4 py-3">{guests}</td>
               <td className="px-4 py-3 text-right">₹{pkg?.price}</td>
-              <td className="px-4 py-3 text-right font-semibold">₹{pkg?.price}</td>
+              <td className="px-4 py-3 text-right font-semibold">₹{(guests - below5Count) * (pkg?.price || 0)}</td>
             </tr>
             {below5Count > 0 && (
               <tr className="border-t border-ocean-50 text-ocean-800">
@@ -84,6 +85,17 @@ const Invoice = ({ bill, pkg, customer, wristTag, wristTags }) => {
                 <td className="px-4 py-3">{below5Count}</td>
                 <td className="px-4 py-3 text-right">₹{pkg?.below5Price || 0}</td>
                 <td className="px-4 py-3 text-right font-semibold">₹{below5Amount}</td>
+              </tr>
+            )}
+            {socksCount > 0 && (
+              <tr className="border-t border-ocean-50 text-ocean-800">
+                <td className="px-4 py-3">
+                  <p className="font-semibold">Socks</p>
+                  <p className="text-xs text-ocean-400">{socksCount} pair(s) @ ₹{bill.socksPrice || 50} each</p>
+                </td>
+                <td className="px-4 py-3">{socksCount}</td>
+                <td className="px-4 py-3 text-right">₹{bill.socksPrice || 50}</td>
+                <td className="px-4 py-3 text-right font-semibold">₹{socksAmount}</td>
               </tr>
             )}
           </tbody>
@@ -118,7 +130,7 @@ const Invoice = ({ bill, pkg, customer, wristTag, wristTags }) => {
             scanned at park entry to start the session timer.
           </p>
         ) : (
-          <p>Thank you for visiting BlueWhale Adventure Park. Please keep this invoice for reference.</p>
+          <p>Thank you for visiting BlueWhale Trampoline & Adventure Park. Please keep this invoice for reference.</p>
         )}
       </div>
     </div>

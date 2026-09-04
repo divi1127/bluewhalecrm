@@ -35,12 +35,14 @@ import {
 import { gallery, venue } from './data'
 import tagImg from './images/tag.png'
 import couponImg from './images/coupon.png'
+import logoImg from '../../../assets/logo.jpeg'
 
 // CRM login screen — override with VITE_CRM_URL if the CRM is hosted elsewhere
 const CRM_LOGIN_URL = import.meta.env.VITE_CRM_URL || '/login'
 
 // Backend API — landing forms (contact enquiry + party booking) post here
-const API_URL = import.meta.env.VITE_API_URL || 'https://bluewhalecrm.onrender.com/api'
+// Strip trailing slashes to prevent double-slash URLs like //bookings/online
+const API_URL = (import.meta.env.VITE_API_URL || 'https://bluewhalecrm.onrender.com/api').replace(/\/+$/, '')
 
 const navLinks = [
   { href: '#overview', label: 'Overview' },
@@ -66,10 +68,8 @@ function Navbar({ theme, setTheme }) {
     <header className={`sticky top-0 z-30 transition-colors ${theme === 'light' ? 'bg-white shadow-sm' : 'border-b border-white/5 bg-night-900/80 backdrop-blur-md'}`}>
       <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-4 sm:px-6">
         <a href="#top" className="flex items-center gap-2.5">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-brand-500 to-accent-500 shadow-glow">
-            <Gamepad2 size={18} className="text-white" />
-          </div>
-          <span className={`font-display text-lg font-bold ${theme === 'light' ? 'text-slate-900' : 'text-white'}`}>bluewhale</span>
+          <img src={logoImg} alt="BlueWhale" className="h-9 w-9 rounded-xl object-cover shadow-glow" />
+          <span className={`font-display text-lg font-bold ${theme === 'light' ? 'text-slate-900' : 'text-white'}`}>Bluewhale</span>
         </a>
         <nav className="hidden items-center gap-6 lg:flex">
           {navLinks.map((l) => (
@@ -728,7 +728,7 @@ function Contact() {
               className="h-44 w-full"
               loading="lazy"
               referrerPolicy="no-referrer-when-downgrade"
-              src="https://www.google.com/maps?q=MG%20Road%2C%20Indiranagar%2C%20Bengaluru&output=embed"
+              src="https://www.google.com/maps?q=Bluewhale+Trampoline+Adventure+Park+Thuvariman+Madurai&output=embed"
             />
           </div>
         </div>
@@ -803,8 +803,8 @@ function Footer() {
         <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
           <div className="flex flex-col items-center gap-3 text-center sm:items-start sm:text-left">
             <div className="flex items-center gap-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-brand-500 to-accent-500"><Gamepad2 size={16} className="text-white" /></div>
-              <span className="font-display font-bold text-white">bluewhale</span>
+              <img src={logoImg} alt="BlueWhale" className="h-9 w-9 rounded-lg object-cover" />
+              <span className="font-display font-bold text-white">Bluewhale</span>
             </div>
             <p className="text-sm text-slate-500">{venue.description}</p>
           </div>
@@ -836,6 +836,16 @@ function Footer() {
                   <Mail size={14} className="shrink-0" /> {venue.email}
                 </a>
               </li>
+              <li>
+                <a
+                  href={`https://wa.me/${venue.whatsapp}?text=${encodeURIComponent('Hi Bluewhale, I would like to know more about your park!')}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-center gap-2 text-sm text-emerald-400 transition hover:text-emerald-300 sm:justify-start"
+                >
+                  <MessageSquareText size={14} className="shrink-0" /> WhatsApp Us
+                </a>
+              </li>
             </ul>
           </div>
 
@@ -849,10 +859,20 @@ function Footer() {
                 </li>
               ))}
             </ul>
-            <a href="#booking" className="l-btn-outline mt-5 inline-flex items-center gap-1.5 px-3 py-1.5 text-xs"><CalendarDays size={13} /> Book a Slot</a>
+            <div className="mt-5 flex flex-wrap justify-center gap-2 sm:justify-start">
+              <a href="#booking" className="l-btn-outline inline-flex items-center gap-1.5 px-3 py-1.5 text-xs"><CalendarDays size={13} /> Book a Slot</a>
+              <a
+                href={venue.googleMapsUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="l-btn-outline inline-flex items-center gap-1.5 px-3 py-1.5 text-xs"
+              >
+                <MapPin size={13} /> Get Directions
+              </a>
+            </div>
           </div>
         </div>
-        <p className="mt-10 text-center text-xs text-slate-600">© 2026 bluewhale. Contact enquiries and party bookings are saved to the park CRM.</p>
+        <p className="mt-10 text-center text-xs text-slate-600">© 2026 Bluewhale Trampoline & Adventure Park. Contact enquiries and party bookings are saved to the park CRM.</p>
       </div>
     </footer>
   )

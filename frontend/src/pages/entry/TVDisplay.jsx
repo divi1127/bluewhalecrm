@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Waves, Clock, AlertTriangle, Volume2, ShieldAlert } from "lucide-react";
+import { Clock, AlertTriangle, Volume2, ShieldAlert, Users } from "lucide-react";
 import api from "../../api/axios";
+import logoImg from "../../assets/logo.jpeg";
 
 const formatRemaining = (expiryTime) => {
   const diffMs = new Date(expiryTime) - new Date();
@@ -86,12 +87,10 @@ const TVDisplay = () => {
       {/* Header */}
       <div className="mb-8 flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-3">
-          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-teal-500">
-            <Waves size={26} />
-          </div>
+          <img src={logoImg} alt="BlueWhale" className="h-12 w-12 rounded-2xl object-cover" />
           <div>
             <h1 className="font-display text-3xl font-bold">BlueWhale Park</h1>
-            <p className="text-ocean-300">Live Entry Status</p>
+            <p className="text-ocean-300">Live Entry Status · {entries.length} Guest{entries.length !== 1 ? 's' : ''} Inside</p>
           </div>
         </div>
         <div className="flex items-center gap-3 text-sm text-ocean-400">
@@ -114,7 +113,7 @@ const TVDisplay = () => {
 
       {entries.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-24 text-center">
-          <Waves size={64} className="mb-4 text-ocean-700" />
+          <img src={logoImg} alt="BlueWhale" className="mb-4 h-16 w-16 rounded-2xl object-cover opacity-30" />
           <p className="text-2xl font-bold text-ocean-500">No active customers inside the park</p>
           <p className="text-ocean-600 mt-2">Scanned entries will appear here in real time</p>
         </div>
@@ -144,7 +143,13 @@ const TVDisplay = () => {
                 )}
 
                 <p className="truncate text-lg font-bold">{entry.customer?.name}</p>
-                <p className="mb-3 text-sm text-ocean-300">{entry.package?.name}</p>
+                <p className="mb-1 text-sm text-ocean-300">{entry.package?.name}</p>
+                <p className="mb-3 text-xs text-ocean-400">
+                  <span className="inline-flex items-center gap-1">
+                    <Users size={11} />
+                    {entry.personType === 'adult' ? 'Adult' : entry.personType === 'child' ? 'Child' : 'Below 5'} · {entry.tagId}
+                  </span>
+                </p>
 
                 <div className={`flex items-center gap-2 text-2xl font-bold ${
                   isExpired ? "text-red-400" : isWarning ? "text-amber-400" : "text-teal-300"

@@ -13,7 +13,6 @@ import {
   BarChart3,
   Package,
   Tv,
-  Waves,
   ShieldCheck,
   Fingerprint,
   ScanFace,
@@ -22,6 +21,7 @@ import {
   X,
 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
+import logoImg from "../../assets/logo.jpeg";
 
 const navItems = [
   { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard, roles: ["super_admin", "admin"], module: "dashboard" },
@@ -73,9 +73,7 @@ const Sidebar = ({ open, onClose }) => {
       }`}
     >
       <div className="flex items-center gap-2 px-6 py-6">
-        <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-teal-500">
-          <Waves size={20} className="text-white" />
-        </div>
+        <img src={logoImg} alt="BlueWhale" className="h-9 w-9 rounded-xl object-cover" />
         <div className="flex-1">
           <p className="font-display text-lg font-bold leading-tight text-white">BlueWhale</p>
           <p className="text-[11px] uppercase tracking-wider text-ocean-300">Park Manager</p>

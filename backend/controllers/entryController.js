@@ -1,6 +1,7 @@
 const asyncHandler = require("../utils/asyncHandler");
 const WristTag = require("../models/WristTag");
 const Package = require("../models/Package");
+const Customer = require("../models/Customer");
 
 // Wrist-tag QRs encode a verification URL (`/scan-tag/<tagId>?zone=indoor|outdoor`).
 // Extract both the clean tagId and the target zone if specified.
@@ -195,4 +196,75 @@ const getTagStatus = asyncHandler(async (req, res) => {
   res.json({ success: true, data: wristTag });
 });
 
-module.exports = { scanEntry, markExit, getActiveEntries, getTagStatus };
+// @desc  Search for a customer by name or mobile to find their active wrist tags for extension
+// @route GET /api/entry/extend-search?q=
+const searchCustomerForExtension = asyncHandler(async (req, res) => {
+  const { q } = req.query;
+  if (!q || q.trim().length < 2) {
+    res.status(400);
+    throw new Error("Search query must be at least 2 characters");
+  }
+
+  const searchRegex = new RegExp(q.trim(), "i");
+  const customers = await Customer.find({
+    $or: [{ name: searchRegex }, { mobile: searchRegex }],
+  }).limit(10);
+
+  if (customers.length === 0) {
+    return res.json({ success: true, data: [] });
+  }
+
+  const customerIds = customers.map((c) => c._id);
+  const activeTags = await WristTag.find({
+    customer: { $in: customerIds },
+    status: "active",
+  })
+    .populate("customer", "name mobile")
+    .populate("package", "name durationMinutes");
+
+  res.json({ success: true, data: activeTags });
+});
+
+// @desc  Extend an active wrist tag's session by additional minutes
+// @route POST /api/entry/extend
+const extendSession = asyncHandler(async (req, res) => {
+  const { tagId, additionalMinutes } = req.body;
+
+  if (!tagId) {
+    res.status(400);
+    throw new Error("tagId is required");
+  }
+  if (!additionalMinutes || additionalMinutes <= 0) {
+    res.status(400);
+    throw new Error("additionalMinutes must be a positive number");
+  }
+
+  const wristTag = await WristTag.findOne({ tagId })
+    .populate("customer", "name mobile")
+    .populate("package", "name durationMinutes");
+
+  if (!wristTag) {
+    res.status(404);
+    throw new Error("Wrist tag not found");
+  }
+
+  if (wristTag.status !== "active") {
+    res.status(400);
+    throw new Error(`Cannot extend — tag status is "${wristTag.status}". Only active tags can be extended.`);
+  }
+
+  const currentExpiry = new Date(wristTag.expiryTime);
+  const now = new Date();
+  // Extend from now or from current expiry, whichever is later
+  const baseTime = currentExpiry > now ? currentExpiry : now;
+  wristTag.expiryTime = new Date(baseTime.getTime() + additionalMinutes * 60000);
+  await wristTag.save();
+
+  res.json({
+    success: true,
+    data: wristTag,
+    message: `Session extended by ${additionalMinutes} minutes for ${wristTag.customer.name}. New expiry: ${wristTag.expiryTime.toLocaleTimeString("en-IN")}`,
+  });
+});
+
+module.exports = { scanEntry, markExit, getActiveEntries, getTagStatus, searchCustomerForExtension, extendSession };

@@ -20,6 +20,8 @@ const createBill = asyncHandler(async (req, res) => {
     adults = 1,
     children = 0,
     below5 = 0,
+    socks = true,
+    socksPrice = 50,
     paymentMode = "cash",
     couponCode,
   } = req.body;
@@ -65,9 +67,12 @@ const createBill = asyncHandler(async (req, res) => {
   // 2. Bill amount = per-person pricing.
   //    Adults and children each pay the full package price.
   //    Below-5 children pay a separate (usually lower) rate per package.
+  //    Socks charge is ₹50 per person (default on).
   const adultChildAmount = (adultCount + childCount) * pkg.price;
   const below5Amount = below5Count * (pkg.below5Price || 0);
-  const baseAmount = adultChildAmount + below5Amount;
+  const socksEnabled = socks !== false && socks !== "false";
+  const socksCharge = socksEnabled ? totalPersons * (Number(socksPrice) || 50) : 0;
+  const baseAmount = adultChildAmount + below5Amount + socksCharge;
 
   // 3. Apply coupon if provided
   let discount = 0;
@@ -109,6 +114,9 @@ const createBill = asyncHandler(async (req, res) => {
     adults: adultCount,
     children: childCount,
     below5: below5Count,
+    socks: socksEnabled,
+    socksPrice: Number(socksPrice) || 50,
+    socksAmount: socksCharge,
     baseAmount,
     discount,
     couponCode: appliedCouponCode ? appliedCouponCode._id : undefined,

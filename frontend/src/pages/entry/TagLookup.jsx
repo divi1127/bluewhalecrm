@@ -1,7 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
 import {
-  Waves,
   User,
   Phone,
   Package,
@@ -13,6 +12,7 @@ import {
   XCircle,
 } from "lucide-react";
 import api from "../../api/axios";
+import logoImg from "../../assets/logo.jpeg";
 
 const statusMeta = {
   unused: { label: "NOT ENTERED YET", cls: "bg-teal-100 text-teal-700" },
@@ -97,7 +97,7 @@ const TagLookup = () => {
     <div className="min-h-screen bg-gradient-to-b from-ocean-900 via-ocean-700 to-teal-600 p-4">
       <div className="mx-auto max-w-sm">
         <div className="mb-4 flex items-center justify-center gap-2 text-white">
-          <Waves size={18} className="text-teal-300" />
+          <img src={logoImg} alt="BlueWhale" className="h-6 w-6 rounded-lg object-cover" />
           <span className="font-display text-lg font-extrabold tracking-widest">BLUEWHALE</span>
         </div>
 
