@@ -41,8 +41,9 @@ import logoImg from '../../../assets/logo.jpeg'
 const CRM_LOGIN_URL = import.meta.env.VITE_CRM_URL || '/login'
 
 // Backend API — landing forms (contact enquiry + party booking) post here
-// Strip trailing slashes to prevent double-slash URLs like //bookings/online
-const API_URL = (import.meta.env.VITE_API_URL || 'https://bluewhalecrm.onrender.com/api').replace(/\/+$/, '')
+// Normalise: strip trailing slashes, then ensure it ends with /api
+const _raw = (import.meta.env.VITE_API_URL || 'https://bluewhalecrm.onrender.com/api').replace(/\/+$/, '')
+const API_URL = _raw.endsWith('/api') ? _raw : _raw + '/api'
 
 const navLinks = [
   { href: '#overview', label: 'Overview' },
