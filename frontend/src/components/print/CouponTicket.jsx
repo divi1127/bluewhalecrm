@@ -1,49 +1,15 @@
 import { Percent, IndianRupee, CalendarDays, ScanLine, Sparkles } from "lucide-react";
 import logoImg from "../../assets/logo.jpeg";
 
-// Vivid color themes that cycle per coupon so prints are colorful
-const THEMES = [
-  {
-    bg: "linear-gradient(135deg, #0b2431 0%, #0f4c75 45%, #14b8a6 100%)",
-    accent: "#14b8a6",
-    accentLight: "rgba(20,184,166,0.18)",
-    discountBg: "linear-gradient(135deg, #0d9488, #0f766e)",
-    stub: "linear-gradient(90deg, #0f766e, #14b8a6)",
-    textDim: "rgba(255,255,255,0.65)",
-  },
-  {
-    bg: "linear-gradient(135deg, #1e1b4b 0%, #4338ca 50%, #818cf8 100%)",
-    accent: "#818cf8",
-    accentLight: "rgba(129,140,248,0.18)",
-    discountBg: "linear-gradient(135deg, #4338ca, #6366f1)",
-    stub: "linear-gradient(90deg, #4338ca, #818cf8)",
-    textDim: "rgba(255,255,255,0.65)",
-  },
-  {
-    bg: "linear-gradient(135deg, #7c2d12 0%, #dc2626 50%, #f97316 100%)",
-    accent: "#f97316",
-    accentLight: "rgba(249,115,22,0.18)",
-    discountBg: "linear-gradient(135deg, #dc2626, #f97316)",
-    stub: "linear-gradient(90deg, #b91c1c, #f97316)",
-    textDim: "rgba(255,255,255,0.65)",
-  },
-  {
-    bg: "linear-gradient(135deg, #064e3b 0%, #059669 50%, #34d399 100%)",
-    accent: "#34d399",
-    accentLight: "rgba(52,211,153,0.18)",
-    discountBg: "linear-gradient(135deg, #059669, #34d399)",
-    stub: "linear-gradient(90deg, #047857, #34d399)",
-    textDim: "rgba(255,255,255,0.65)",
-  },
-  {
-    bg: "linear-gradient(135deg, #4a044e 0%, #a21caf 50%, #e879f9 100%)",
-    accent: "#e879f9",
-    accentLight: "rgba(232,121,249,0.18)",
-    discountBg: "linear-gradient(135deg, #a21caf, #c026d3)",
-    stub: "linear-gradient(90deg, #86198f, #e879f9)",
-    textDim: "rgba(255,255,255,0.65)",
-  },
-];
+// Default blue color theme for all coupons
+const THEME = {
+  bg: "linear-gradient(135deg, #0c1d36 0%, #1a3a6b 45%, #4a90d9 100%)",
+  accent: "#60a5fa",
+  accentLight: "rgba(96,165,250,0.18)",
+  discountBg: "linear-gradient(135deg, #2563eb, #1d4ed8)",
+  stub: "linear-gradient(90deg, #1e40af, #60a5fa)",
+  textDim: "rgba(255,255,255,0.65)",
+};
 
 const CouponTicket = ({
   partnerName,
@@ -56,10 +22,9 @@ const CouponTicket = ({
   code,
   qrCodeDataUrl,
   compact = false,
-  themeIndex = 0,
 }) => {
   const isPercent = discountType === "percent";
-  const theme = THEMES[themeIndex % THEMES.length];
+  const theme = THEME;
   const fmtDate = (d) =>
     new Date(d).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" });
   const now = new Date();
@@ -101,12 +66,22 @@ const CouponTicket = ({
 
       {/* TOP ROW: Brand + Status */}
       <div className="relative flex items-center justify-between px-5 pt-4 pb-2">
-        <div className="flex items-center gap-2 text-white">
-          <img src={logoImg} alt="BlueWhale" className="rounded object-cover" style={{ width: compact ? 15 : 18, height: compact ? 15 : 18 }} />
+        <div className="flex items-center gap-2.5 text-white">
+          <div
+            className="flex items-center justify-center rounded-lg"
+            style={{
+              width: compact ? 32 : 36,
+              height: compact ? 32 : 36,
+              background: "rgba(255,255,255,0.15)",
+              border: "1px solid rgba(255,255,255,0.25)",
+            }}
+          >
+            <img src={logoImg} alt="BlueWhale" className="rounded object-cover" style={{ width: compact ? 22 : 26, height: compact ? 22 : 26 }} />
+          </div>
           <div>
             <p
               className="font-display font-extrabold leading-tight tracking-wide"
-              style={{ fontSize: compact ? 13 : 15, color: "#fff" }}
+              style={{ fontSize: compact ? 14 : 16, color: "#fff" }}
             >
               BLUEWHALE
             </p>

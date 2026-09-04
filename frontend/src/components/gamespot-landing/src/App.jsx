@@ -879,6 +879,23 @@ function Footer() {
   )
 }
 
+function WhatsAppFloat() {
+  return (
+    <a
+      href={`https://wa.me/${venue.whatsapp}?text=${encodeURIComponent('Hi Bluewhale, I would like to know more about your park!')}`}
+      target="_blank"
+      rel="noopener noreferrer"
+      aria-label="Chat on WhatsApp"
+      className="fixed bottom-6 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full shadow-lg transition-transform hover:scale-110"
+      style={{ background: '#25D366' }}
+    >
+      <svg viewBox="0 0 32 32" fill="#fff" width="28" height="28">
+        <path d="M16.004 0h-.008C7.174 0 0 7.176 0 16c0 3.5 1.132 6.744 3.054 9.374L1.054 31.25l6.112-1.982A15.907 15.907 0 0 0 16.004 32C24.83 32 32 24.822 32 16S24.83 0 16.004 0Zm9.31 22.6c-.39 1.1-1.932 2.014-3.158 2.28-.84.18-1.936.324-5.626-1.21-4.724-1.962-7.762-6.764-8-7.076-.226-.312-1.896-2.524-1.896-4.814 0-2.29 1.2-3.414 1.626-3.87.39-.42.924-.56 1.23-.56.312 0 .624.003.894.016.29.012.678-.11 1.06.81.39.944 1.332 3.24 1.448 3.476.116.236.194.51.038.822-.156.312-.234.506-.468.782-.234.276-.492.616-.702.828-.192.192-.392.4-.168.788.224.388.996 1.646 2.136 2.666 1.468 1.314 2.706 1.722 3.094 1.914.388.192.612.16.838-.096.234-.264.986-1.15 1.25-1.552.264-.404.528-.336.894-.202.364.134 2.318 1.092 2.716 1.29.398.198.664.296.762.46.096.164.096.95-.294 2.05Z"/>
+      </svg>
+    </a>
+  )
+}
+
 export default function App() {
   const [theme, setTheme] = useState(() => (typeof window !== 'undefined' ? localStorage.getItem('theme') || 'dark' : 'dark'))
 
@@ -899,6 +916,7 @@ export default function App() {
         <Contact />
       </main>
       <Footer />
+      <WhatsAppFloat />
     </div>
   )
 }

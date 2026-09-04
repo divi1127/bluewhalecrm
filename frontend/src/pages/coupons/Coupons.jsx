@@ -108,7 +108,7 @@ const Coupons = () => {
     return out;
   };
 
-  const couponProps = (c, idx = 0) => ({
+  const couponProps = (c) => ({
     partnerName: codesModal.coupon.partnerName,
     campaignName: codesModal.coupon.campaignName,
     discountType: codesModal.coupon.discountType,
@@ -118,7 +118,6 @@ const Coupons = () => {
     validTo: codesModal.coupon.validTo,
     code: c.code,
     qrCodeDataUrl: c.qrCodeDataUrl,
-    themeIndex: idx,
   });
 
   const columns = [
@@ -309,7 +308,7 @@ const Coupons = () => {
                       onChange={() => toggleSelect(c._id)}
                     />
                     <div className="flex-1 min-w-0">
-                      <CouponTicket {...couponProps(c, idx)} compact themeIndex={idx} />
+                      <CouponTicket {...couponProps(c)} compact />
                     </div>
                   </label>
                 ))}
