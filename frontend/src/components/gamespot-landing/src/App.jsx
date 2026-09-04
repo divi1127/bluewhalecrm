@@ -32,7 +32,7 @@ import {
   UtensilsCrossed,
   X,
 } from 'lucide-react'
-import { gallery, memberships, packages, pricing, venue } from './data'
+import { gallery, venue } from './data'
 import tagImg from './images/tag.png'
 import couponImg from './images/coupon.png'
 
@@ -296,7 +296,6 @@ function Gallery() {
             <div className="relative h-56 overflow-hidden" style={{ clipPath: index % 2 === 0 ? 'polygon(0 0, 100% 0, 100% 90%, 0% 100%)' : 'polygon(0 0, 100% 0, 100% 100%, 0% 90%)' }}>
               <img src={item.image} alt={item.name} loading="lazy" className="h-full w-full object-cover transition duration-700 group-hover:scale-110 group-hover:rotate-1" />
               <div className={`absolute inset-0 bg-gradient-to-t ${current.tone} opacity-0 transition group-hover:opacity-40`} />
-              <span className="absolute left-4 top-4 rounded-[1rem] rounded-bl-sm bg-night-950/80 px-3 py-1 font-mono text-sm font-black text-white backdrop-blur shadow-lg border border-white/10 z-10">₹{item.price}</span>
             </div>
             <div className="p-5 flex flex-col items-center text-center">
               <h3 className="font-display text-lg font-bold text-white mb-1 group-hover:text-amber-400 transition-colors uppercase">{item.name}</h3>
@@ -310,48 +309,92 @@ function Gallery() {
 }
 
 function Pricing() {
+  const plans = [
+    {
+      title: 'General Entry',
+      price: '600',
+      period: 'per person',
+      icon: Users,
+      iconBg: 'bg-brand-100 dark:bg-brand-500/20',
+      iconColor: 'text-brand-600 dark:text-brand-400',
+      checkBg: 'bg-brand-100 dark:bg-brand-500/20',
+      noteBg: 'bg-brand-50 dark:bg-brand-500/10',
+      features: [
+        'Access to all indoor game zones',
+        'Outdoor adventure activities',
+        'Kids play area included',
+        'Food court access',
+        'Free parking available',
+      ],
+      note: 'Valid for full day entry',
+    },
+    {
+      title: 'Kids Below 5 Years',
+      price: '350',
+      period: 'per child',
+      icon: Baby,
+      iconBg: 'bg-emerald-100 dark:bg-emerald-500/20',
+      iconColor: 'text-emerald-600 dark:text-emerald-400',
+      checkBg: 'bg-emerald-100 dark:bg-emerald-500/20',
+      noteBg: 'bg-emerald-50 dark:bg-emerald-500/10',
+      features: [
+        'Safe indoor soft play zone',
+        'Supervised kids activities',
+        'Dedicated kids area',
+        'Kids snack included',
+        'Parent陪同 free entry',
+      ],
+      note: 'Age verification required',
+    },
+  ]
+
   return (
     <section id="pricing" className="mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-20">
-      <SectionHeading eyebrow="Pricing Details" title="Simple, transparent pricing" desc="Pay per game, bundle sessions into a package, or unlock savings with a membership." />
+      <SectionHeading eyebrow="Pricing Details" title="Simple, transparent pricing" desc="Entry fee for all games and activities. Pay at the counter when you visit." />
 
-      <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {memberships.map((m) => (
-          <div key={m.name} className={`l-card relative flex flex-col p-6 ${m.popular ? 'border-brand-500/40 shadow-glow' : ''}`}>
-            {m.popular && (
-              <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-brand-600 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-white">
-                Most popular
-              </span>
-            )}
-            <div className={`flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br ${m.color} text-white`}>
-              <BadgeCheck size={20} />
+      <div className="mt-12 grid gap-8 sm:grid-cols-2 max-w-4xl mx-auto">
+        {plans.map((plan) => (
+          <div key={plan.title} className="bg-white dark:bg-night-850 rounded-3xl shadow-lg border border-slate-100 dark:border-white/10 overflow-hidden transition-all duration-300 hover:-translate-y-2 hover:shadow-xl">
+            {/* Header */}
+            <div className="px-6 py-8 text-center border-b border-slate-100 dark:border-white/10">
+              <div className={`flex h-14 w-14 mx-auto items-center justify-center rounded-2xl ${plan.iconBg}`}>
+                <plan.icon size={28} className={plan.iconColor} />
+              </div>
+              <h3 className="mt-4 font-display text-xl font-bold text-slate-800 dark:text-white">{plan.title}</h3>
+              <div className="mt-3 flex items-baseline justify-center gap-1">
+                <span className="text-lg font-semibold text-slate-500 dark:text-slate-400">₹</span>
+                <span className="font-display text-5xl font-bold text-slate-900 dark:text-white">{plan.price}</span>
+              </div>
+              <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">{plan.period}</p>
             </div>
-            <p className="mt-3 font-display font-semibold text-white">{m.name}</p>
-            <p className="mt-1"><span className="font-display text-2xl font-bold text-brand-400">₹{m.price}</span><span className="text-xs text-slate-500"> / year</span></p>
-            <p className="mt-1 text-xs font-medium text-emerald-400">{m.discount}% off on games & food</p>
-            <ul className="mt-4 space-y-2">
-              {m.benefits.map((b) => (
-                <li key={b} className="flex items-start gap-2 text-xs text-slate-400">
-                  <CheckIcon /> {b}
-                </li>
-              ))}
-            </ul>
-            <a href="#contact" className={`l-btn mt-6 ${m.popular ? 'l-btn-primary' : 'l-btn-outline'}`}>Choose {m.name}</a>
+
+            {/* Features list */}
+            <div className="p-6">
+              <ul className="space-y-3">
+                {plan.features.map((feature) => (
+                  <li key={feature} className="flex items-center gap-3">
+                    <div className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full ${plan.checkBg}`}>
+                      <CheckIcon />
+                    </div>
+                    <span className="text-sm text-slate-600 dark:text-slate-300">{feature}</span>
+                  </li>
+                ))}
+              </ul>
+
+              {/* Note */}
+              <div className={`mt-6 rounded-xl ${plan.noteBg} px-4 py-3 text-center`}>
+                <p className="text-xs font-medium text-slate-600 dark:text-slate-300">{plan.note}</p>
+              </div>
+            </div>
           </div>
         ))}
       </div>
 
-      <div className="mt-12 max-w-3xl mx-auto space-y-4">
-        <div className="space-y-4">
-          {packages.map((p) => (
-            <div key={p.name} className="l-card p-5">
-              <div className="flex items-center justify-between">
-                <p className="font-display font-semibold text-white">{p.name}</p>
-                <p className="font-display text-lg font-bold text-brand-400">₹{p.price}</p>
-              </div>
-              <p className="mt-0.5 text-xs text-slate-500">{p.meta}</p>
-              <p className="mt-3 text-xs text-slate-400">{p.included.join(' · ')}</p>
-            </div>
-          ))}
+      {/* Additional info */}
+      <div className="mt-12 text-center">
+        <div className="inline-flex items-center gap-2 rounded-full bg-brand-50 dark:bg-brand-500/10 border border-brand-100 dark:border-brand-500/20 px-6 py-3">
+          <Sparkles size={16} className="text-brand-500 dark:text-brand-400" />
+          <span className="text-sm text-slate-600 dark:text-slate-300">Group discounts available for 10+ people</span>
         </div>
       </div>
     </section>
@@ -360,6 +403,10 @@ function Pricing() {
 
 function CheckIcon() {
   return <svg viewBox="0 0 20 20" fill="currentColor" className="mt-0.5 h-3.5 w-3.5 shrink-0 text-brand-400"><path fillRule="evenodd" d="M16.7 5.3a1 1 0 0 1 0 1.4l-7.5 7.5a1 1 0 0 1-1.4 0l-3.5-3.5a1 1 0 1 1 1.4-1.4l2.8 2.79 6.8-6.8a1 1 0 0 1 1.4 0Z" clipRule="evenodd" /></svg>
+}
+
+function CheckIconLight() {
+  return <svg viewBox="0 0 20 20" fill="currentColor" className="h-3 w-3 shrink-0 text-emerald-600"><path fillRule="evenodd" d="M16.7 5.3a1 1 0 0 1 0 1.4l-7.5 7.5a1 1 0 0 1-1.4 0l-3.5-3.5a1 1 0 1 1 1.4-1.4l2.8 2.79 6.8-6.8a1 1 0 0 1 1.4 0Z" clipRule="evenodd" /></svg>
 }
 
 function Booking() {
