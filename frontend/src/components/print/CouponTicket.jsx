@@ -67,17 +67,7 @@ const CouponTicket = ({
       {/* TOP ROW: Brand + Status */}
       <div className="relative flex items-center justify-between px-5 pt-4 pb-2">
         <div className="flex items-center gap-2.5 text-white">
-          <div
-            className="flex items-center justify-center rounded-lg"
-            style={{
-              width: compact ? 32 : 36,
-              height: compact ? 32 : 36,
-              background: "rgba(255,255,255,0.15)",
-              border: "1px solid rgba(255,255,255,0.25)",
-            }}
-          >
-            <img src={logoImg} alt="BlueWhale" className="rounded object-cover" style={{ width: compact ? 22 : 26, height: compact ? 22 : 26 }} />
-          </div>
+          <img src={logoImg} alt="BlueWhale" className="rounded object-cover" style={{ width: compact ? 40 : 48, height: compact ? 40 : 48 }} />
           <div>
             <p
               className="font-display font-extrabold leading-tight tracking-wide"

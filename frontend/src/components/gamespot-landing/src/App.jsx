@@ -69,8 +69,8 @@ function Navbar({ theme, setTheme }) {
     <header className={`sticky top-0 z-30 transition-colors ${theme === 'light' ? 'bg-white shadow-sm' : 'border-b border-white/5 bg-night-900/80 backdrop-blur-md'}`}>
       <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-4 sm:px-6">
         <a href="#top" className="flex items-center gap-2.5">
-          <img src={logoImg} alt="BlueWhale" className="h-9 w-9 rounded-xl object-cover shadow-glow" />
-          <span className={`font-display text-lg font-bold ${theme === 'light' ? 'text-slate-900' : 'text-white'}`}>Bluewhale</span>
+          <img src={logoImg} alt="BlueWhale" className="h-12 w-12 rounded-xl object-cover shadow-glow" />
+          <span className={`font-display text-xl font-bold ${theme === 'light' ? 'text-slate-900' : 'text-white'}`}>Bluewhale</span>
         </a>
         <nav className="hidden items-center gap-6 lg:flex">
           {navLinks.map((l) => (

@@ -46,7 +46,9 @@ const Login = () => {
       <div className="flex w-full items-center justify-center lg:w-1/2 px-4 sm:px-12 lg:px-24">
         <div className="w-full max-w-sm">
           <div className="mb-10 flex flex-col items-center text-center">
-            <img src={logoImg} alt="BlueWhale" className="mb-4 h-16 w-16 rounded-2xl object-cover shadow-xl shadow-teal-500/20" />
+            <Link to="/">
+              <img src={logoImg} alt="BlueWhale" className="mb-4 h-16 w-16 rounded-2xl object-cover shadow-xl shadow-teal-500/20" />
+            </Link>
             <h1 className="font-display text-3xl font-bold text-white">BlueWhale</h1>
             <p className="text-sm text-ocean-300 mt-2">Welcome back! Please login to your account.</p>
           </div>
