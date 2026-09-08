@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { LogIn, ScanFace, Eye, EyeOff } from "lucide-react";
+import { LogIn, ScanFace, Eye, EyeOff, ArrowLeft } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import logoImg from "../assets/logo.jpeg";
 
@@ -45,6 +45,11 @@ const Login = () => {
       {/* Right side: Form */}
       <div className="flex w-full items-center justify-center lg:w-1/2 px-4 sm:px-12 lg:px-24">
         <div className="w-full max-w-sm">
+          <div className="mb-4 text-center">
+            <Link to="/" className="inline-flex items-center gap-2 text-sm font-semibold text-ocean-300 transition hover:text-teal-400">
+              <ArrowLeft size={16} /> Back to Home
+            </Link>
+          </div>
           <div className="mb-10 flex flex-col items-center text-center">
             <Link to="/">
               <img src={logoImg} alt="BlueWhale" className="mb-4 h-16 w-16 rounded-2xl object-cover shadow-xl shadow-teal-500/20" />
