@@ -6,6 +6,7 @@ const {
   getTagStatus,
   searchCustomerForExtension,
   extendSession,
+  getTvLiveData,
 } = require("../controllers/entryController");
 const { protect, access } = require("../middleware/auth");
 
@@ -13,6 +14,7 @@ const router = express.Router();
 
 // TV display + wrist-tag verification page are public/kiosk - no auth required
 router.get("/active", getActiveEntries);
+router.get("/tv-live", getTvLiveData);
 router.get("/status/:tagId", getTagStatus);
 
 router.use(protect);

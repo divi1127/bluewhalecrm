@@ -33,12 +33,39 @@ const extractTagInfo = (raw) => {
 
 const extractTagId = (raw) => extractTagInfo(raw).tagId;
 
+const Bill = require("../models/Bill");
+
+let latestTvEvent = null;
+
+// Helper to calculate park-wide statistics
+const getParkStats = async () => {
+  const totalInside = await WristTag.countDocuments({
+    status: { $in: ["INSIDE", "active"] },
+  });
+  const indoorCount = await WristTag.countDocuments({
+    status: { $in: ["INSIDE", "active"] },
+    $or: [
+      { area: { $regex: /^indoor$/i } },
+      { indoorStatus: { $in: ["INSIDE", "active"] } },
+    ],
+  });
+  const outdoorCount = await WristTag.countDocuments({
+    status: { $in: ["INSIDE", "active"] },
+    $or: [
+      { area: { $regex: /^outdoor$/i } },
+      { outdoorStatus: { $in: ["INSIDE", "active"] } },
+    ],
+  });
+  return { totalInside, indoorCount, outdoorCount };
+};
+
 // @desc  Entry staff scans a wrist-tag QR (Indoor or Outdoor). Validates single-use entry.
 // @route POST /api/entry/scan
 const scanEntry = asyncHandler(async (req, res) => {
   const { tagId: rawId, zone: explicitZone } = req.body;
   const { tagId, zone: extractedZone } = extractTagInfo(rawId);
-  const zone = explicitZone || extractedZone || "general";
+  const selectedArea = explicitZone || extractedZone || "Indoor";
+  const area = String(selectedArea).toLowerCase() === "outdoor" ? "Outdoor" : "Indoor";
 
   if (!tagId) {
     res.status(400);
@@ -47,70 +74,98 @@ const scanEntry = asyncHandler(async (req, res) => {
 
   const wristTag = await WristTag.findOne({ tagId })
     .populate("customer", "name mobile")
-    .populate("package", "name durationMinutes");
+    .populate("package", "name durationMinutes")
+    .populate("bill", "billNumber");
 
   if (!wristTag) {
     res.status(404);
-    throw new Error("Invalid QR code - ticket not found");
+    throw new Error("✕ UNKNOWN WRIST TAG");
   }
 
-  // Zone specific single-use check
-  if (zone === "indoor") {
-    if (wristTag.indoorStatus === "exited") {
-      res.status(400);
-      throw new Error("Indoor entry QR for this ticket has ALREADY BEEN USED and exited");
-    }
-    if (wristTag.indoorStatus === "active") {
-      res.status(400);
-      throw new Error("Indoor entry is currently active for this ticket");
-    }
-    wristTag.indoorStatus = "active";
-    wristTag.indoorEntryTime = new Date();
-  } else if (zone === "outdoor") {
-    if (wristTag.outdoorStatus === "exited") {
-      res.status(400);
-      throw new Error("Outdoor entry QR for this ticket has ALREADY BEEN USED and exited");
-    }
-    if (wristTag.outdoorStatus === "active") {
-      res.status(400);
-      throw new Error("Outdoor entry is currently active for this ticket");
-    }
-    wristTag.outdoorStatus = "active";
-    wristTag.outdoorEntryTime = new Date();
+  // 1. Error handling: Already inside
+  if (wristTag.status === "INSIDE" || wristTag.status === "active") {
+    res.status(400);
+    throw new Error("⚠ ALREADY INSIDE");
+  }
+
+  // 2. Error handling: Already exited (single-use band finished)
+  if (wristTag.status === "EXITED" || wristTag.status === "exited") {
+    res.status(400);
+    throw new Error("⚠ ALREADY EXITED");
+  }
+
+  // 3. Mark as INSIDE
+  const now = new Date();
+  wristTag.status = "INSIDE";
+  wristTag.area = area;
+  wristTag.entryTime = now;
+  if (area === "Indoor") {
+    wristTag.indoorStatus = "INSIDE";
+    wristTag.indoorEntryTime = now;
   } else {
-    if (wristTag.status === "exited") {
-      res.status(400);
-      throw new Error("This ticket has already been used and the customer has exited");
-    }
-    if (wristTag.status === "active") {
-      res.status(400);
-      throw new Error("This ticket is already active inside the park");
-    }
+    wristTag.outdoorStatus = "INSIDE";
+    wristTag.outdoorEntryTime = now;
   }
 
-  // Set overall entry timer if not set yet
-  if (wristTag.status === "unused") {
-    wristTag.status = "active";
-    wristTag.entryTime = new Date();
-    wristTag.expiryTime = new Date(wristTag.entryTime.getTime() + wristTag.package.durationMinutes * 60000);
+  if (wristTag.package && wristTag.package.durationMinutes) {
+    wristTag.expiryTime = new Date(now.getTime() + wristTag.package.durationMinutes * 60000);
   }
 
   await wristTag.save();
 
-  const zoneLabel = zone === "indoor" ? "Indoor Zone" : zone === "outdoor" ? "Outdoor Zone" : "Park";
+  // Find all members under this bill
+  const billId = wristTag.bill?._id || wristTag.bill;
+  const billTags = await WristTag.find({ bill: billId }).sort({ memberNumber: 1, createdAt: 1 });
+  const totalMembers = billTags.length || 1;
+  const insideCount = billTags.filter((t) => t.status === "INSIDE" || t.status === "active").length;
+
+  const membersList = billTags.map((t, idx) => ({
+    memberNumber: t.memberNumber || idx + 1,
+    tagId: t.tagId,
+    status: (t.status === "INSIDE" || t.status === "active") ? "INSIDE" : (t.status === "EXITED" || t.status === "exited") ? "EXITED" : "NOT ENTERED",
+    area: t.area || (t.indoorStatus === "INSIDE" ? "Indoor" : t.outdoorStatus === "INSIDE" ? "Outdoor" : "Indoor"),
+    entryTime: t.entryTime,
+    exitTime: t.exitTime,
+  }));
+
+  const parkStats = await getParkStats();
+
+  // Store scan event for instant TV Display temporary popup
+  latestTvEvent = {
+    id: Date.now(),
+    type: "ENTRY",
+    title: "✓ ENTRY SUCCESSFUL",
+    billNumber: wristTag.bill?.billNumber || "N/A",
+    memberNumber: wristTag.memberNumber || 1,
+    tagId: wristTag.tagId,
+    customerName: wristTag.customer?.name || "Guest",
+    area,
+    insideCount,
+    totalMembers,
+    timestamp: now,
+  };
+
   res.json({
     success: true,
-    data: wristTag,
-    message: `${zoneLabel} entry allowed for ${wristTag.customer.name}`,
+    message: "✓ ENTRY SUCCESSFUL",
+    data: {
+      tag: wristTag,
+      billNumber: wristTag.bill?.billNumber || "N/A",
+      memberNumber: wristTag.memberNumber || 1,
+      area,
+      insideCount,
+      totalMembers,
+      membersList,
+      parkStats,
+    },
   });
 });
 
-// @desc  Mark a wrist tag (or specific zone) as exited (one-time use finished)
+// @desc  Mark a wrist tag as exited
 // @route POST /api/entry/exit
 const markExit = asyncHandler(async (req, res) => {
-  const { tagId: rawId, zone: explicitZone } = req.body;
-  const { tagId, zone: extractedZone } = extractTagInfo(rawId);
-  const zone = explicitZone || extractedZone || "general";
+  const { tagId: rawId } = req.body;
+  const { tagId } = extractTagInfo(rawId);
 
   if (!tagId) {
     res.status(400);
@@ -119,47 +174,103 @@ const markExit = asyncHandler(async (req, res) => {
 
   const wristTag = await WristTag.findOne({ tagId })
     .populate("customer", "name mobile")
-    .populate("package", "name durationMinutes");
+    .populate("package", "name durationMinutes")
+    .populate("bill", "billNumber");
 
   if (!wristTag) {
     res.status(404);
-    throw new Error("Invalid QR code - ticket not found");
+    throw new Error("✕ UNKNOWN WRIST TAG");
+  }
+
+  // 1. Error handling: Exit without entering
+  if (wristTag.status === "NOT_ENTERED" || wristTag.status === "unused" || !wristTag.entryTime) {
+    res.status(400);
+    throw new Error("⚠ INVALID EXIT");
+  }
+
+  // 2. Error handling: Already exited
+  if (wristTag.status === "EXITED" || wristTag.status === "exited") {
+    res.status(400);
+    throw new Error("⚠ ALREADY EXITED");
   }
 
   const now = new Date();
-  if (zone === "indoor") {
-    if (wristTag.indoorStatus === "exited") {
-      res.status(400);
-      throw new Error("Indoor section already marked as exited/used");
-    }
-    wristTag.indoorStatus = "exited";
-    wristTag.indoorExitTime = now;
-  } else if (zone === "outdoor") {
-    if (wristTag.outdoorStatus === "exited") {
-      res.status(400);
-      throw new Error("Outdoor section already marked as exited/used");
-    }
-    wristTag.outdoorStatus = "exited";
-    wristTag.outdoorExitTime = now;
-  } else {
-    wristTag.status = "exited";
-    wristTag.indoorStatus = "exited";
-    wristTag.outdoorStatus = "exited";
-    wristTag.exitTime = now;
-  }
-
-  // If both sections are exited, mark overall status as exited
-  if (wristTag.indoorStatus === "exited" && wristTag.outdoorStatus === "exited") {
-    wristTag.status = "exited";
-    wristTag.exitTime = now;
-  }
-
+  wristTag.status = "EXITED";
+  wristTag.exitTime = now;
+  wristTag.indoorStatus = "EXITED";
+  wristTag.outdoorStatus = "EXITED";
   await wristTag.save();
-  const zoneText = zone === "indoor" ? "Indoor" : zone === "outdoor" ? "Outdoor" : "Overall";
+
+  // Find all members under this bill
+  const billId = wristTag.bill?._id || wristTag.bill;
+  const billTags = await WristTag.find({ bill: billId }).sort({ memberNumber: 1, createdAt: 1 });
+  const totalMembers = billTags.length || 1;
+  const insideCount = billTags.filter((t) => t.status === "INSIDE" || t.status === "active").length;
+
+  const membersList = billTags.map((t, idx) => ({
+    memberNumber: t.memberNumber || idx + 1,
+    tagId: t.tagId,
+    status: (t.status === "INSIDE" || t.status === "active") ? "INSIDE" : (t.status === "EXITED" || t.status === "exited") ? "EXITED" : "NOT ENTERED",
+    area: t.area || "Indoor",
+    entryTime: t.entryTime,
+    exitTime: t.exitTime,
+  }));
+
+  const parkStats = await getParkStats();
+
+  // Store scan event for TV Display
+  latestTvEvent = {
+    id: Date.now(),
+    type: "EXIT",
+    title: "✓ EXIT SUCCESSFUL",
+    billNumber: wristTag.bill?.billNumber || "N/A",
+    memberNumber: wristTag.memberNumber || 1,
+    tagId: wristTag.tagId,
+    customerName: wristTag.customer?.name || "Guest",
+    area: wristTag.area || "Indoor",
+    insideCount,
+    totalMembers,
+    timestamp: now,
+  };
+
   res.json({
     success: true,
-    data: wristTag,
-    message: `${zoneText} exit recorded for ${wristTag.customer.name}`,
+    message: "✓ EXIT SUCCESSFUL",
+    data: {
+      tag: wristTag,
+      billNumber: wristTag.bill?.billNumber || "N/A",
+      memberNumber: wristTag.memberNumber || 1,
+      area: wristTag.area || "Indoor",
+      insideCount,
+      totalMembers,
+      membersList,
+      parkStats,
+    },
+  });
+});
+
+// @desc  TV Display Live endpoint: live inside count + temporary scan notification
+// @route GET /api/entry/tv-live
+const getTvLiveData = asyncHandler(async (req, res) => {
+  const parkStats = await getParkStats();
+
+  // Return latest scan event if occurred within the last 6 seconds
+  const isRecentEvent = latestTvEvent && (Date.now() - latestTvEvent.id < 6000);
+
+  // Group active inside tags
+  const insideTags = await WristTag.find({ status: { $in: ["INSIDE", "active"] } })
+    .populate("customer", "name mobile")
+    .populate("bill", "billNumber")
+    .populate("package", "name durationMinutes")
+    .sort({ entryTime: -1 });
+
+  res.json({
+    success: true,
+    data: {
+      ...parkStats,
+      latestEvent: isRecentEvent ? latestTvEvent : null,
+      insideTags,
+    },
   });
 });
 
@@ -267,4 +378,12 @@ const extendSession = asyncHandler(async (req, res) => {
   });
 });
 
-module.exports = { scanEntry, markExit, getActiveEntries, getTagStatus, searchCustomerForExtension, extendSession };
+module.exports = {
+  scanEntry,
+  markExit,
+  getActiveEntries,
+  getTvLiveData,
+  getTagStatus,
+  searchCustomerForExtension,
+  extendSession,
+};

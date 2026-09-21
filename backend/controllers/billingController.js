@@ -183,12 +183,13 @@ const createBill = asyncHandler(async (req, res) => {
       customer: customer._id,
       package: pkg._id,
       personType,
+      memberNumber: i + 1,
       adults: personType === "adult" ? 1 : 0,
       children: personType === "child" ? 1 : 0,
       below5: personType === "below5" ? 1 : 0,
-      status: "unused",
-      indoorStatus: "unused",
-      outdoorStatus: "unused",
+      status: "NOT_ENTERED",
+      indoorStatus: "NOT_ENTERED",
+      outdoorStatus: "NOT_ENTERED",
       expiryTime,
     });
     wristTags.push(wristTag);
