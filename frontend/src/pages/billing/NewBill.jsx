@@ -333,8 +333,8 @@ const NewBill = () => {
   }
 
   return (
-    <div className="mx-auto max-w-2xl">
-      <div className="card">
+    <div className="mx-auto w-full max-w-2xl px-0 sm:px-0">
+      <div className="card !p-4 sm:!p-5">
         <div className="mb-5 flex flex-wrap items-center justify-between gap-3 border-b border-ocean-100 pb-4">
           <div>
             <h2 className="flex items-center gap-2 text-lg font-bold text-ocean-900">
@@ -378,8 +378,9 @@ const NewBill = () => {
             </p>
           )}
 
-          <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2">
-            <div className="col-span-1 sm:col-span-2">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            {/* Customer Name — full width on all screens */}
+            <div className="col-span-full">
               <label className="label">Customer Name *</label>
               <input
                 className="input-field"
@@ -389,12 +390,14 @@ const NewBill = () => {
                 required
               />
             </div>
-            <div className="col-span-1">
+
+            {/* Mobile Number — full width on mobile, half on sm+ */}
+            <div className="col-span-full sm:col-span-1">
               <label className="label">Mobile Number *</label>
-              <div className="flex gap-2">
+              <div className="flex gap-1.5">
                 <input
                   type="tel"
-                  className="input-field flex-1 min-w-0"
+                  className="input-field min-w-0 flex-1"
                   value={form.mobile}
                   onChange={(e) => {
                     const val = e.target.value;
@@ -410,22 +413,24 @@ const NewBill = () => {
                   type="button"
                   title="Search returning customer by this mobile number"
                   onClick={() => handleLookup(form.mobile)}
-                  className="btn-secondary shrink-0 px-3"
+                  className="btn-secondary shrink-0 px-2.5 py-2"
                 >
                   <Search size={15} className="text-teal-600" />
                 </button>
                 <button
                   type="button"
-                  title="Use same number as WhatsApp"
+                  title="Copy to WhatsApp"
                   onClick={() => setForm({ ...form, whatsapp: form.mobile })}
                   disabled={!form.mobile.trim()}
-                  className="btn-secondary shrink-0 px-3"
+                  className="btn-secondary shrink-0 px-2.5 py-2"
                 >
                   <MessageCircle size={15} className="text-teal-500" />
                 </button>
               </div>
             </div>
-            <div className="col-span-1">
+
+            {/* WhatsApp Number */}
+            <div className="col-span-full sm:col-span-1">
               <label className="label">WhatsApp Number</label>
               <input
                 type="tel"
@@ -435,7 +440,9 @@ const NewBill = () => {
                 placeholder="Same or different"
               />
             </div>
-            <div className="col-span-2">
+
+            {/* Address — full width */}
+            <div className="col-span-full">
               <label className="label">Address</label>
               <input
                 className="input-field"
@@ -444,7 +451,9 @@ const NewBill = () => {
                 placeholder="Street, area, city"
               />
             </div>
-            <div className="col-span-2">
+
+            {/* Notes — full width */}
+            <div className="col-span-full">
               <label className="label flex items-center gap-1.5">
                 <StickyNote size={13} /> Visit Details (notes)
               </label>
