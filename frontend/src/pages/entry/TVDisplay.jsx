@@ -55,7 +55,7 @@ const TVDisplay = () => {
   }, []);
 
   // Filter out which active entries are currently expired
-  const expiredEntries = entries.filter((e) => formatRemaining(e.expiryTime).expired);
+  const expiredEntries = entries.filter((e) => e.status === "expired" || formatRemaining(e.expiryTime).expired);
   
   // Find which of the expired entries have NOT been acknowledged yet
   const unacknowledgedExpirations = expiredEntries.filter((e) => !acknowledged.has(e._id));

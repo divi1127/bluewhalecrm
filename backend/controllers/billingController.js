@@ -214,7 +214,7 @@ const createBill = asyncHandler(async (req, res) => {
 // @desc  Preview a coupon's offer on the current selection (used to confirm the bill)
 // @route POST /api/billing/verify-coupon
 const verifyCoupon = asyncHandler(async (req, res) => {
-  const { packageId, below5 = 0, adults = 1, children = 0, couponCode } = req.body;
+  const { packageId, below5 = 0, adults = 1, children = 0, socks = true, socksPrice = 50, couponCode } = req.body;
   if (!packageId || !couponCode) {
     res.status(400);
     throw new Error("packageId and couponCode are required");
@@ -228,9 +228,12 @@ const verifyCoupon = asyncHandler(async (req, res) => {
   const below5Count = Number(below5) || 0;
   const adultCount = Number(adults) || 1;
   const childCount = Number(children) || 0;
+  const totalPersons = adultCount + childCount + below5Count;
   const adultChildAmount = (adultCount + childCount) * pkg.price;
   const below5Amount = below5Count * (pkg.below5Price || 0);
-  const baseAmount = adultChildAmount + below5Amount;
+  const socksEnabled = socks !== false && socks !== "false";
+  const socksAmount = socksEnabled ? totalPersons * (Number(socksPrice) || 50) : 0;
+  const baseAmount = adultChildAmount + below5Amount + socksAmount;
 
   const normalizedCode = String(couponCode).trim().toUpperCase();
   const couponCodeDoc = await CouponCode.findOne({ code: normalizedCode }).populate("coupon");
@@ -271,8 +274,12 @@ const verifyCoupon = asyncHandler(async (req, res) => {
         discountValue: campaign.discountValue,
         minBillAmount: campaign.minBillAmount,
       },
+      adultCount,
+      childCount,
       below5Count,
       below5Amount,
+      socksEnabled,
+      socksAmount,
       baseAmount,
       discount: Math.round(discount),
       finalAmount: Math.round(finalAmount),

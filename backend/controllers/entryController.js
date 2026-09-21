@@ -172,7 +172,7 @@ const getActiveEntries = asyncHandler(async (req, res) => {
     { $set: { status: "expired" } }
   );
 
-  const active = await WristTag.find({ status: "active" })
+  const active = await WristTag.find({ status: { $in: ["active", "expired"] } })
     .populate("customer", "name mobile")
     .populate("package", "name")
     .sort({ expiryTime: 1 });

@@ -58,6 +58,7 @@ const GlobalSessionAlert = () => {
   // Filter for tags that are expired
   const now = new Date();
   const expiredTags = activeEntries.filter((tag) => {
+    if (tag.status === "expired") return true;
     if (!tag.expiryTime) return false;
     return new Date(tag.expiryTime) <= now;
   });

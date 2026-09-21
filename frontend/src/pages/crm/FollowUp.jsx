@@ -27,7 +27,7 @@ const daysSince = (d) => {
 
 const FollowUp = () => {
   const { can } = useAuth();
-  const [days, setDays] = useState(30);
+  const [days, setDays] = useState(0);
   const [type, setType] = useState("");
   const [status, setStatus] = useState("");
   const [customers, setCustomers] = useState([]);
@@ -49,7 +49,7 @@ const FollowUp = () => {
   };
 
   useEffect(() => {
-    load(30, "", "");
+    load(0, "", "");
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -223,13 +223,19 @@ const FollowUp = () => {
       <div className="card flex flex-wrap items-end gap-3">
         <div>
           <label className="label">Inactive for (days)</label>
-          <input
-            type="number"
-            min="1"
-            className="input-field w-32"
-            value={days}
-            onChange={(e) => setDays(e.target.value)}
-          />
+          <div className="flex items-center gap-1.5">
+            <input
+              type="number"
+              min="0"
+              placeholder="0 = all"
+              className="input-field w-24 text-sm"
+              value={days}
+              onChange={(e) => setDays(e.target.value)}
+            />
+            <button type="button" onClick={() => { setDays(0); load(0, type, status); }} className={`px-2 py-1.5 text-xs rounded border ${days === 0 ? "bg-teal-50 border-teal-400 text-teal-700 font-bold" : "bg-white border-ocean-200 text-ocean-600"}`}>All</button>
+            <button type="button" onClick={() => { setDays(7); load(7, type, status); }} className={`px-2 py-1.5 text-xs rounded border ${days === 7 ? "bg-teal-50 border-teal-400 text-teal-700 font-bold" : "bg-white border-ocean-200 text-ocean-600"}`}>7d</button>
+            <button type="button" onClick={() => { setDays(30); load(30, type, status); }} className={`px-2 py-1.5 text-xs rounded border ${days === 30 ? "bg-teal-50 border-teal-400 text-teal-700 font-bold" : "bg-white border-ocean-200 text-ocean-600"}`}>30d</button>
+          </div>
         </div>
         <div>
           <label className="label">Customer Type</label>

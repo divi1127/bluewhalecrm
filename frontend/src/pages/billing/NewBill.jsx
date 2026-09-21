@@ -38,6 +38,10 @@ const NewBill = () => {
   const [extLoading, setExtLoading] = useState(false);
   const [extMessage, setExtMessage] = useState(null); // { type: 'success'|'error', text }
   const [showExtension, setShowExtension] = useState(false);
+  const [custSearchOpen, setCustSearchOpen] = useState(false);
+  const [custSearchQuery, setCustSearchQuery] = useState("");
+  const [custSearchResults, setCustSearchResults] = useState([]);
+  const [custSearching, setCustSearching] = useState(false);
 
   const canCreate = can("billing", "create");
 
@@ -77,6 +81,8 @@ const NewBill = () => {
         adults: adultCount,
         children: childCount,
         below5: below5Count,
+        socks,
+        socksPrice: SOCKS_PRICE,
         couponCode: couponCode.trim(),
       });
       setCouponCheck({ checking: false, error: null, offer: data.data });
@@ -87,12 +93,23 @@ const NewBill = () => {
 
   // Extension timing functions
   const handleExtSearch = async () => {
-    if (!extSearchQuery.trim() || extSearchQuery.trim().length < 2) return;
+    const q = extSearchQuery.trim();
+    if (!q) {
+      setExtMessage({ type: "error", text: "Customer name or mobile number is required to search." });
+      return;
+    }
+    if (q.length < 2) {
+      setExtMessage({ type: "error", text: "Please enter at least 2 characters to search." });
+      return;
+    }
     setExtSearching(true);
     setExtMessage(null);
     try {
-      const { data } = await api.get("/entry/extend-search", { params: { q: extSearchQuery.trim() } });
+      const { data } = await api.get("/entry/extend-search", { params: { q } });
       setExtResults(data.data || []);
+      if (!data.data || data.data.length === 0) {
+        setExtMessage({ type: "error", text: `No active sessions found for "${q}".` });
+      }
     } catch (err) {
       setExtMessage({ type: "error", text: err.response?.data?.message || "Search failed" });
     } finally {
@@ -115,28 +132,68 @@ const NewBill = () => {
     }
   };
 
-  const handleLookup = async () => {
-    if (!form.mobile.trim()) return;
-    setError(null);
-    setLookupMsg(null);
-    const { data } = await api.get(`/customers/lookup/${form.mobile.trim()}`);
-    if (data.data) {
-      const c = data.data;
-      setCustomer(c);
-      setForm((f) => ({
-        ...f,
-        name: f.name || c.name,
-        whatsapp: f.whatsapp || c.whatsapp,
-        address: f.address || c.address,
-      }));
-      setLookupMsg({
-        found: true,
-        text: `Returning customer: ${c.name} (${c.customerType}, ${c.totalVisits} visits, spent ₹${c.totalSpending})`,
-      });
-    } else {
-      setCustomer(null);
-      setLookupMsg({ found: false, text: "No customer found for this mobile — registering a new customer." });
+  const handleLookup = async (manualMobile) => {
+    const targetMobile = (typeof manualMobile === "string" ? manualMobile : form.mobile).trim();
+    if (!targetMobile) {
+      // If mobile is empty, open the customer search modal
+      setCustSearchOpen(true);
+      return;
     }
+    setError(null);
+    setLookupMsg({ found: null, text: `Searching for ${targetMobile}...` });
+    try {
+      const { data } = await api.get(`/customers/lookup/${targetMobile}`);
+      if (data.data) {
+        const c = data.data;
+        setCustomer(c);
+        setForm((f) => ({
+          ...f,
+          name: c.name || f.name,
+          mobile: c.mobile,
+          whatsapp: c.whatsapp || f.whatsapp || c.mobile,
+          address: c.address || f.address,
+        }));
+        setLookupMsg({
+          found: true,
+          text: `Returning customer: ${c.name} (${c.customerType}, ${c.totalVisits} visits, spent ₹${c.totalSpending})`,
+        });
+      } else {
+        setCustomer(null);
+        setLookupMsg({ found: false, text: `No customer found for ${targetMobile} — ready to register as a new customer.` });
+      }
+    } catch {
+      setLookupMsg({ found: false, text: "Error looking up customer. Please try again." });
+    }
+  };
+
+  const handleCustSearch = async (e) => {
+    if (e && e.preventDefault) e.preventDefault();
+    if (!custSearchQuery.trim()) return;
+    setCustSearching(true);
+    try {
+      const { data } = await api.get("/customers", { params: { search: custSearchQuery.trim(), limit: 10 } });
+      setCustSearchResults(data.data || []);
+    } catch {
+      setCustSearchResults([]);
+    } finally {
+      setCustSearching(false);
+    }
+  };
+
+  const handleSelectCustomer = (c) => {
+    setCustomer(c);
+    setForm((f) => ({
+      ...f,
+      name: c.name,
+      mobile: c.mobile,
+      whatsapp: c.whatsapp || c.mobile,
+      address: c.address || "",
+    }));
+    setLookupMsg({
+      found: true,
+      text: `Returning customer selected: ${c.name} (${c.customerType}, ${c.totalVisits} visits, spent ₹${c.totalSpending})`,
+    });
+    setCustSearchOpen(false);
   };
 
   const resetForm = () => {
@@ -302,8 +359,12 @@ const NewBill = () => {
               {customer ? <UserCheck size={16} className="text-teal-500" /> : <UserPlus size={16} className="text-teal-500" />}
               Customer Registration
             </h3>
-            <button type="button" onClick={handleLookup} className="btn-secondary py-1.5 text-xs">
-              <Search size={14} /> Find Returning Customer
+            <button
+              type="button"
+              onClick={() => setCustSearchOpen(true)}
+              className="btn-secondary py-1.5 px-3 text-xs flex items-center gap-1.5 shadow-sm"
+            >
+              <Search size={14} className="text-teal-600" /> Find Returning Customer
             </button>
           </div>
 
@@ -317,8 +378,8 @@ const NewBill = () => {
             </p>
           )}
 
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            <div className="col-span-2">
+          <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2">
+            <div className="col-span-1 sm:col-span-2">
               <label className="label">Customer Name *</label>
               <input
                 className="input-field"
@@ -328,16 +389,31 @@ const NewBill = () => {
                 required
               />
             </div>
-            <div>
+            <div className="col-span-1">
               <label className="label">Mobile Number *</label>
               <div className="flex gap-2">
                 <input
-                  className="input-field"
+                  type="tel"
+                  className="input-field flex-1 min-w-0"
                   value={form.mobile}
-                  onChange={(e) => setForm({ ...form, mobile: e.target.value })}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    setForm({ ...form, mobile: val });
+                    if (val.replace(/\D/g, "").length === 10) {
+                      handleLookup(val);
+                    }
+                  }}
                   placeholder="10-digit mobile"
                   required
                 />
+                <button
+                  type="button"
+                  title="Search returning customer by this mobile number"
+                  onClick={() => handleLookup(form.mobile)}
+                  className="btn-secondary shrink-0 px-3"
+                >
+                  <Search size={15} className="text-teal-600" />
+                </button>
                 <button
                   type="button"
                   title="Use same number as WhatsApp"
@@ -345,14 +421,15 @@ const NewBill = () => {
                   disabled={!form.mobile.trim()}
                   className="btn-secondary shrink-0 px-3"
                 >
-                  <MessageCircle size={16} className="text-teal-500" />
+                  <MessageCircle size={15} className="text-teal-500" />
                 </button>
               </div>
             </div>
-            <div>
+            <div className="col-span-1">
               <label className="label">WhatsApp Number</label>
               <input
-                className="input-field"
+                type="tel"
+                className="input-field w-full"
                 value={form.whatsapp}
                 onChange={(e) => setForm({ ...form, whatsapp: e.target.value })}
                 placeholder="Same or different"
@@ -521,9 +598,15 @@ const NewBill = () => {
                     <span className="font-medium">₹{couponCheck.offer.below5Amount}</span>
                   </div>
                 )}
+                {socks && totalPersons > 0 && (
+                  <div className="flex justify-between">
+                    <span>🧦 Socks × {totalPersons} (₹{SOCKS_PRICE} each)</span>
+                    <span className="font-medium">₹{socksAmount}</span>
+                  </div>
+                )}
                 <div className="flex justify-between border-t border-teal-200 pt-1">
                   <span>Subtotal</span>
-                  <span className="font-medium">₹{couponCheck.offer.baseAmount}</span>
+                  <span className="font-medium">₹{baseAmount}</span>
                 </div>
                 <div className="flex justify-between text-coral-600">
                   <span>Coupon discount</span>
@@ -531,7 +614,7 @@ const NewBill = () => {
                 </div>
                 <div className="flex justify-between rounded-lg bg-gradient-to-r from-teal-500 to-teal-600 px-3 py-2 text-white">
                   <span className="font-bold">Final Amount</span>
-                  <span className="font-display text-base font-extrabold">₹{couponCheck.offer.finalAmount}</span>
+                  <span className="font-display text-base font-extrabold">₹{Math.max(baseAmount - couponCheck.offer.discount, 0)}</span>
                 </div>
               </div>
             </div>
@@ -579,7 +662,7 @@ const NewBill = () => {
               <div className="mt-2 flex items-center justify-between rounded-lg bg-ocean-900 px-3 py-2 text-white">
                 <span className="font-bold">Bill Total</span>
                 <span className="font-display text-base font-extrabold">
-                  ₹{couponCheck?.offer ? couponCheck.offer.finalAmount : baseAmount}
+                  ₹{couponCheck?.offer ? Math.max(baseAmount - couponCheck.offer.discount, 0) : baseAmount}
                 </span>
               </div>
               <p className="mt-2 text-xs text-ocean-400">
@@ -632,18 +715,19 @@ const NewBill = () => {
                   <UserSearch size={14} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-ocean-400" />
                   <input
                     className="input-field !pl-9"
-                    placeholder="Search by name or mobile number..."
+                    placeholder="Search by name or mobile number... *"
                     value={extSearchQuery}
                     onChange={(e) => setExtSearchQuery(e.target.value)}
                     onKeyDown={(e) => e.key === "Enter" && handleExtSearch()}
+                    required
                     autoFocus
                   />
                 </div>
                 <button
                   type="button"
                   onClick={handleExtSearch}
-                  disabled={extSearching || extSearchQuery.trim().length < 2}
-                  className="btn-secondary shrink-0"
+                  disabled={extSearching}
+                  className="btn-secondary shrink-0 font-semibold"
                 >
                   {extSearching ? "Searching..." : "Search"}
                 </button>
@@ -716,6 +800,81 @@ const NewBill = () => {
                   Close
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* RETURNING CUSTOMER LOOKUP MODAL */}
+      {custSearchOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm animate-fadeIn">
+          <div className="relative w-full max-w-lg rounded-2xl bg-white p-6 shadow-2xl animate-scaleIn">
+            <div className="mb-4 flex items-center justify-between border-b border-ocean-100 pb-3">
+              <h3 className="flex items-center gap-2 text-base font-bold text-ocean-900">
+                <UserSearch size={20} className="text-teal-600" /> Find Returning Customer
+              </h3>
+              <button
+                type="button"
+                onClick={() => setCustSearchOpen(false)}
+                className="rounded-lg p-1.5 text-ocean-400 hover:bg-ocean-100 hover:text-ocean-700"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <form onSubmit={handleCustSearch} className="mb-4 flex gap-2">
+              <input
+                className="input-field flex-1"
+                placeholder="Search by customer name or mobile..."
+                value={custSearchQuery}
+                onChange={(e) => setCustSearchQuery(e.target.value)}
+                autoFocus
+              />
+              <button
+                type="submit"
+                disabled={custSearching || !custSearchQuery.trim()}
+                className="btn-accent shrink-0 px-4 py-2 text-xs font-semibold"
+              >
+                {custSearching ? "Searching..." : "Search"}
+              </button>
+            </form>
+
+            <div className="max-h-64 space-y-2 overflow-y-auto pr-1">
+              {custSearchResults.length > 0 ? (
+                custSearchResults.map((c) => (
+                  <div
+                    key={c._id}
+                    className="flex items-center justify-between rounded-xl border border-ocean-100 bg-ocean-50/40 p-3 transition hover:border-teal-300 hover:bg-teal-50/30"
+                  >
+                    <div>
+                      <p className="text-sm font-bold text-ocean-900">{c.name}</p>
+                      <p className="text-xs text-ocean-500">📱 {c.mobile} · {c.customerType?.toUpperCase()}</p>
+                      <p className="text-[11px] text-ocean-400">{c.totalVisits} visits · Spent ₹{c.totalSpending}</p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => handleSelectCustomer(c)}
+                      className="btn-secondary px-3 py-1.5 text-xs font-bold text-teal-600 hover:bg-teal-50"
+                    >
+                      Select
+                    </button>
+                  </div>
+                ))
+              ) : (
+                custSearchQuery.trim() && !custSearching && (
+                  <p className="py-6 text-center text-sm text-ocean-400">No customers found matching "{custSearchQuery}".</p>
+                )
+              )}
+            </div>
+
+            <div className="flex justify-end pt-3 border-t border-ocean-100 mt-4">
+              <button
+                type="button"
+                onClick={() => setCustSearchOpen(false)}
+                className="btn-secondary text-xs px-4 py-2"
+              >
+                Cancel
+              </button>
             </div>
           </div>
         </div>

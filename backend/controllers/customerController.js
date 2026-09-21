@@ -72,9 +72,14 @@ const updateCustomer = asyncHandler(async (req, res) => {
 // @desc  Follow-up list: customers matching inactivity / type criteria, with stats
 // @route GET /api/customers/followup/list?days=30&type=inactive&status=pending
 const getFollowUpList = asyncHandler(async (req, res) => {
-  const { days = 30, type, status } = req.query;
+  const { days = 0, type, status } = req.query;
   const cutoff = new Date();
-  cutoff.setDate(cutoff.getDate() - Number(days));
+  if (days && Number(days) > 0) {
+    cutoff.setDate(cutoff.getDate() - Number(days));
+  } else {
+    // Include all visits up to the end of today
+    cutoff.setHours(23, 59, 59, 999);
+  }
 
   const query = { lastVisitDate: { $lte: cutoff } };
   if (type) query.customerType = type;
