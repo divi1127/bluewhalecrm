@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Search, Receipt, Printer, CheckCircle2, UserPlus, UserCheck, StickyNote, MessageCircle, ScanLine, BadgePercent, AlertCircle, ShieldAlert, Clock, Timer, UserSearch } from "lucide-react";
+import { Search, Receipt, Printer, CheckCircle2, UserPlus, UserCheck, StickyNote, MessageCircle, ScanLine, BadgePercent, AlertCircle, ShieldAlert, Clock, Timer, UserSearch, X } from "lucide-react";
 import api from "../../api/axios";
 import { useAuth } from "../../context/AuthContext";
 import WristTag from "../../components/print/WristTag";
@@ -278,12 +278,23 @@ const NewBill = () => {
   return (
     <div className="mx-auto max-w-2xl">
       <div className="card">
-        <h2 className="mb-1 flex items-center gap-2 text-lg font-bold text-ocean-900">
-          <Receipt size={20} className="text-teal-500" /> New Bill
-        </h2>
-        <p className="mb-5 text-sm text-ocean-400">
-          Customer Arrives → Select Package → Enter Persons → Coupon → Payment → Bill + Wrist Tags
-        </p>
+        <div className="mb-5 flex flex-wrap items-center justify-between gap-3 border-b border-ocean-100 pb-4">
+          <div>
+            <h2 className="flex items-center gap-2 text-lg font-bold text-ocean-900">
+              <Receipt size={20} className="text-teal-500" /> New Bill
+            </h2>
+            <p className="text-xs text-ocean-400">
+              Customer Arrives → Select Package → Enter Persons → Coupon → Payment → Bill + Wrist Tags
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => setShowExtension(true)}
+            className="btn-accent flex items-center gap-2 px-4 py-2 text-sm font-semibold shadow-sm"
+          >
+            <Timer size={17} /> Extend Session
+          </button>
+        </div>
 
         <div className="mb-5 rounded-xl border border-ocean-100 bg-ocean-50/40 p-4">
           <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
@@ -594,101 +605,121 @@ const NewBill = () => {
 
       {scannerOpen && <QrScanner onScan={handleScanCoupon} onClose={() => setScannerOpen(false)} />}
 
-      {/* EXTENSION TIMING SECTION */}
-      <div className="mt-6 card">
-        <button
-          type="button"
-          onClick={() => setShowExtension(!showExtension)}
-          className="flex w-full items-center justify-between"
-        >
-          <h3 className="flex items-center gap-2 text-sm font-bold text-ocean-900">
-            <Timer size={18} className="text-amber-500" /> Extend Session Time
-          </h3>
-          <span className="text-xs text-ocean-400">{showExtension ? '▲ Collapse' : '▼ Expand'}</span>
-        </button>
-
-        {showExtension && (
-          <div className="mt-4 space-y-4">
-            <p className="text-xs text-ocean-400">
-              Search for a customer by name or mobile number to find their active wrist tags and extend session time.
-            </p>
-
-            <div className="flex gap-2">
-              <div className="relative flex-1">
-                <UserSearch size={14} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-ocean-400" />
-                <input
-                  className="input-field !pl-9"
-                  placeholder="Search by name or mobile number..."
-                  value={extSearchQuery}
-                  onChange={(e) => setExtSearchQuery(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && handleExtSearch()}
-                />
-              </div>
-              <button type="button" onClick={handleExtSearch} disabled={extSearching || extSearchQuery.trim().length < 2} className="btn-secondary shrink-0">
-                {extSearching ? "Searching..." : "Search"}
+      {/* EXTENSION TIMING MODAL */}
+      {showExtension && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm animate-fadeIn">
+          <div className="relative w-full max-w-lg rounded-2xl bg-white p-6 shadow-2xl animate-scaleIn">
+            <div className="mb-4 flex items-center justify-between border-b border-ocean-100 pb-3">
+              <h3 className="flex items-center gap-2 text-base font-bold text-ocean-900">
+                <Timer size={20} className="text-amber-500" /> Extend Session Time
+              </h3>
+              <button
+                type="button"
+                onClick={() => setShowExtension(false)}
+                className="rounded-lg p-1.5 text-ocean-400 hover:bg-ocean-100 hover:text-ocean-700"
+              >
+                <X size={18} />
               </button>
             </div>
 
-            {extMessage && (
-              <div className={`rounded-lg px-3 py-2 text-sm font-semibold ${
-                extMessage.type === "success" ? "bg-teal-50 text-teal-700" : "bg-coral-50 text-coral-600"
-              }`}>
-                {extMessage.text}
-              </div>
-            )}
+            <div className="space-y-4">
+              <p className="text-xs text-ocean-400">
+                Search for a customer by name or mobile number to find their active wrist tags and extend session time.
+              </p>
 
-            {extResults.length > 0 && (
-              <div className="space-y-3">
-                <div className="flex items-center gap-2">
-                  <label className="label mb-0">Extend by:</label>
-                  <select
-                    className="input-field w-auto"
-                    value={extMinutes}
-                    onChange={(e) => setExtMinutes(e.target.value)}
-                  >
-                    <option value={15}>15 min</option>
-                    <option value={30}>30 min</option>
-                    <option value={45}>45 min</option>
-                    <option value={60}>60 min</option>
-                    <option value={90}>90 min</option>
-                    <option value={120}>2 hours</option>
-                  </select>
+              <div className="flex gap-2">
+                <div className="relative flex-1">
+                  <UserSearch size={14} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-ocean-400" />
+                  <input
+                    className="input-field !pl-9"
+                    placeholder="Search by name or mobile number..."
+                    value={extSearchQuery}
+                    onChange={(e) => setExtSearchQuery(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && handleExtSearch()}
+                    autoFocus
+                  />
                 </div>
-
-                {extResults.map((tag) => {
-                  const remaining = new Date(tag.expiryTime) - new Date();
-                  const mins = Math.max(0, Math.floor(remaining / 60000));
-                  return (
-                    <div key={tag._id} className="flex items-center justify-between rounded-xl border border-ocean-100 bg-white p-3">
-                      <div>
-                        <p className="text-sm font-bold text-ocean-900">{tag.customer?.name}</p>
-                        <p className="text-xs text-ocean-400">{tag.package?.name} · {tag.tagId}</p>
-                        <p className="text-xs text-ocean-500 flex items-center gap-1 mt-0.5">
-                          <Clock size={11} />
-                          {mins > 0 ? `${mins} min remaining` : "Expired"}
-                          {' · Expires ' + new Date(tag.expiryTime).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" })}
-                        </p>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => handleExtend(tag.tagId)}
-                        disabled={extLoading}
-                        className="btn-accent shrink-0 text-xs px-3 py-1.5"
-                      >
-                        {extLoading ? "Extending..." : `+${extMinutes} min`}
-                      </button>
-                    </div>
-                  );
-                })}
+                <button
+                  type="button"
+                  onClick={handleExtSearch}
+                  disabled={extSearching || extSearchQuery.trim().length < 2}
+                  className="btn-secondary shrink-0"
+                >
+                  {extSearching ? "Searching..." : "Search"}
+                </button>
               </div>
-            )}
 
-            {!extSearching && extResults.length === 0 && extSearchQuery.trim().length >= 2 && (
-              <p className="text-center text-sm text-ocean-400 py-4">No active sessions found for this customer.</p>
-            )}
+              {extMessage && (
+                <div className={`rounded-lg px-3 py-2 text-sm font-semibold ${
+                  extMessage.type === "success" ? "bg-teal-50 text-teal-700" : "bg-coral-50 text-coral-600"
+                }`}>
+                  {extMessage.text}
+                </div>
+              )}
+
+              {extResults.length > 0 && (
+                <div className="max-h-64 space-y-3 overflow-y-auto pr-1">
+                  <div className="flex items-center gap-2">
+                    <label className="label mb-0 text-xs">Extend by:</label>
+                    <select
+                      className="input-field w-auto py-1 text-xs"
+                      value={extMinutes}
+                      onChange={(e) => setExtMinutes(e.target.value)}
+                    >
+                      <option value={15}>15 min</option>
+                      <option value={30}>30 min</option>
+                      <option value={45}>45 min</option>
+                      <option value={60}>60 min</option>
+                      <option value={90}>90 min</option>
+                      <option value={120}>2 hours</option>
+                    </select>
+                  </div>
+
+                  {extResults.map((tag) => {
+                    const remaining = new Date(tag.expiryTime) - new Date();
+                    const mins = Math.max(0, Math.floor(remaining / 60000));
+                    return (
+                      <div key={tag._id} className="flex items-center justify-between rounded-xl border border-ocean-100 bg-ocean-50/50 p-3">
+                        <div>
+                          <p className="text-sm font-bold text-ocean-900">{tag.customer?.name}</p>
+                          <p className="text-xs text-ocean-400">{tag.package?.name} · {tag.tagId}</p>
+                          <p className="mt-0.5 flex items-center gap-1 text-xs text-ocean-500">
+                            <Clock size={11} />
+                            {mins > 0 ? `${mins} min remaining` : "Expired"}
+                            {' · Expires ' + new Date(tag.expiryTime).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" })}
+                          </p>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => handleExtend(tag.tagId)}
+                          disabled={extLoading}
+                          className="btn-accent shrink-0 px-3 py-1.5 text-xs font-semibold"
+                        >
+                          {extLoading ? "Extending..." : `+${extMinutes} min`}
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+
+              {!extSearching && extResults.length === 0 && extSearchQuery.trim().length >= 2 && (
+                <p className="py-4 text-center text-sm text-ocean-400">No active sessions found for this customer.</p>
+              )}
+
+              <div className="flex justify-end pt-2 border-t border-ocean-100">
+                <button
+                  type="button"
+                  onClick={() => setShowExtension(false)}
+                  className="btn-secondary text-xs px-4 py-2"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
           </div>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 };

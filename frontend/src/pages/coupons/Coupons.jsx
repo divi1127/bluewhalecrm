@@ -84,9 +84,12 @@ const Coupons = () => {
   };
 
   const handleGenerateCodes = async (coupon, amount = count) => {
-    const { data } = await api.post(`/coupons/${coupon._id}/generate-codes`, { count: amount });
-    setCodesModal({ coupon, generatedCodes: data.data });
-    setSelected(data.data.map((c) => c._id));
+    const { data } = await api.post(`/coupons/${coupon._id}/generate-codes`, { count: Number(amount) || 1 });
+    setCodesModal((prev) => {
+      const existing = prev?.coupon?._id === coupon._id ? (prev.generatedCodes || []) : [];
+      return { coupon, generatedCodes: [...existing, ...data.data] };
+    });
+    setSelected((prev) => [...prev, ...data.data.map((c) => c._id)]);
     load();
   };
 
@@ -216,13 +219,14 @@ const Coupons = () => {
             </select>
           </div>
           <div>
-            <label className="label">Codes to generate now (optional)</label>
+            <label className="label">Codes to generate now *</label>
             <input
               type="number"
               min="1"
+              required={!editingId}
               className="input-field"
               value={form.generateCount}
-              placeholder="e.g. 5"
+              placeholder="e.g. 10"
               onChange={(e) => setForm({ ...form, generateCount: e.target.value })}
             />
           </div>
@@ -315,11 +319,24 @@ const Coupons = () => {
               </div>
 
               <div className="mt-2 flex flex-wrap items-center gap-2 border-t border-ocean-100 pt-4">
-                <label className="label mb-0 mr-1 whitespace-nowrap">Copies per code</label>
-                <input type="number" min="1" className="input-field w-24" value={count} onChange={(e) => setCount(e.target.value)} />
-                <button onClick={() => handleGenerateCodes(codesModal.coupon)} className="btn-secondary">
-                  Generate More
-                </button>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-semibold text-ocean-600">Generate more:</span>
+                  <input
+                    type="number"
+                    min="1"
+                    className="input-field w-20 py-1 text-xs"
+                    value={count}
+                    placeholder="Qty"
+                    onChange={(e) => setCount(e.target.value)}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => handleGenerateCodes(codesModal.coupon, count)}
+                    className="btn-secondary py-1 text-xs"
+                  >
+                    + Generate More
+                  </button>
+                </div>
                 <button
                   onClick={() => window.print()}
                   className="btn-primary"

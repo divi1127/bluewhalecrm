@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import Sidebar from "./Sidebar";
 import Navbar from "./Navbar";
+import GlobalSessionAlert from "../common/GlobalSessionAlert";
 
 // Standard app shell (sidebar + navbar) wrapping every page except Login and TV Display.
 const Layout = ({ title, children }) => {
@@ -18,6 +19,7 @@ const Layout = ({ title, children }) => {
       <div className="flex flex-1 flex-col overflow-hidden">
         <Navbar title={title} onMenuClick={() => setSidebarOpen(true)} />
         <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">{children}</main>
+        <GlobalSessionAlert />
       </div>
     </div>
   );

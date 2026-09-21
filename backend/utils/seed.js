@@ -54,11 +54,9 @@ const wipe = async () => {
 
 const seedPackages = async () => {
   await Package.insertMany([
-    { name: "Standard Entry", price: 299, below5Price: 100, durationValue: 2, durationUnit: "hours", durationMinutes: 120, description: "General park access, 2 hours" },
-    { name: "Premium Entry", price: 499, below5Price: 150, durationValue: 3, durationUnit: "hours", durationMinutes: 180, description: "All rides + 3 hours access" },
-    { name: "Full Day Pass", price: 799, below5Price: 250, durationValue: 8, durationUnit: "hours", durationMinutes: 480, description: "Full day access, all attractions" },
+    { name: "General Entry", price: 600, below5Price: 350, durationValue: 1, durationUnit: "hours", durationMinutes: 60, description: "General Entry - ₹600 per person, Kids Below 5 Years ₹350 per child" },
   ]);
-  log(`Packages: 3 created.`);
+  log(`Packages: 1 created (General Entry ₹600, Below-5 ₹350).`);
   return Package.find();
 };
 
