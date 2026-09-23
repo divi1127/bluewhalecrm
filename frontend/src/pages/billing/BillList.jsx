@@ -10,6 +10,7 @@ const BillList = () => {
   const [bills, setBills] = useState([]);
   const [loading, setLoading] = useState(true);
   const [detail, setDetail] = useState(null);
+  const [printTarget, setPrintTarget] = useState(null); // "wrist-tags" | "bill" | null
 
   useEffect(() => {
     api.get("/billing").then(({ data }) => setBills(data.data)).finally(() => setLoading(false));
@@ -44,6 +45,39 @@ const BillList = () => {
   const customer = bill?.customer;
   const tags = wristTags && wristTags.length ? wristTags : [];
 
+  const renderWristTag = (wristTag) => (
+    <WristTag
+      tagId={wristTag.tagId}
+      qrCodeDataUrl={wristTag.qrCodeDataUrl}
+      indoorQrCodeDataUrl={wristTag.indoorQrCodeDataUrl}
+      outdoorQrCodeDataUrl={wristTag.outdoorQrCodeDataUrl}
+      customerName={customer?.name}
+      customerMobile={customer?.mobile}
+      packageName={pkg?.name}
+      personType={wristTag.personType}
+      durationMinutes={pkg?.durationMinutes}
+      durationUnit={pkg?.durationUnit}
+      billNumber={bill?.billNumber}
+      status={wristTag.status}
+      indoorStatus={wristTag.indoorStatus}
+      outdoorStatus={wristTag.outdoorStatus}
+    />
+  );
+
+  const handlePrint = (target) => {
+    setPrintTarget(target);
+    setTimeout(() => {
+      window.print();
+      setTimeout(() => setPrintTarget(null), 600);
+    }, 250);
+  };
+
+  const tagPages = tags.reduce((acc, t, i) => {
+    const pageIdx = Math.floor(i / 3);
+    (acc[pageIdx] = acc[pageIdx] || []).push(t);
+    return acc;
+  }, []);
+
   return (
     <div className="space-y-4">
       <h2 className="text-lg font-bold text-ocean-900">Recent Bills</h2>
@@ -55,41 +89,39 @@ const BillList = () => {
 
       {detail && (
         <>
-          <PrintSheet>
-            {bill && (
-              <div className="print-break flex justify-center bg-white p-4">
-                <Invoice bill={bill} pkg={pkg} customer={customer} wristTags={tags} />
-              </div>
-            )}
-            {tags.map((wristTag) => (
-              <div key={wristTag._id} className="print-break flex justify-center bg-white p-4">
-                <WristTag
-                  tagId={wristTag.tagId}
-                  qrCodeDataUrl={wristTag.qrCodeDataUrl}
-                  customerName={customer?.name}
-                  customerMobile={customer?.mobile}
-                  packageName={pkg?.name}
-                  personType={wristTag.personType}
-                  adults={wristTag.adults ?? bill?.adults}
-                  children={wristTag.children ?? bill?.children}
-                  below5={wristTag.below5 ?? bill?.below5}
-                  durationMinutes={pkg?.durationMinutes}
-                  durationUnit={pkg?.durationUnit}
-                  billNumber={bill?.billNumber}
-                  status={wristTag.status}
-                  entryTime={wristTag.entryTime}
-                  expiryTime={wristTag.expiryTime}
-                />
-              </div>
-            ))}
-          </PrintSheet>
+          {printTarget === "wrist-tags" && (
+            <PrintSheet>
+              <style>{`@page { size: A4 landscape; margin: 8mm; }`}</style>
+              {tagPages.map((pageTags, pageIdx) => (
+                <div key={pageIdx} className="wrist-page">
+                  {pageTags.map((wristTag) => (
+                    <div key={wristTag._id} className="wrist-slot">
+                      {renderWristTag(wristTag)}
+                    </div>
+                  ))}
+                </div>
+              ))}
+            </PrintSheet>
+          )}
+          {printTarget === "bill" && (
+            <PrintSheet>
+              {bill && (
+                <div className="print-break flex justify-center bg-white p-4">
+                  <Invoice bill={bill} pkg={pkg} customer={customer} wristTags={tags} />
+                </div>
+              )}
+            </PrintSheet>
+          )}
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
             <div className="max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-2xl bg-white p-6">
               <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <h3 className="text-lg font-bold text-ocean-900">Bill {bill?.billNumber}</h3>
                 <div className="flex flex-wrap gap-2">
-                  <button onClick={() => window.print()} className="btn-primary">
-                    <Printer size={16} /> Print Invoice & {tags.length} Wrist Tag{tags.length === 1 ? "" : "s"}
+                  <button onClick={() => handlePrint("wrist-tags")} className="btn-primary">
+                    <Printer size={16} /> Print {tags.length} Wrist Tag{tags.length === 1 ? "" : "s"}
+                  </button>
+                  <button onClick={() => handlePrint("bill")} className="btn-secondary">
+                    <Printer size={16} /> Print Bill
                   </button>
                   <button onClick={() => setDetail(null)} className="btn-accent">
                     Close
@@ -100,23 +132,9 @@ const BillList = () => {
                 {bill && <Invoice bill={bill} pkg={pkg} customer={customer} wristTags={tags} />}
                 {tags.map((wristTag) => (
                   <div key={wristTag._id} className="flex justify-center">
-                    <WristTag
-                      tagId={wristTag.tagId}
-                      qrCodeDataUrl={wristTag.qrCodeDataUrl}
-                      customerName={customer?.name}
-                      customerMobile={customer?.mobile}
-                      packageName={pkg?.name}
-                      personType={wristTag.personType}
-                      adults={wristTag.adults ?? bill?.adults}
-                      children={wristTag.children ?? bill?.children}
-                      below5={wristTag.below5 ?? bill?.below5}
-                      durationMinutes={pkg?.durationMinutes}
-                      durationUnit={pkg?.durationUnit}
-                      billNumber={bill?.billNumber}
-                      status={wristTag.status}
-                      entryTime={wristTag.entryTime}
-                      expiryTime={wristTag.expiryTime}
-                    />
+                    <div className="wrist-tag-preview">
+                      {renderWristTag(wristTag)}
+                    </div>
                   </div>
                 ))}
               </div>

@@ -29,6 +29,7 @@ const NewBill = () => {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
   const [result, setResult] = useState(null); // { bill, wristTags, customer }
+  const [printTarget, setPrintTarget] = useState(null); // "wrist-tags" | "bill" | null
 
   // Extension timing state
   const [extSearchQuery, setExtSearchQuery] = useState("");
@@ -209,6 +210,7 @@ const NewBill = () => {
     setCouponCheck(null);
     setPaymentMode("cash");
     setResult(null);
+    setPrintTarget(null);
   };
 
   const handleSubmit = async (e) => {
@@ -241,38 +243,68 @@ const NewBill = () => {
     }
   };
 
+  const renderWristTag = (wristTag) => (
+    <WristTag
+      tagId={wristTag.tagId}
+      qrCodeDataUrl={wristTag.qrCodeDataUrl}
+      indoorQrCodeDataUrl={wristTag.indoorQrCodeDataUrl}
+      outdoorQrCodeDataUrl={wristTag.outdoorQrCodeDataUrl}
+      customerName={result?.customer?.name}
+      customerMobile={result?.customer?.mobile}
+      packageName={selectedPackage?.name}
+      personType={wristTag.personType}
+      durationMinutes={selectedPackage?.durationMinutes}
+      durationUnit={selectedPackage?.durationUnit}
+      billNumber={result?.bill?.billNumber}
+      status={wristTag.status}
+      indoorStatus={wristTag.indoorStatus}
+      outdoorStatus={wristTag.outdoorStatus}
+    />
+  );
+
+  const handlePrint = (target) => {
+    setPrintTarget(target);
+    setTimeout(() => {
+      window.print();
+      setTimeout(() => setPrintTarget(null), 600);
+    }, 250);
+  };
+
   if (result) {
     const { bill, wristTags, customer: billedCustomer } = result;
     const pkg = selectedPackage;
     const tags = wristTags && wristTags.length ? wristTags : [];
+    const tagPages = tags.reduce((acc, t, i) => {
+      const pageIdx = Math.floor(i / 3);
+      (acc[pageIdx] = acc[pageIdx] || []).push(t);
+      return acc;
+    }, []);
     return (
       <>
-        {/* PRINT SHEET — bill first, then each tag on its own page */}
-        <PrintSheet>
-          <div className="print-break flex justify-center bg-white p-6">
-            <Invoice bill={bill} pkg={pkg} customer={billedCustomer} wristTags={tags} />
-          </div>
-          {tags.map((wristTag) => (
-            <div key={wristTag._id} className="print-break flex justify-center bg-white py-6 px-4">
-              <WristTag
-                tagId={wristTag.tagId}
-                qrCodeDataUrl={wristTag.qrCodeDataUrl}
-                indoorQrCodeDataUrl={wristTag.indoorQrCodeDataUrl}
-                outdoorQrCodeDataUrl={wristTag.outdoorQrCodeDataUrl}
-                customerName={billedCustomer.name}
-                customerMobile={billedCustomer.mobile}
-                packageName={pkg?.name}
-                personType={wristTag.personType}
-                durationMinutes={pkg?.durationMinutes}
-                durationUnit={pkg?.durationUnit}
-                billNumber={bill.billNumber}
-                status={wristTag.status}
-                indoorStatus={wristTag.indoorStatus}
-                outdoorStatus={wristTag.outdoorStatus}
-              />
+        {/* PRINT SHEET — WRIST TAGS ONLY (3 per A4 landscape page), no bill */}
+        {printTarget === "wrist-tags" && (
+          <PrintSheet>
+            <style>{`@page { size: A4 landscape; margin: 8mm; }`}</style>
+            {tagPages.map((pageTags, pageIdx) => (
+              <div key={pageIdx} className="wrist-page">
+                {pageTags.map((wristTag) => (
+                  <div key={wristTag._id} className="wrist-slot">
+                    {renderWristTag(wristTag)}
+                  </div>
+                ))}
+              </div>
+            ))}
+          </PrintSheet>
+        )}
+
+        {/* PRINT SHEET — BILL ONLY */}
+        {printTarget === "bill" && (
+          <PrintSheet>
+            <div className="print-break flex justify-center bg-white p-6">
+              <Invoice bill={bill} pkg={pkg} customer={billedCustomer} wristTags={tags} />
             </div>
-          ))}
-        </PrintSheet>
+          </PrintSheet>
+        )}
 
         {/* ON-SCREEN PREVIEW — Bill on top, tags stacked below */}
         <div className="mx-auto max-w-3xl space-y-4">
@@ -283,12 +315,15 @@ const NewBill = () => {
                 <CheckCircle2 size={20} className="text-teal-500" /> Bill & Wrist Tags Generated
               </h2>
               <p className="text-sm text-ocean-400">
-                {bill.billNumber} · {tags.length} wrist tag(s) · {totalPersons} person(s)
+                {bill.billNumber} · {tags.length} wrist tag(s) · {totalPersons} person(s) · 3 per print page
               </p>
             </div>
             <div className="flex flex-wrap gap-3">
-              <button onClick={() => window.print()} className="btn-primary">
-                <Printer size={16} /> Print Bill & Wrist Tags
+              <button onClick={() => handlePrint("wrist-tags")} className="btn-primary">
+                <Printer size={16} /> Print Wrist Tags
+              </button>
+              <button onClick={() => handlePrint("bill")} className="btn-secondary">
+                <Receipt size={16} /> Print Bill
               </button>
               <button onClick={resetForm} className="btn-accent">New Bill</button>
             </div>
@@ -303,26 +338,13 @@ const NewBill = () => {
           {tags.length > 0 && (
             <div className="space-y-3">
               <p className="text-xs font-bold uppercase tracking-widest text-ocean-500">
-                Wrist Tags ({tags.length})
+                Wrist Tags ({tags.length}) — printed 3 per page, no bill
               </p>
               {tags.map((wristTag) => (
                 <div key={wristTag._id} className="flex justify-center">
-                  <WristTag
-                    tagId={wristTag.tagId}
-                    qrCodeDataUrl={wristTag.qrCodeDataUrl}
-                    indoorQrCodeDataUrl={wristTag.indoorQrCodeDataUrl}
-                    outdoorQrCodeDataUrl={wristTag.outdoorQrCodeDataUrl}
-                    customerName={billedCustomer.name}
-                    customerMobile={billedCustomer.mobile}
-                    packageName={pkg?.name}
-                    personType={wristTag.personType}
-                    durationMinutes={pkg?.durationMinutes}
-                    durationUnit={pkg?.durationUnit}
-                    billNumber={bill.billNumber}
-                    status={wristTag.status}
-                    indoorStatus={wristTag.indoorStatus}
-                    outdoorStatus={wristTag.outdoorStatus}
-                  />
+                  <div className="wrist-tag-preview">
+                    {renderWristTag(wristTag)}
+                  </div>
                 </div>
               ))}
             </div>

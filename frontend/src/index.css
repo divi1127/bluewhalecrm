@@ -80,6 +80,225 @@
   pointer-events: none;
 }
 
+/* ==========================================================================
+   Wrist tag bands — printed 3 per A4 landscape sheet.
+   Band size: 250mm long × 25mm wide · QR area 20×20 mm · print area ≈230×20 mm
+   ========================================================================== */
+
+/* Screen preview wrapper — scales the 1:1 band down so it fits the app layout */
+.wrist-tag-preview {
+  --wrist-scale: 0.45;
+  display: inline-block;
+  width: calc(250mm * var(--wrist-scale));
+  height: calc(25mm * var(--wrist-scale));
+}
+.wrist-tag-preview .wrist-band {
+  transform: scale(var(--wrist-scale));
+  transform-origin: top left;
+}
+
+/* The physical 250×25 mm band */
+.wrist-band {
+  width: 250mm;
+  height: 25mm;
+  box-sizing: border-box;
+  overflow: hidden;
+  background: #fff;
+  border: 0.3mm solid #94a3b8;
+  border-radius: 1.5mm;
+  flex-shrink: 0;
+}
+.wrist-band-inner {
+  display: flex;
+  align-items: stretch;
+  gap: 4mm;
+  height: 100%;
+  padding: 2.5mm 4mm;
+  box-sizing: border-box;
+}
+
+/* 20×20 mm QR area */
+.wrist-qr {
+  width: 20mm;
+  height: 20mm;
+  flex-shrink: 0;
+  box-sizing: border-box;
+  border: 0.3mm solid #5eead4;
+  border-radius: 1mm;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.7mm;
+}
+.wrist-qr img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.wrist-brand {
+  flex-shrink: 0;
+  width: 60mm;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 1.2mm;
+  padding: 0 4mm;
+  background: linear-gradient(90deg, #0b2431 0%, #0f4c75 60%, #14b8a6 100%);
+  border-radius: 1mm;
+  color: #fff;
+}
+.wrist-brand-row {
+  display: flex;
+  align-items: center;
+  gap: 1.6mm;
+}
+.wrist-logo {
+  width: 5.5mm;
+  height: 5.5mm;
+  border-radius: 1mm;
+  object-fit: cover;
+}
+.wrist-brand-name {
+  font-size: 5mm;
+  font-weight: 900;
+  letter-spacing: 0.09em;
+  line-height: 1;
+  color: #fff;
+}
+.wrist-brand-sub {
+  font-size: 1.8mm;
+  font-weight: 700;
+  letter-spacing: 0.28em;
+  color: #5eead4;
+  line-height: 1.4;
+}
+.wrist-tagid {
+  font-family: 'Courier New', Consolas, monospace;
+  font-size: 3mm;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: #bae6fd;
+}
+
+.wrist-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.9mm;
+}
+.wrist-cust {
+  font-size: 4.2mm;
+  font-weight: 800;
+  color: #0b2431;
+  line-height: 1.15;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.wrist-mobile {
+  font-weight: 500;
+  color: #475569;
+  font-size: 3mm;
+}
+.wrist-pkg {
+  font-size: 3mm;
+  font-weight: 600;
+  color: #334155;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.wrist-zone {
+  font-size: 2.2mm;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #64748b;
+}
+
+.wrist-right {
+  flex-shrink: 0;
+  min-width: 58mm;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 0.9mm;
+}
+.wrist-bill {
+  font-family: 'Courier New', Consolas, monospace;
+  font-size: 3.4mm;
+  font-weight: 800;
+  color: #0b2431;
+  letter-spacing: 0.05em;
+}
+.wrist-date {
+  font-size: 2.6mm;
+  font-weight: 600;
+  color: #475569;
+}
+.wrist-chip {
+  font-size: 2.6mm;
+  font-weight: 800;
+  text-transform: uppercase;
+  padding: 0.5mm 2mm;
+  border-radius: 2mm;
+}
+.wrist-admit {
+  font-size: 2.2mm;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: #0d9488;
+}
+
+/* Print page — groups 3 bands per A4 sheet, dashed cut guides between bands */
+.wrist-page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  break-after: page;
+  page-break-after: always;
+}
+.wrist-page:last-child {
+  break-after: auto;
+  page-break-after: auto;
+}
+.wrist-slot {
+  position: relative;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  padding: 2mm 0 3mm;
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+.wrist-slot + .wrist-slot {
+  border-top: 0.4mm dashed #b0bec5;
+  padding-top: 3mm;
+}
+.wrist-slot + .wrist-slot::before {
+  content: "CUT HERE";
+  position: absolute;
+  top: -1.2mm;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #fff;
+  padding: 0 2mm;
+  color: #94a3b8;
+  font-size: 2mm;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  white-space: nowrap;
+  z-index: 1;
+}
+
 @media print {
   body {
     background: #fff !important;
