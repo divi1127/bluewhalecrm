@@ -25,7 +25,8 @@ const WristTag = ({
   const personLabel =
     personType === "below5" ? "Below 5 Yrs" : personType === "child" ? "Child" : "Adult";
   const colors = personColors[personType] || personColors.adult;
-  const primaryQr = indoorQrCodeDataUrl || qrCodeDataUrl || outdoorQrCodeDataUrl;
+  const indoorQr = indoorQrCodeDataUrl || qrCodeDataUrl;
+  const outdoorQr = outdoorQrCodeDataUrl || qrCodeDataUrl;
   const fmtDate = new Date().toLocaleDateString("en-IN", {
     day: "2-digit",
     month: "short",
@@ -35,9 +36,14 @@ const WristTag = ({
   return (
     <div className="wrist-band">
       <div className="wrist-band-inner">
-        {/* QR AREA — 20×20 mm */}
-        <div className="wrist-qr">
-          <img src={primaryQr} alt={`QR ${tagId}`} />
+        {/* QR AREAS — 20×20 mm each, indoor (IND) and outdoor (OUT) */}
+        <div className="wrist-qr wrist-qr--indoor">
+          <img src={indoorQr} alt={`Indoor QR ${tagId}`} />
+          <span className="wrist-qr-label">IND</span>
+        </div>
+        <div className="wrist-qr wrist-qr--outdoor">
+          <img src={outdoorQr} alt={`Outdoor QR ${tagId}`} />
+          <span className="wrist-qr-label">OUT</span>
         </div>
 
         {/* BRAND + TAG ID */}
@@ -59,7 +65,7 @@ const WristTag = ({
             {customerMobile && <span className="wrist-mobile">&nbsp;{customerMobile}</span>}
           </p>
           <p className="wrist-pkg">Pkg: {packageName} · {durationLabel}</p>
-          <p className="wrist-zone">Indoor / Outdoor Entry</p>
+          <p className="wrist-zone">Scan Each Zone Once</p>
         </div>
 
         {/* BILL / DATE / PERSON */}
