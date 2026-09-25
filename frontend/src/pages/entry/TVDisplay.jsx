@@ -188,7 +188,10 @@ const TVDisplay = () => {
 
                   <div className="rounded-xl bg-ocean-950/60 p-2.5 border border-ocean-800">
                     <p className="text-[10px] uppercase font-bold text-ocean-400">Area</p>
-                    <p className="text-base font-black text-cyan-300">{activeNotification.area}</p>
+                    <p className="text-base font-black text-cyan-300">
+                      {activeNotification.area}
+                      {activeNotification.gameName && <span className="text-emerald-400 ml-1 text-xs uppercase block truncate">{activeNotification.gameName}</span>}
+                    </p>
                   </div>
 
                   <div className="rounded-xl bg-ocean-950/60 p-2.5 border border-ocean-800">

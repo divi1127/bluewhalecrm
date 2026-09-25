@@ -156,6 +156,11 @@ const scanEntry = asyncHandler(async (req, res) => {
       throw new Error(`⚠ MAXIMUM OUTDOOR GAMES (5) ALREADY PLAYED`);
     }
 
+    if (wristTag.outdoorGamesPlayed && wristTag.outdoorGamesPlayed.some(g => g.gameName === gameName)) {
+      res.status(400);
+      throw new Error(`⚠ ${gameName.toUpperCase()} HAS ALREADY BEEN PLAYED`);
+    }
+
     // Record the game
     if (!wristTag.outdoorGamesPlayed) wristTag.outdoorGamesPlayed = [];
     wristTag.outdoorGamesPlayed.push({ gameName, timestamp: now });
@@ -195,6 +200,7 @@ const scanEntry = asyncHandler(async (req, res) => {
     tagId: wristTag.tagId,
     customerName: wristTag.customer?.name || "Guest",
     area,
+    gameName: area === "Outdoor" ? req.body.gameName : null,
     insideCount,
     totalMembers,
     timestamp: now,
@@ -208,6 +214,7 @@ const scanEntry = asyncHandler(async (req, res) => {
       billNumber: wristTag.bill?.billNumber || "N/A",
       memberNumber: wristTag.memberNumber || 1,
       area,
+      gameName: area === "Outdoor" ? req.body.gameName : null,
       insideCount,
       totalMembers,
       membersList,

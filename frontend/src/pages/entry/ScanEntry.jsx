@@ -438,7 +438,10 @@ const ScanEntry = () => {
 
             <div className="rounded-xl bg-white p-3.5 border border-ocean-100 shadow-sm">
               <p className="text-[11px] font-bold uppercase tracking-wider text-ocean-400">Package & Time</p>
-              <p className="text-sm font-bold text-ocean-900 truncate">{result.tag?.package?.name || "Entry"}</p>
+              <p className="text-sm font-bold text-ocean-900 truncate">
+                {result.tag?.package?.name || "Entry"}
+                {result.gameName && <span className="ml-1 text-emerald-600">({result.gameName})</span>}
+              </p>
               <p className="text-xs text-ocean-500">
                 {result.actionType === "exit"
                   ? `Exited at ${new Date().toLocaleTimeString("en-IN")}`
