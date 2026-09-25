@@ -6,11 +6,10 @@ export const venue = {
   address: '24/7, Lakshmi Nagar, Melakkal Main Road, Thuvariman, Madurai - 625019',
   phone: '+91 9361979291',
   whatsapp: '919361979291',
-  email: 'hello@bluewhale.in',
+  email: 'bluewhale.fec@gmail.com',
   googleMapsUrl: 'https://maps.app.goo.gl/WAkp1k5UeDQCdrqW8',
   hours: [
-    { days: 'Mon – Fri', time: '11 AM to 11 PM' },
-    { days: 'Sat – Sun', time: '10 AM to 1 AM' },
+    { days: 'Mon – Sun', time: '10 AM to 10 PM' },
   ],
   stats: [
     { value: '30+', label: 'Games & Activities' },

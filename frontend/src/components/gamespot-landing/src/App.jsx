@@ -324,7 +324,6 @@ function Pricing() {
         'Access to all indoor game zones',
         'Outdoor adventure activities',
         'Kids play area included',
-        'Food court access',
         'Free parking available',
       ],
       note: 'Valid for full day entry',
@@ -342,8 +341,7 @@ function Pricing() {
         'Safe indoor soft play zone',
         'Supervised kids activities',
         'Dedicated kids area',
-        'Kids snack included',
-        'Parent陪同 free entry',
+        'Parent accompanying free entry',
       ],
       note: 'Age verification required',
     },
@@ -568,21 +566,21 @@ function Booking() {
                   <label className="text-xs text-slate-500">Full name</label>
                   <div className="relative mt-1">
                     <User size={14} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
-                    <input required className="l-input !pl-9" placeholder="Arun Kumar" value={form.customerName} onChange={set('customerName')} />
+                    <input required className="l-input !pl-9" value={form.customerName} onChange={set('customerName')} />
                   </div>
                 </div>
                 <div>
                   <label className="text-xs text-slate-500">Phone</label>
                   <div className="relative mt-1">
                     <Phone size={14} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
-                    <input required className="l-input !pl-9" placeholder="98450 12345" value={form.customerMobile} onChange={set('customerMobile')} />
+                    <input required className="l-input !pl-9" value={form.customerMobile} onChange={set('customerMobile')} />
                   </div>
                 </div>
                 <div>
                   <label className="text-xs text-slate-500">Email (optional)</label>
                   <div className="relative mt-1">
                     <Mail size={14} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
-                    <input type="email" className="l-input !pl-9" placeholder="you@example.com" value={form.email} onChange={set('email')} />
+                    <input type="email" className="l-input !pl-9" value={form.email} onChange={set('email')} />
                   </div>
                 </div>
                 <div>
@@ -750,21 +748,21 @@ function Contact() {
                 <label className="text-xs text-slate-500">Full name</label>
                 <div className="relative mt-1">
                   <User size={14} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
-                  <input required className="l-input !pl-9" placeholder="Arun Kumar" value={form.name} onChange={set('name')} />
+                  <input required className="l-input !pl-9" value={form.name} onChange={set('name')} />
                 </div>
               </div>
               <div>
                 <label className="text-xs text-slate-500">Phone</label>
                 <div className="relative mt-1">
                   <Phone size={14} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
-                  <input required className="l-input !pl-9" placeholder="98450 12345" value={form.mobile} onChange={set('mobile')} />
+                  <input required className="l-input !pl-9" value={form.mobile} onChange={set('mobile')} />
                 </div>
               </div>
               <div className="sm:col-span-2">
                 <label className="text-xs text-slate-500">Email</label>
                 <div className="relative mt-1">
                   <Mail size={14} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
-                  <input type="email" required className="l-input !pl-9" placeholder="you@example.com" value={form.email} onChange={set('email')} />
+                  <input type="email" required className="l-input !pl-9" value={form.email} onChange={set('email')} />
                 </div>
               </div>
               <div className="sm:col-span-2">
@@ -780,7 +778,7 @@ function Contact() {
                   {submitting ? <Loader2 size={15} className="animate-spin" /> : <Send size={15} />}
                   {submitting ? 'Sending...' : 'Send Message'}
                 </button>
-                <p className="flex items-center gap-1.5 text-xs text-slate-500"><MessageSquareText size={13} /> Average response time: under 2 hours</p>
+
               </div>
             </form>
           )}
