@@ -35,26 +35,63 @@ const extractTagId = (raw) => extractTagInfo(raw).tagId;
 
 const Bill = require("../models/Bill");
 
+// ── Zone helpers: indoor/outdoor each have independent entry & exit ──
+const zoneField = (t, area, suffix) =>
+  t[area === "Outdoor" ? `outdoor${suffix}` : `indoor${suffix}`];
+
+const zoneStatus = (t, area) => zoneField(t, area, "Status");
+const zoneEntryTime = (t, area) => zoneField(t, area, "EntryTime");
+const zoneExitTime = (t, area) => zoneField(t, area, "ExitTime");
+
+const zoneIncluded = (s) => ["INSIDE", "active"].includes(s);
+const zoneFinished = (s) => ["EXITED", "exited"].includes(s);
+const zoneFresh = (s) => !s || ["NOT_ENTERED", "unused"].includes(s);
+
+const isZoneActive = (t, area) => zoneIncluded(zoneStatus(t, area));
+const isZoneDone = (t, area) => zoneFinished(zoneStatus(t, area));
+const isZoneEntered = (t, area) => !zoneFresh(zoneStatus(t, area));
+const bothZonesDone = (t) => isZoneDone(t, "Indoor") && isZoneDone(t, "Outdoor");
+const anyZoneActive = (t) => isZoneActive(t, "Indoor") || isZoneActive(t, "Outdoor");
+
+const memberStatus = (t) =>
+  bothZonesDone(t)
+    ? "EXITED"
+    : anyZoneActive(t) || t.entryTime
+      ? "INSIDE"
+      : "NOT ENTERED";
+
+const memberArea = (t) => {
+  if (isZoneActive(t, "Indoor")) return "Indoor";
+  if (isZoneActive(t, "Outdoor")) return "Outdoor";
+  if (isZoneDone(t, "Indoor")) return "Indoor";
+  if (isZoneDone(t, "Outdoor")) return "Outdoor";
+  return t.area || "Indoor";
+};
+
+const buildMembersList = (billTags) =>
+  billTags.map((t, idx) => ({
+    memberNumber: t.memberNumber || idx + 1,
+    tagId: t.tagId,
+    status: memberStatus(t),
+    area: memberArea(t),
+    entryTime: t.entryTime,
+    exitTime: t.exitTime,
+  }));
+
+const countInside = (billTags) => billTags.filter((t) => memberStatus(t) === "INSIDE").length;
+
 let latestTvEvent = null;
 
-// Helper to calculate park-wide statistics
+// Helper to calculate park-wide statistics (per-zone, independent entries)
 const getParkStats = async () => {
   const totalInside = await WristTag.countDocuments({
     status: { $in: ["INSIDE", "active"] },
   });
   const indoorCount = await WristTag.countDocuments({
-    status: { $in: ["INSIDE", "active"] },
-    $or: [
-      { area: { $regex: /^indoor$/i } },
-      { indoorStatus: { $in: ["INSIDE", "active"] } },
-    ],
+    indoorStatus: { $in: ["INSIDE", "active"] },
   });
   const outdoorCount = await WristTag.countDocuments({
-    status: { $in: ["INSIDE", "active"] },
-    $or: [
-      { area: { $regex: /^outdoor$/i } },
-      { outdoorStatus: { $in: ["INSIDE", "active"] } },
-    ],
+    outdoorStatus: { $in: ["INSIDE", "active"] },
   });
   return { totalInside, indoorCount, outdoorCount };
 };
@@ -82,23 +119,20 @@ const scanEntry = asyncHandler(async (req, res) => {
     throw new Error("✕ UNKNOWN WRIST TAG");
   }
 
-  // 1. Error handling: Already inside
-  if (wristTag.status === "INSIDE" || wristTag.status === "active") {
+  // 1. Zone-specific guards: each zone is single-use independently.
+  //    Scanning indoor does not affect outdoor, and vice-versa.
+  if (isZoneActive(wristTag, area)) {
     res.status(400);
-    throw new Error("⚠ ALREADY INSIDE");
+    throw new Error(`⚠ ALREADY INSIDE (${area})`);
+  }
+  if (isZoneDone(wristTag, area)) {
+    res.status(400);
+    throw new Error(`⚠ ALREADY EXITED (${area})`);
   }
 
-  // 2. Error handling: Already exited (single-use band finished)
-  if (wristTag.status === "EXITED" || wristTag.status === "exited") {
-    res.status(400);
-    throw new Error("⚠ ALREADY EXITED");
-  }
-
-  // 3. Mark as INSIDE
+  // 2. Mark the scanned zone as INSIDE
   const now = new Date();
-  wristTag.status = "INSIDE";
   wristTag.area = area;
-  wristTag.entryTime = now;
   if (area === "Indoor") {
     wristTag.indoorStatus = "INSIDE";
     wristTag.indoorEntryTime = now;
@@ -106,6 +140,10 @@ const scanEntry = asyncHandler(async (req, res) => {
     wristTag.outdoorStatus = "INSIDE";
     wristTag.outdoorEntryTime = now;
   }
+
+  // Overall tag stays INSIDE until both zones have been fully used
+  if (!wristTag.entryTime) wristTag.entryTime = now;
+  wristTag.status = "INSIDE";
 
   if (wristTag.package && wristTag.package.durationMinutes) {
     wristTag.expiryTime = new Date(now.getTime() + wristTag.package.durationMinutes * 60000);
@@ -117,16 +155,9 @@ const scanEntry = asyncHandler(async (req, res) => {
   const billId = wristTag.bill?._id || wristTag.bill;
   const billTags = await WristTag.find({ bill: billId }).sort({ memberNumber: 1, createdAt: 1 });
   const totalMembers = billTags.length || 1;
-  const insideCount = billTags.filter((t) => t.status === "INSIDE" || t.status === "active").length;
+  const insideCount = countInside(billTags);
 
-  const membersList = billTags.map((t, idx) => ({
-    memberNumber: t.memberNumber || idx + 1,
-    tagId: t.tagId,
-    status: (t.status === "INSIDE" || t.status === "active") ? "INSIDE" : (t.status === "EXITED" || t.status === "exited") ? "EXITED" : "NOT ENTERED",
-    area: t.area || (t.indoorStatus === "INSIDE" ? "Indoor" : t.outdoorStatus === "INSIDE" ? "Outdoor" : "Indoor"),
-    entryTime: t.entryTime,
-    exitTime: t.exitTime,
-  }));
+  const membersList = buildMembersList(billTags);
 
   const parkStats = await getParkStats();
 
@@ -161,11 +192,11 @@ const scanEntry = asyncHandler(async (req, res) => {
   });
 });
 
-// @desc  Mark a wrist tag as exited
+// @desc  Mark a wrist tag as exited (zone-specific: indoor or outdoor)
 // @route POST /api/entry/exit
 const markExit = asyncHandler(async (req, res) => {
-  const { tagId: rawId } = req.body;
-  const { tagId } = extractTagInfo(rawId);
+  const { tagId: rawId, zone: explicitZone } = req.body;
+  const { tagId, zone: extractedZone } = extractTagInfo(rawId);
 
   if (!tagId) {
     res.status(400);
@@ -182,39 +213,52 @@ const markExit = asyncHandler(async (req, res) => {
     throw new Error("✕ UNKNOWN WRIST TAG");
   }
 
-  // 1. Error handling: Exit without entering
-  if (wristTag.status === "NOT_ENTERED" || wristTag.status === "unused" || !wristTag.entryTime) {
+  // Determine which zone is being exited (requested zone → last-entered zone)
+  const requestedArea = explicitZone || extractedZone;
+  const area = requestedArea
+    ? String(requestedArea).toLowerCase() === "outdoor" ? "Outdoor" : "Indoor"
+    : wristTag.area === "Outdoor" ? "Outdoor" : "Indoor";
+
+  // 1. Error handling: Exit a zone that was never entered
+  if (!zoneEntryTime(wristTag, area) || !isZoneEntered(wristTag, area)) {
     res.status(400);
-    throw new Error("⚠ INVALID EXIT");
+    throw new Error(`⚠ INVALID EXIT (${area} not entered)`);
   }
 
-  // 2. Error handling: Already exited
-  if (wristTag.status === "EXITED" || wristTag.status === "exited") {
+  // 2. Error handling: Zone already exited
+  if (isZoneDone(wristTag, area)) {
     res.status(400);
-    throw new Error("⚠ ALREADY EXITED");
+    throw new Error(`⚠ ALREADY EXITED (${area})`);
   }
 
   const now = new Date();
-  wristTag.status = "EXITED";
-  wristTag.exitTime = now;
-  wristTag.indoorStatus = "EXITED";
-  wristTag.outdoorStatus = "EXITED";
+  if (area === "Indoor") {
+    wristTag.indoorStatus = "EXITED";
+    wristTag.indoorExitTime = now;
+    // Person is still in the park if the other zone is active
+    if (isZoneActive(wristTag, "Outdoor")) wristTag.area = "Outdoor";
+  } else {
+    wristTag.outdoorStatus = "EXITED";
+    wristTag.outdoorExitTime = now;
+    if (isZoneActive(wristTag, "Indoor")) wristTag.area = "Indoor";
+  }
+
+  // Overall tag = EXITED only when both zones are finished
+  if (bothZonesDone(wristTag)) {
+    wristTag.status = "EXITED";
+    wristTag.exitTime = now;
+  } else {
+    wristTag.status = "INSIDE";
+  }
   await wristTag.save();
 
   // Find all members under this bill
   const billId = wristTag.bill?._id || wristTag.bill;
   const billTags = await WristTag.find({ bill: billId }).sort({ memberNumber: 1, createdAt: 1 });
   const totalMembers = billTags.length || 1;
-  const insideCount = billTags.filter((t) => t.status === "INSIDE" || t.status === "active").length;
+  const insideCount = countInside(billTags);
 
-  const membersList = billTags.map((t, idx) => ({
-    memberNumber: t.memberNumber || idx + 1,
-    tagId: t.tagId,
-    status: (t.status === "INSIDE" || t.status === "active") ? "INSIDE" : (t.status === "EXITED" || t.status === "exited") ? "EXITED" : "NOT ENTERED",
-    area: t.area || "Indoor",
-    entryTime: t.entryTime,
-    exitTime: t.exitTime,
-  }));
+  const membersList = buildMembersList(billTags);
 
   const parkStats = await getParkStats();
 
