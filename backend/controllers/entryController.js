@@ -249,9 +249,20 @@ const markExit = asyncHandler(async (req, res) => {
 
   // Determine which zone is being exited (requested zone → last-entered zone)
   const requestedArea = explicitZone || extractedZone;
-  const area = requestedArea
+  let area = requestedArea
     ? String(requestedArea).toLowerCase() === "outdoor" ? "Outdoor" : "Indoor"
     : wristTag.area === "Outdoor" ? "Outdoor" : "Indoor";
+
+  if (area === "Outdoor") {
+    // If the scan didn't strictly request outdoor but the last area was outdoor,
+    // and they are active indoors, default to indoor exit instead.
+    if (!requestedArea && isZoneActive(wristTag, "Indoor")) {
+      area = "Indoor";
+    } else {
+      res.status(400);
+      throw new Error(`⚠ OUTDOOR ZONE DOES NOT REQUIRE EXIT SCANNING`);
+    }
+  }
 
   // 1. Error handling: Exit a zone that was never entered
   if (!zoneEntryTime(wristTag, area) || !isZoneEntered(wristTag, area)) {

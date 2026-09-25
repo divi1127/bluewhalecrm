@@ -240,6 +240,7 @@ const ScanEntry = () => {
               type="button"
               onClick={() => {
                 setArea("Outdoor");
+                setMode("entry");
                 setResult(null);
                 setError(null);
               }}
@@ -271,8 +272,11 @@ const ScanEntry = () => {
           <button
             type="button"
             onClick={() => switchMode("exit")}
+            disabled={area === "Outdoor"}
             className={`flex items-center justify-center gap-2 rounded-xl py-3 text-sm font-bold transition ${
-              isExit
+              area === "Outdoor"
+                ? "bg-ocean-100/50 text-ocean-300 cursor-not-allowed"
+                : isExit
                 ? "bg-coral-500 text-white shadow-md shadow-coral-500/20 ring-2 ring-coral-500/20"
                 : "bg-ocean-50 text-ocean-700 hover:bg-ocean-100"
             }`}
