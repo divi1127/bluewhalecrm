@@ -37,55 +37,56 @@ const WristTag = ({
 
   return (
     <div className="wrist-band">
-      <div className="wrist-band-inner">
-        {/* QR AREAS — 20×20 mm each, indoor (IND) & outdoor (OUT) with separate barcode IDs */}
+      <div className="wrist-band-inner" style={{ justifyContent: 'space-between' }}>
+        
+        {/* Left White Space (Spacer) */}
+        <div style={{ width: '5mm', flexShrink: 0 }}></div>
+
+        {/* Indoor QR */}
         <div className="wrist-qr wrist-qr--indoor">
           <img src={indoorQr} alt={`Indoor QR ${indoorId}`} />
           <span className="wrist-qr-label">IND</span>
           <span className="wrist-qr-id">{indoorId}</span>
         </div>
+
+        {/* Center: Brand + Package Info */}
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '1mm', padding: '0 4mm' }}>
+          <div className="wrist-brand" style={{ width: '100%', maxWidth: '60mm', padding: '1mm 4mm' }}>
+            <div className="wrist-brand-row" style={{ justifyContent: 'center' }}>
+              <img src={logoImg} alt="BlueWhale" className="wrist-logo" />
+              <div>
+                <p className="wrist-brand-name">BLUEWHALE</p>
+                <p className="wrist-brand-sub">WRIST BAND</p>
+              </div>
+            </div>
+            <p className="wrist-tagid" style={{ textAlign: 'center' }}>ID: {tagId}</p>
+          </div>
+          
+          <div style={{ textAlign: 'center' }}>
+            <p className="wrist-pkg">Pkg: {packageName} · {durationLabel}</p>
+            <p className="wrist-zone">Scan Each Zone Once</p>
+            <span
+              className="wrist-chip"
+              style={{ background: colors.bg, border: `0.3mm solid ${colors.border}`, color: colors.text, display: 'inline-block', padding: '0.2mm 2mm', fontSize: '2mm', marginTop: '0.5mm' }}
+            >
+              {personLabel}
+            </span>
+          </div>
+        </div>
+
+        {/* Outdoor QR */}
         <div className="wrist-qr wrist-qr--outdoor">
           <img src={outdoorQr} alt={`Outdoor QR ${outdoorId}`} />
           <span className="wrist-qr-label">OUT</span>
           <span className="wrist-qr-id">{outdoorId}</span>
         </div>
 
-        {/* BRAND + TAG ID */}
-        <div className="wrist-brand">
-          <div className="wrist-brand-row">
-            <img src={logoImg} alt="BlueWhale" className="wrist-logo" />
-            <div>
-              <p className="wrist-brand-name">BLUEWHALE</p>
-              <p className="wrist-brand-sub">WRIST BAND</p>
-            </div>
-          </div>
-          <p className="wrist-tagid">ID: {tagId}</p>
+        {/* Right side: White space & Bill No */}
+        <div style={{ width: '35mm', flexShrink: 0, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'flex-end', paddingRight: '2mm' }}>
+          <p style={{ fontFamily: 'monospace', fontSize: '3mm', fontWeight: 800, color: '#0b2431' }}>Bill {billNumber}</p>
+          <p style={{ fontSize: '2.5mm', fontWeight: 600, color: '#475569' }}>{fmtDate}</p>
         </div>
 
-        {/* CUSTOMER + PACKAGE + BILL DETAILS (CENTER) */}
-        <div className="wrist-info">
-          <p className="wrist-cust">
-            {customerName}
-            {customerMobile && <span className="wrist-mobile">&nbsp;{customerMobile}</span>}
-          </p>
-          <p className="wrist-pkg">Pkg: {packageName} · {durationLabel}</p>
-          <p className="wrist-zone">Scan Each Zone Once</p>
-          
-          <div style={{ marginTop: '2mm', display: 'flex', gap: '2mm', alignItems: 'center' }}>
-            <span style={{ fontSize: '7pt', fontWeight: 600, color: '#334155' }}>
-              Bill {billNumber}
-            </span>
-            <span style={{ fontSize: '7pt', color: '#64748b' }}>
-              · {fmtDate} ·
-            </span>
-            <span
-              className="wrist-chip"
-              style={{ background: colors.bg, border: `0.3mm solid ${colors.border}`, color: colors.text, display: 'inline-block' }}
-            >
-              {personLabel}
-            </span>
-          </div>
-        </div>
       </div>
     </div>
   );

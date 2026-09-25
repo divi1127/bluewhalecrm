@@ -10,11 +10,19 @@ const BillList = () => {
   const [bills, setBills] = useState([]);
   const [loading, setLoading] = useState(true);
   const [detail, setDetail] = useState(null);
-  const [printTarget, setPrintTarget] = useState(null); // "wrist-tags" | "bill" | null
+  const [printTarget, setPrintTarget] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
     api.get("/billing").then(({ data }) => setBills(data.data)).finally(() => setLoading(false));
   }, []);
+
+  const filteredBills = bills.filter((b) => {
+    const term = searchTerm.toLowerCase();
+    const billMatch = b.billNumber?.toLowerCase().includes(term);
+    const phoneMatch = b.customer?.mobile?.includes(term);
+    return billMatch || phoneMatch;
+  });
 
   const handleView = async (id) => {
     const { data } = await api.get(`/billing/${id}`);
@@ -80,11 +88,20 @@ const BillList = () => {
 
   return (
     <div className="space-y-4">
-      <h2 className="text-lg font-bold text-ocean-900">Recent Bills</h2>
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+        <h2 className="text-lg font-bold text-ocean-900">Recent Bills</h2>
+        <input
+          type="text"
+          placeholder="Search Bill No or Mobile..."
+          className="w-full sm:w-64 rounded-xl border border-ocean-200 bg-white px-4 py-2 text-sm text-ocean-900 outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
+      </div>
       {loading ? (
         <p className="text-sm text-ocean-400">Loading...</p>
       ) : (
-        <Table columns={columns} rows={bills} />
+        <Table columns={columns} rows={filteredBills} />
       )}
 
       {detail && (

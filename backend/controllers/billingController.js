@@ -107,8 +107,17 @@ const createBill = asyncHandler(async (req, res) => {
   const finalAmount = Math.max(baseAmount - discount, 0);
 
   // 4. Create the bill
+  const year = new Date().getFullYear();
+  const lastBill = await Bill.findOne({ billNumber: new RegExp(`^BW-${year}`) }).sort({ createdAt: -1 });
+  let seq = 1;
+  if (lastBill) {
+    const lastSeq = parseInt(lastBill.billNumber.replace(`BW-${year}`, ''), 10);
+    if (!isNaN(lastSeq)) seq = lastSeq + 1;
+  }
+  const billNumber = `BW-${year}${String(seq).padStart(4, '0')}`;
+
   const bill = await Bill.create({
-    billNumber: generateBillNumber(),
+    billNumber,
     customer: customer._id,
     package: pkg._id,
     adults: adultCount,
