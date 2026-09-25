@@ -73,7 +73,7 @@ const Sidebar = ({ open, onClose }) => {
       }`}
     >
       <div className="flex items-center gap-2 px-6 py-6">
-        <img src={logoImg} alt="BlueWhale" className="h-9 w-9 rounded-xl object-cover" />
+        <img src={logoImg} alt="BlueWhale" className="h-12 w-12 rounded-xl object-cover" />
         <div className="flex-1">
           <p className="font-display text-lg font-bold leading-tight text-white">BlueWhale</p>
           <p className="text-[11px] uppercase tracking-wider text-ocean-300">Park Manager</p>
