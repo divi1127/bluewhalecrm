@@ -873,7 +873,20 @@ function Footer() {
             </div>
           </div>
         </div>
-        <p className="mt-10 text-center text-xs text-slate-600">© 2026 Bluewhale Trampoline & Adventure Park. Contact enquiries and party bookings are saved to the park CRM.</p>
+        <div className="mt-10 text-center text-xs text-slate-600">
+          <p>© 2026 Bluewhale Trampoline & Adventure Park. Contact enquiries and party bookings are saved to the park CRM.</p>
+          <p className="mt-2">
+            Developed by{' '}
+            <a
+              href="https://www.jodtech.in/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="transition hover:text-brand-400"
+            >
+              JOD TECH IT SOLUTION
+            </a>
+          </p>
+        </div>
       </div>
     </footer>
   )
