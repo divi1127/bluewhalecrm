@@ -37,11 +37,8 @@ const WristTag = ({
 
   return (
     <div className="wrist-band">
-      <div className="wrist-band-inner" style={{ justifyContent: 'space-between' }}>
+      <div className="wrist-band-inner" style={{ justifyContent: 'center', gap: '5mm', padding: '2.5mm' }}>
         
-        {/* Left White Space (Spacer) */}
-        <div style={{ width: '5mm', flexShrink: 0 }}></div>
-
         {/* Indoor QR */}
         <div className="wrist-qr wrist-qr--indoor">
           <img src={indoorQr} alt={`Indoor QR ${indoorId}`} />
@@ -50,7 +47,7 @@ const WristTag = ({
         </div>
 
         {/* Center: Brand + Package Info */}
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '1mm', padding: '0 4mm' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '1mm' }}>
           <div className="wrist-brand" style={{ width: '100%', maxWidth: '60mm', padding: '1mm 4mm' }}>
             <div className="wrist-brand-row" style={{ justifyContent: 'center' }}>
               <img src={logoImg} alt="BlueWhale" className="wrist-logo" />
@@ -65,12 +62,6 @@ const WristTag = ({
           <div style={{ textAlign: 'center' }}>
             <p className="wrist-pkg">Pkg: {packageName} · {durationLabel}</p>
             <p className="wrist-zone">Scan Each Zone Once</p>
-            <span
-              className="wrist-chip"
-              style={{ background: colors.bg, border: `0.3mm solid ${colors.border}`, color: colors.text, display: 'inline-block', padding: '0.2mm 2mm', fontSize: '2mm', marginTop: '0.5mm' }}
-            >
-              {personLabel}
-            </span>
           </div>
         </div>
 
@@ -81,8 +72,8 @@ const WristTag = ({
           <span className="wrist-qr-id">{outdoorId}</span>
         </div>
 
-        {/* Right side: White space & Bill No */}
-        <div style={{ width: '35mm', flexShrink: 0, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'flex-end', paddingRight: '2mm' }}>
+        {/* Bill No & Date (next to outdoor QR) */}
+        <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'flex-start' }}>
           <p style={{ fontFamily: 'monospace', fontSize: '3mm', fontWeight: 800, color: '#0b2431' }}>Bill {billNumber}</p>
           <p style={{ fontSize: '2.5mm', fontWeight: 600, color: '#475569' }}>{fmtDate}</p>
         </div>
