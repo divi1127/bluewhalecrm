@@ -140,17 +140,30 @@
   border-color: #93c5fd;
 }
 .wrist-qr img {
-  width: 15mm;
-  height: 15mm;
+  width: 12.5mm;
+  height: 12.5mm;
   object-fit: contain;
 }
 .wrist-qr-label {
-  font-size: 2mm;
+  font-size: 1.7mm;
   font-weight: 800;
   letter-spacing: 0.12em;
   line-height: 1;
   padding: 0.3mm 1.2mm;
   border-radius: 1mm;
+}
+.wrist-qr-id {
+  font-family: 'Courier New', Consolas, monospace;
+  font-size: 1.6mm;
+  font-weight: 700;
+  line-height: 1;
+  white-space: nowrap;
+}
+.wrist-qr--indoor .wrist-qr-id {
+  color: #0f766e;
+}
+.wrist-qr--outdoor .wrist-qr-id {
+  color: #0369a1;
 }
 .wrist-qr--indoor .wrist-qr-label {
   background: #ccfbf1;

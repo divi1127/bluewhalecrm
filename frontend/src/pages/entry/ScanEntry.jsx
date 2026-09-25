@@ -37,6 +37,10 @@ const extractTagInfo = (raw) => {
     const q = s.match(/[?&]tagId=([^&]+)/);
     if (q) tagId = decodeURIComponent(q[1]);
   }
+  // Separate barcode IDs: WT-XXXX-IND (indoor) / WT-XXXX-OUT (outdoor)
+  if (!zone && /-IND$/.test(tagId)) zone = "Indoor";
+  if (!zone && /-OUT$/.test(tagId)) zone = "Outdoor";
+  tagId = tagId.replace(/-IND$|-OUT$/, "");
   return { tagId, zone };
 };
 

@@ -27,6 +27,8 @@ const WristTag = ({
   const colors = personColors[personType] || personColors.adult;
   const indoorQr = indoorQrCodeDataUrl || qrCodeDataUrl;
   const outdoorQr = outdoorQrCodeDataUrl || qrCodeDataUrl;
+  const indoorId = `${tagId}-IND`;
+  const outdoorId = `${tagId}-OUT`;
   const fmtDate = new Date().toLocaleDateString("en-IN", {
     day: "2-digit",
     month: "short",
@@ -36,14 +38,16 @@ const WristTag = ({
   return (
     <div className="wrist-band">
       <div className="wrist-band-inner">
-        {/* QR AREAS — 20×20 mm each, indoor (IND) and outdoor (OUT) */}
+        {/* QR AREAS — 20×20 mm each, indoor (IND) & outdoor (OUT) with separate barcode IDs */}
         <div className="wrist-qr wrist-qr--indoor">
-          <img src={indoorQr} alt={`Indoor QR ${tagId}`} />
+          <img src={indoorQr} alt={`Indoor QR ${indoorId}`} />
           <span className="wrist-qr-label">IND</span>
+          <span className="wrist-qr-id">{indoorId}</span>
         </div>
         <div className="wrist-qr wrist-qr--outdoor">
-          <img src={outdoorQr} alt={`Outdoor QR ${tagId}`} />
+          <img src={outdoorQr} alt={`Outdoor QR ${outdoorId}`} />
           <span className="wrist-qr-label">OUT</span>
+          <span className="wrist-qr-id">{outdoorId}</span>
         </div>
 
         {/* BRAND + TAG ID */}
