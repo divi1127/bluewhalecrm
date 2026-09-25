@@ -67,9 +67,9 @@ function Navbar({ theme, setTheme }) {
   const [open, setOpen] = useState(false)
   return (
     <header className={`sticky top-0 z-30 transition-colors ${theme === 'light' ? 'bg-white shadow-sm' : 'border-b border-white/5 bg-night-900/80 backdrop-blur-md'}`}>
-      <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-4 sm:px-6">
+      <div className="mx-auto flex h-30 max-w-7xl items-center justify-between px-4 sm:px-6">
         <a href="#top" className="flex items-center gap-2.5">
-          <img src={logoImg} alt="BlueWhale" className="h-16 w-16 rounded-xl object-cover shadow-glow" />
+          <img src="/logo.png" alt="BlueWhale" className="h-24 w-24 rounded-full object-cover" />
           <span className={`font-display text-xl font-bold ${theme === 'light' ? 'text-slate-900' : 'text-white'}`}>Bluewhale</span>
         </a>
         <nav className="hidden items-center gap-6 lg:flex">
@@ -803,9 +803,9 @@ function Footer() {
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6">
         <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
           <div className="flex flex-col items-center gap-3 text-center sm:items-start sm:text-left">
-            <div className="flex items-center gap-2">
-              <img src={logoImg} alt="BlueWhale" className="h-9 w-9 rounded-lg object-cover" />
-              <span className="font-display font-bold text-white">Bluewhale</span>
+            <div className="flex items-center gap-3">
+              <img src="/logo.png" alt="BlueWhale" className="h-16 w-16 rounded-full object-cover" />
+              <span className="font-display text-xl font-bold text-white">Bluewhale</span>
             </div>
             <p className="text-sm text-slate-500">{venue.description}</p>
           </div>
