@@ -76,7 +76,7 @@ export const gallery = [
       { name: 'Zipcycle', desc: 'Ride a suspended cycle along the zip line.', image: 'https://i.pinimg.com/1200x/f2/2b/8d/f22b8df61664dded83f6cabfe0b489e1.jpg' },
       { name: 'Wall Climbing', desc: 'Scale climbing walls with safety harnesses.', image: 'https://i.pinimg.com/736x/24/c8/cd/24c8cdf4e01f15d6325a8ed81382b96c.jpg' },
       { name: 'Rocket Ejector', desc: 'Blast high into the air on the ejector ride.', image: 'https://i.pinimg.com/1200x/0b/ed/71/0bed71dc7fe088dae6f6786f6389cfd5.jpg' },
-      { name: '4-Seater Gyro', desc: 'Spin together on the giant 4-seater gyro.', image: 'https://5.imimg.com/data5/SELLER/Default/2024/1/381074008/DB/TI/UN/59899173/gyroscope-ride.png' },
+      { name: 'Human Gyro', desc: 'Spin together on the giant human gyro.', image: 'https://5.imimg.com/data5/SELLER/Default/2024/1/381074008/DB/TI/UN/59899173/gyroscope-ride.png' },
     ],
   },
   {
