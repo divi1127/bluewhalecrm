@@ -109,6 +109,16 @@ const scanEntry = asyncHandler(async (req, res) => {
     throw new Error("tagId is required");
   }
 
+  // Cross-zone barcode scan validation
+  if (explicitZone === "Outdoor" && extractedZone === "Indoor") {
+    res.status(400);
+    throw new Error("⚠ This is an Indoor barcode. Not allowed at Outdoor entry.");
+  }
+  if (explicitZone === "Indoor" && extractedZone === "Outdoor") {
+    res.status(400);
+    throw new Error("⚠ This is an Outdoor barcode. Not allowed at Indoor entry.");
+  }
+
   const wristTag = await WristTag.findOne({ tagId })
     .populate("customer", "name mobile")
     .populate("package", "name durationMinutes")
@@ -119,26 +129,40 @@ const scanEntry = asyncHandler(async (req, res) => {
     throw new Error("✕ UNKNOWN WRIST TAG");
   }
 
-  // 1. Zone-specific guards: each zone is single-use independently.
-  //    Scanning indoor does not affect outdoor, and vice-versa.
-  if (isZoneActive(wristTag, area)) {
-    res.status(400);
-    throw new Error(`⚠ ALREADY INSIDE (${area})`);
-  }
-  if (isZoneDone(wristTag, area)) {
-    res.status(400);
-    throw new Error(`⚠ ALREADY EXITED (${area})`);
-  }
-
-  // 2. Mark the scanned zone as INSIDE
   const now = new Date();
   wristTag.area = area;
+
   if (area === "Indoor") {
+    if (isZoneActive(wristTag, "Indoor")) {
+      res.status(400);
+      throw new Error(`⚠ ALREADY INSIDE (Indoor)`);
+    }
+    if (isZoneDone(wristTag, "Indoor")) {
+      res.status(400);
+      throw new Error(`⚠ ALREADY EXITED (Indoor)`);
+    }
     wristTag.indoorStatus = "INSIDE";
     wristTag.indoorEntryTime = now;
   } else {
+    // Outdoor logic: Allow up to 5 scans for specific games
+    const { gameName } = req.body;
+    if (!gameName) {
+      res.status(400);
+      throw new Error("⚠ Please select an outdoor game to scan.");
+    }
+    
+    if (wristTag.outdoorGamesPlayed && wristTag.outdoorGamesPlayed.length >= 5) {
+      res.status(400);
+      throw new Error(`⚠ MAXIMUM OUTDOOR GAMES (5) ALREADY PLAYED`);
+    }
+
+    // Record the game
+    if (!wristTag.outdoorGamesPlayed) wristTag.outdoorGamesPlayed = [];
+    wristTag.outdoorGamesPlayed.push({ gameName, timestamp: now });
+    
+    // Set status
     wristTag.outdoorStatus = "INSIDE";
-    wristTag.outdoorEntryTime = now;
+    if (!wristTag.outdoorEntryTime) wristTag.outdoorEntryTime = now;
   }
 
   // Overall tag stays INSIDE until both zones have been fully used

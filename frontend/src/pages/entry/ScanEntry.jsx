@@ -47,6 +47,7 @@ const extractTagInfo = (raw) => {
 const ScanEntry = () => {
   const [mode, setMode] = useState("entry"); // "entry" | "exit"
   const [area, setArea] = useState("Indoor"); // "Indoor" | "Outdoor"
+  const [outdoorGame, setOutdoorGame] = useState("Zipline");
   const [tagId, setTagId] = useState("");
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
@@ -108,6 +109,7 @@ const ScanEntry = () => {
       const { data } = await api.post(endpoint, {
         tagId: info.tagId,
         zone: targetArea,
+        gameName: targetArea === "Outdoor" ? outdoorGame : undefined,
       });
 
       setResult({
@@ -158,6 +160,7 @@ const ScanEntry = () => {
       const { data } = await api.post(endpoint, {
         tagId: info.tagId,
         zone: targetArea,
+        gameName: targetArea === "Outdoor" ? outdoorGame : undefined,
       });
       setResult({
         ...data.data,
@@ -280,6 +283,26 @@ const ScanEntry = () => {
             Exit Scan
           </button>
         </div>
+
+        {/* Outdoor Game Selector */}
+        {area === "Outdoor" && !isExit && (
+          <div className="mt-4 flex flex-col gap-1.5">
+            <label className="text-[11px] font-bold uppercase tracking-wider text-ocean-600">
+              Select Outdoor Game
+            </label>
+            <select
+              value={outdoorGame}
+              onChange={(e) => setOutdoorGame(e.target.value)}
+              className="input-field h-11 px-3 text-sm font-semibold text-ocean-900 border-ocean-200 focus:border-emerald-500 focus:ring-emerald-500"
+            >
+              <option value="Zipline">Zipline</option>
+              <option value="Zipcycle">Zipcycle</option>
+              <option value="Wall Climbing">Wall Climbing</option>
+              <option value="Rocket Ejector">Rocket Ejector</option>
+              <option value="Human Gyro">Human Gyro</option>
+            </select>
+          </div>
+        )}
 
         {/* Fast Scanner Input */}
         <form onSubmit={handleScan} className="mt-5 flex gap-2">
