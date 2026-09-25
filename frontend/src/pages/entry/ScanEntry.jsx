@@ -102,14 +102,13 @@ const ScanEntry = () => {
     setLoading(true);
 
     const info = extractTagInfo(tagId);
-    const targetArea = info.zone || area;
-
+    
     try {
       const endpoint = mode === "entry" ? "/entry/scan" : "/entry/exit";
       const { data } = await api.post(endpoint, {
-        tagId: info.tagId,
-        zone: targetArea,
-        gameName: targetArea === "Outdoor" ? outdoorGame : undefined,
+        tagId: tagId, // Send raw tagId so backend can extract zone
+        zone: area,   // Send the scanner's selected area
+        gameName: area === "Outdoor" ? outdoorGame : undefined,
       });
 
       setResult({
@@ -153,14 +152,13 @@ const ScanEntry = () => {
     setLoading(true);
 
     const info = extractTagInfo(scannedId);
-    const targetArea = info.zone || area;
-
+    
     try {
       const endpoint = mode === "entry" ? "/entry/scan" : "/entry/exit";
       const { data } = await api.post(endpoint, {
-        tagId: info.tagId,
-        zone: targetArea,
-        gameName: targetArea === "Outdoor" ? outdoorGame : undefined,
+        tagId: scannedId,
+        zone: area,
+        gameName: area === "Outdoor" ? outdoorGame : undefined,
       });
       setResult({
         ...data.data,
