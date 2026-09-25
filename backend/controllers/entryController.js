@@ -110,11 +110,14 @@ const scanEntry = asyncHandler(async (req, res) => {
   }
 
   // Cross-zone barcode scan validation
-  if (explicitZone === "Outdoor" && extractedZone === "Indoor") {
+  const expZone = String(explicitZone || "").toLowerCase();
+  const extZone = String(extractedZone || "").toLowerCase();
+
+  if (expZone === "outdoor" && extZone === "indoor") {
     res.status(400);
     throw new Error("⚠ This is an Indoor barcode. Not allowed at Outdoor entry.");
   }
-  if (explicitZone === "Indoor" && extractedZone === "Outdoor") {
+  if (expZone === "indoor" && extZone === "outdoor") {
     res.status(400);
     throw new Error("⚠ This is an Outdoor barcode. Not allowed at Indoor entry.");
   }

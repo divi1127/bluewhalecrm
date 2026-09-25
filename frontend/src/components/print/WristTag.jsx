@@ -62,7 +62,7 @@ const WristTag = ({
           <p className="wrist-tagid">ID: {tagId}</p>
         </div>
 
-        {/* CUSTOMER + PACKAGE */}
+        {/* CUSTOMER + PACKAGE + BILL DETAILS (CENTER) */}
         <div className="wrist-info">
           <p className="wrist-cust">
             {customerName}
@@ -70,19 +70,21 @@ const WristTag = ({
           </p>
           <p className="wrist-pkg">Pkg: {packageName} · {durationLabel}</p>
           <p className="wrist-zone">Scan Each Zone Once</p>
-        </div>
-
-        {/* BILL / DATE / PERSON */}
-        <div className="wrist-right">
-          <p className="wrist-bill">Bill {billNumber}</p>
-          <p className="wrist-date">{fmtDate}</p>
-          <span
-            className="wrist-chip"
-            style={{ background: colors.bg, border: `0.3mm solid ${colors.border}`, color: colors.text }}
-          >
-            {personLabel}
-          </span>
-          <p className="wrist-admit">Admit One</p>
+          
+          <div style={{ marginTop: '2mm', display: 'flex', gap: '2mm', alignItems: 'center' }}>
+            <span style={{ fontSize: '7pt', fontWeight: 600, color: '#334155' }}>
+              Bill {billNumber}
+            </span>
+            <span style={{ fontSize: '7pt', color: '#64748b' }}>
+              · {fmtDate} ·
+            </span>
+            <span
+              className="wrist-chip"
+              style={{ background: colors.bg, border: `0.3mm solid ${colors.border}`, color: colors.text, display: 'inline-block' }}
+            >
+              {personLabel}
+            </span>
+          </div>
         </div>
       </div>
     </div>
