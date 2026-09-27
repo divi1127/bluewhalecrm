@@ -3,9 +3,9 @@ const Staff = require('../models/Staff');
 const Attendance = require('../models/Attendance');
 
 const initCronJobs = () => {
-  // Run every day at 20:00 (8:00 PM)
-  cron.schedule('0 20 * * *', async () => {
-    console.log("Running attendance cron job at 8:00 PM...");
+  // Run every day at 23:30 (11:30 PM)
+  cron.schedule('30 23 * * *', async () => {
+    console.log("Running attendance cron job at 11:30 PM...");
     try {
       const today = new Date().toISOString().slice(0, 10);
       

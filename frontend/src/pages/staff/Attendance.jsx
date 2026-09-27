@@ -141,7 +141,30 @@ const Attendance = () => {
     if (!selectedStaff) return;
     const { data } = await api.get(`/attendance/salary/${selectedStaff}`, { params: { month } });
     setSalary(data.data);
-  };  const recordFor = (staffId) => records.find((r) => r.staff?._id === staffId || r.staff === staffId);
+  };
+
+  const handleDelete = async (recordId) => {
+    if (!window.confirm("Are you sure you want to delete this attendance record?")) return;
+    try {
+      await api.delete(`/attendance/${recordId}`);
+      setNote("Record deleted successfully.");
+      reload();
+    } catch (err) {
+      setNote(err.response?.data?.message || "Failed to delete record.");
+    }
+  };
+
+  const handleMarkStatus = async (staffId, date, status) => {
+    try {
+      await api.post("/attendance/mark", { staffId, date, status });
+      setNote(`Marked as ${status}.`);
+      reload();
+    } catch (err) {
+      setNote(err.response?.data?.message || "Failed to mark status.");
+    }
+  };
+
+  const recordFor = (staffId) => records.find((r) => r.staff?._id === staffId || r.staff === staffId);
 
   const handleCheckIn = (staffId) => handleAction("checkin", staffId);
   const handleCheckOut = (staffId) => handleAction("checkout", staffId);
@@ -217,7 +240,7 @@ const Attendance = () => {
               const checkedOut = !!rec?.checkOut;
               const reLoginGranted = !!rec?.allowReLogin;
               return canCreate ? (
-                <div className="flex gap-2">
+                <div className="flex gap-2 items-center">
                   <button disabled={!!rec?.checkIn} onClick={() => handleCheckIn(row._id)} className="btn-secondary py-1 text-xs" title="Check In">
                     <LogIn size={13} />
                   </button>
@@ -237,6 +260,22 @@ const Attendance = () => {
                     <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-semibold text-amber-700">
                       <KeyRound size={10} /> Re-login OK
                     </span>
+                  )}
+                  <select 
+                    className="input-field py-1 text-xs w-24 h-7" 
+                    value={rec?.status || ""}
+                    onChange={(e) => handleMarkStatus(row._id, dailyDate, e.target.value)}
+                  >
+                    <option value="" disabled>Status</option>
+                    <option value="present">Present</option>
+                    <option value="absent">Absent</option>
+                    <option value="half-day">Half Day</option>
+                    <option value="leave">Leave</option>
+                  </select>
+                  {rec && (
+                    <button onClick={() => handleDelete(rec._id)} className="btn-secondary py-1 text-xs text-red-600 border-red-200 hover:bg-red-50" title="Delete Record">
+                      <X size={13} />
+                    </button>
                   )}
                 </div>
               ) : (

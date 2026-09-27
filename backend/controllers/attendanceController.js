@@ -305,4 +305,15 @@ const grantReLogin = asyncHandler(async (req, res) => {
   res.json({ success: true, message: "Re-login permission granted", data: record });
 });
 
-module.exports = { checkIn, checkOut, markStatus, getAttendance, getAttendanceSummary, computeMonthlySalary, selfCheckIn, selfCheckOut, selfStatus, grantReLogin, computeLateMinutes };
+// @desc  Delete an attendance record
+// @route DELETE /api/attendance/:id
+const deleteRecord = asyncHandler(async (req, res) => {
+  const record = await Attendance.findByIdAndDelete(req.params.id);
+  if (!record) {
+    res.status(404);
+    throw new Error("Record not found");
+  }
+  res.json({ success: true, message: "Record deleted successfully" });
+});
+
+module.exports = { checkIn, checkOut, markStatus, getAttendance, getAttendanceSummary, computeMonthlySalary, selfCheckIn, selfCheckOut, selfStatus, grantReLogin, computeLateMinutes, deleteRecord };

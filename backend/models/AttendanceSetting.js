@@ -28,7 +28,7 @@ const attendanceSettingSchema = new mongoose.Schema(
       // Paid leaves allowed per month; any leave beyond this deducts one day's salary each.
       allowedLeavesPerMonth: { type: Number, default: 2, min: 0 },
       // Shift start (HH:MM) used to detect late check-ins.
-      shiftStart: { type: String, default: "09:00" },
+      shiftStart: { type: String, default: "10:00" },
       // Minutes of grace after shift start before a check-in counts as late.
       graceMinutes: { type: Number, default: 10, min: 0 },
       // Every N late days deduct one day's salary. 0 disables the deduction.

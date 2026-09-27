@@ -32,7 +32,7 @@ const FaceCapture = ({ onCapture, onClose }) => {
       }
       setLive(true);
     } catch {
-      setErr("Camera unavailable or permission denied. You can upload a photo instead.");
+      setErr("Camera blocked by browser (often happens if not using HTTPS). Click 'Upload Photo' above to use your phone's native camera.");
     }
   };
 
@@ -120,10 +120,12 @@ const FaceCapture = ({ onCapture, onClose }) => {
         {mode === "upload" && (
           <div className="flex flex-col items-center gap-3 rounded-xl border-2 border-dashed border-ocean-200 bg-sand-50 p-6">
             <Upload size={32} className="text-ocean-300" />
-            <p className="text-center text-xs text-ocean-500">Upload a clear, well-lit photo of your face.</p>
-            <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleFile} />
+            <p className="text-center text-xs text-ocean-500">
+              Take a selfie with your camera app, or upload a clear photo of your face. (Works on all mobile devices).
+            </p>
+            <input ref={fileInputRef} type="file" accept="image/*" capture="user" className="hidden" onChange={handleFile} />
             <button type="button" onClick={() => fileInputRef.current && fileInputRef.current.click()} className="btn-accent">
-              Choose Photo
+              Take / Choose Photo
             </button>
           </div>
         )}

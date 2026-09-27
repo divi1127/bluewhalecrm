@@ -10,6 +10,7 @@ const {
   selfCheckOut,
   selfStatus,
   grantReLogin,
+  deleteRecord,
 } = require("../controllers/attendanceController");
 const { protect, access, authorize, requirePermission } = require("../middleware/auth");
 
@@ -26,5 +27,6 @@ router.post("/checkin", access("attendance", "create", "super_admin", "admin", "
 router.post("/checkout", access("attendance", "create", "super_admin", "admin", "hr_manager"), checkOut);
 router.post("/mark", access("attendance", "create", "super_admin", "admin", "hr_manager"), markStatus);
 router.patch("/grant-relogin", authorize("super_admin"), grantReLogin);
+router.delete("/:id", authorize("super_admin"), deleteRecord);
 
 module.exports = router;
