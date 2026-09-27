@@ -400,7 +400,7 @@ const NewBill = () => {
             </p>
           )}
 
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
             {/* Customer Name — full width on all screens */}
             <div className="col-span-full">
               <label className="label">Customer Name *</label>
@@ -502,7 +502,7 @@ const NewBill = () => {
             </select>
           </div>
 
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
             <div>
               <label className="label">Adults</label>
               <input type="number" min={0} className="input-field" value={adults} onChange={(e) => setAdults(e.target.value)} />

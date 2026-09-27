@@ -47,6 +47,15 @@ const updatePackage = asyncHandler(async (req, res) => {
 });
 
 const deletePackage = asyncHandler(async (req, res) => {
+  if (req.query.hard === "true") {
+    const pkg = await Package.findByIdAndDelete(req.params.id);
+    if (!pkg) {
+      res.status(404);
+      throw new Error("Package not found");
+    }
+    return res.json({ success: true, data: {} });
+  }
+
   const pkg = await Package.findByIdAndUpdate(req.params.id, { active: false }, { new: true });
   if (!pkg) {
     res.status(404);

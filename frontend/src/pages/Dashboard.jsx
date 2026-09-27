@@ -175,7 +175,7 @@ const Dashboard = () => {
         </div>
       )}
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
         <StatCard label="Sales" value={money(current.sales)} icon={IndianRupee} accent="teal" delta={delta("sales")} />
         <StatCard label="Bills" value={current.bills} icon={Receipt} accent="ocean" delta={delta("bills")} />
         <StatCard label="Visitors / Walk-ins" value={current.visitors} icon={Users} accent="coral" delta={delta("visitors")} />

@@ -62,7 +62,7 @@ const Reports = () => {
   };
 
   const renderBreakdown = (obj) => (
-    <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+    <div className="grid grid-cols-2 gap-2 md:grid-cols-3">
       {Object.entries(obj || {}).map(([key, value]) => (
         <div key={key} className="rounded-lg bg-ocean-50 px-3 py-2">
           <p className="text-xs font-semibold uppercase text-ocean-400">{key}</p>
@@ -241,7 +241,7 @@ const Reports = () => {
 
           {activeTab === "customers" && (
             <>
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+              <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
                 <div className="rounded-lg bg-teal-50 px-4 py-3">
                   <p className="text-xs font-semibold uppercase text-teal-500">New</p>
                   <p className="text-xl font-bold text-ocean-900">{data.newCount}</p>
@@ -282,7 +282,7 @@ const Reports = () => {
 
           {activeTab === "entries" && (
             <>
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+              <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
                 <div className="rounded-lg bg-teal-50 px-4 py-3">
                   <p className="text-xs font-semibold uppercase text-teal-500">Total Entries</p>
                   <p className="text-xl font-bold text-ocean-900">{data.totalEntries}</p>

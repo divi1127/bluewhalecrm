@@ -106,7 +106,7 @@ const Salary = () => {
       </div>
 
       {/* Totals */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <div className="card flex items-center justify-between !py-4">
           <div>
             <p className="text-xs font-medium text-ocean-500">Net Payroll ({data?.rows?.length || 0} staff)</p>

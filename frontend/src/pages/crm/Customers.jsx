@@ -126,7 +126,7 @@ const Customers = () => {
               </div>
             </div>
 
-            <div className="mb-5 grid grid-cols-1 gap-3 sm:grid-cols-3">
+            <div className="mb-5 grid grid-cols-1 gap-3 md:grid-cols-3">
               <StatCard label="Total Visits" value={history.customer.totalVisits} icon={CalendarCheck} accent="ocean" />
               <StatCard label="Total Spending" value={`₹${history.customer.totalSpending}`} icon={Wallet} accent="teal" />
               <StatCard

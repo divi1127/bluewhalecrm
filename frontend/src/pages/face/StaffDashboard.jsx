@@ -98,7 +98,7 @@ const StaffDashboard = () => {
         <StatCard label="Active Wrist Tags" value={activeTags} icon={TicketCheck} accent="teal" />
       </div>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
         {myActions.map((a) => (
           <Link key={a.to} to={a.to} className="card group p-5 transition hover:ring-2 hover:ring-ocean-200">
             <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-ocean-50 text-ocean-700 group-hover:bg-teal-500 group-hover:text-white">

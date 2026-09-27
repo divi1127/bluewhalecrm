@@ -103,7 +103,7 @@ const Packages = () => {
       </div>
 
       {(canCreate || canEdit) && showForm && (
-        <form onSubmit={handleSubmit} className="card grid grid-cols-1 gap-3 sm:grid-cols-2">
+        <form onSubmit={handleSubmit} className="card grid grid-cols-1 gap-3 md:grid-cols-2">
           <div>
             <label className="label">Name</label>
             <input className="input-field" required value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />

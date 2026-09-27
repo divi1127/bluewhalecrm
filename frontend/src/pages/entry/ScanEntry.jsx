@@ -413,7 +413,7 @@ const ScanEntry = () => {
           </div>
 
           {/* Group Summary: X / Y Inside */}
-          <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-3">
+          <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-3">
             <div className="rounded-xl bg-white p-3.5 border border-ocean-100 shadow-sm">
               <p className="text-[11px] font-bold uppercase tracking-wider text-ocean-400">Scanned Member</p>
               <p className="text-lg font-black text-ocean-900">
@@ -459,7 +459,7 @@ const ScanEntry = () => {
                 <Users size={14} />
                 Bill {result.billNumber} — All Members Status
               </p>
-              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="grid grid-cols-1 gap-2 md:grid-cols-2 lg:grid-cols-3">
                 {result.membersList.map((m) => {
                   const isCurrent = m.tagId === result.tag?.tagId;
                   const isInside = m.status === "INSIDE";

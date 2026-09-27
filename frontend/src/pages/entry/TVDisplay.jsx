@@ -241,7 +241,7 @@ const TVDisplay = () => {
       </div>
 
       {/* THREE HERO METRIC CARDS (TOTAL INSIDE, INDOOR, OUTDOOR) */}
-      <div className="mb-8 grid grid-cols-1 gap-5 sm:grid-cols-3">
+      <div className="mb-8 grid grid-cols-1 gap-5 md:grid-cols-3">
         {/* TOTAL PEOPLE INSIDE */}
         <div className="relative overflow-hidden rounded-3xl border-2 border-teal-500/30 bg-gradient-to-br from-teal-950/40 via-ocean-900 to-ocean-950 p-6 shadow-xl shadow-teal-950/40">
           <div className="flex items-center justify-between text-teal-300">
@@ -342,7 +342,7 @@ const TVDisplay = () => {
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
             {entries.map((entry) => {
               const remaining = formatRemaining(entry.expiryTime);
               const isExpired = remaining.expired;

@@ -179,7 +179,7 @@ const Coupons = () => {
       </div>
 
       {(canCreate || canEdit) && showForm && (
-        <form onSubmit={handleSubmit} className="card grid grid-cols-1 gap-3 sm:grid-cols-2">
+        <form onSubmit={handleSubmit} className="card grid grid-cols-1 gap-3 md:grid-cols-2">
           <div>
             <label className="label">Partner Name</label>
             <input className="input-field" required value={form.partnerName} onChange={(e) => setForm({ ...form, partnerName: e.target.value })} />

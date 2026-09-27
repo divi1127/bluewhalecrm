@@ -126,7 +126,7 @@ const Bookings = () => {
       </div>
 
       {canCreate && showForm && (
-        <form onSubmit={handleCreate} className="card grid grid-cols-1 gap-3 sm:grid-cols-2">
+        <form onSubmit={handleCreate} className="card grid grid-cols-1 gap-3 md:grid-cols-2">
           <div>
             <label className="label">Customer Name</label>
             <input className="input-field" required value={form.customerName} onChange={(e) => setForm({ ...form, customerName: e.target.value })} />
