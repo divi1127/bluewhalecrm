@@ -410,7 +410,7 @@ const Reports = () => {
                   <p className="text-xs font-semibold uppercase text-coral-500">Cancelled</p>
                   <p className="text-xl font-bold text-ocean-900">{data.cancelled}</p>
                 </div>
-                <div className="col-span-2 rounded-lg bg-ocean-50 px-4 py-3 sm:col-span-4">
+                <div className="col-span-1 md:col-span-2 rounded-lg bg-ocean-50 px-4 py-3 sm:col-span-4">
                   <p className="text-xs font-semibold uppercase text-ocean-500">Party Revenue</p>
                   <p className="text-xl font-bold text-ocean-900">₹{data.revenue}</p>
                 </div>

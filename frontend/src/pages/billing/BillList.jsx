@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { Eye, Printer } from "lucide-react";
+import { Eye, Printer, Trash2 } from "lucide-react";
+import { useAuth } from "../../context/AuthContext";
 import Table from "../../components/common/Table";
 import api from "../../api/axios";
 import Invoice from "../../components/print/Invoice";
@@ -12,6 +13,9 @@ const BillList = () => {
   const [detail, setDetail] = useState(null);
   const [printTarget, setPrintTarget] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
+
+  const { can } = useAuth();
+  const canDelete = can("billing", "delete");
 
   useEffect(() => {
     api.get("/billing").then(({ data }) => setBills(data.data)).finally(() => setLoading(false));
@@ -29,6 +33,16 @@ const BillList = () => {
     setDetail(data.data);
   };
 
+  const handleDelete = async (id) => {
+    if (!window.confirm("Are you sure you want to permanently delete this bill?")) return;
+    try {
+      await api.delete(`/billing/${id}`);
+      setBills(bills.filter(b => b._id !== id));
+    } catch (err) {
+      alert(err.response?.data?.message || "Failed to delete");
+    }
+  };
+
   const columns = [
     { key: "billNumber", label: "Bill No." },
     { key: "customer", label: "Customer", render: (row) => row.customer?.name },
@@ -41,9 +55,16 @@ const BillList = () => {
       key: "actions",
       label: "",
       render: (row) => (
-        <button onClick={() => handleView(row._id)} className="btn-secondary py-1.5 text-xs">
-          <Eye size={14} /> View
-        </button>
+        <div className="flex items-center gap-2">
+          <button onClick={() => handleView(row._id)} className="btn-secondary py-1.5 text-xs">
+            <Eye size={14} /> View
+          </button>
+          {canDelete && (
+            <button onClick={() => handleDelete(row._id)} className="btn-secondary py-1.5 text-xs text-red-600 border-red-200 hover:bg-red-50" title="Delete Permanently">
+              <Trash2 size={14} />
+            </button>
+          )}
+        </div>
       ),
     },
   ];

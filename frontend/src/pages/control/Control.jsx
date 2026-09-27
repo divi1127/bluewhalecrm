@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Pencil, Plus, Power, KeyRound, UserCheck, ShieldCheck } from "lucide-react";
+import { Pencil, Plus, Power, KeyRound, UserCheck, ShieldCheck, Trash2 } from "lucide-react";
 import Table from "../../components/common/Table";
 import Badge from "../../components/common/Badge";
 import api from "../../api/axios";
@@ -160,6 +160,17 @@ const Control = () => {
     }
   };
 
+  const handleDelete = async (u) => {
+    if (!window.confirm(`Permanently delete the user "${u.name}"?`)) return;
+    try {
+      await api.delete(`/users/${u._id}?permanent=true`);
+      flash(`${u.name} deleted permanently`);
+      load();
+    } catch (err) {
+      flash(err.response?.data?.message || "Something went wrong", "error");
+    }
+  };
+
   const handleResetPassword = (u) => {
     setResetTarget(u);
     setNewPassword("");
@@ -234,7 +245,10 @@ const Control = () => {
             <KeyRound size={13} />
           </button>
           <button onClick={() => handleToggleActive(row)} title={row.active ? "Deactivate" : "Activate"} className="btn-secondary py-1.5 text-xs">
-            <Power size={13} />
+            <Power size={13} className={row.active ? "text-coral-500" : "text-teal-500"} />
+          </button>
+          <button onClick={() => handleDelete(row)} title="Delete Permanently" className="btn-secondary border-coral-200 py-1.5 text-xs text-coral-600 hover:bg-coral-50">
+            <Trash2 size={13} />
           </button>
         </div>
       ),
@@ -312,7 +326,7 @@ const Control = () => {
             <label className="label">Phone</label>
             <input className="input-field" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
           </div>
-          <div className="col-span-2">
+          <div className="col-span-1 md:col-span-2">
             <label className="label">Link to Staff Profile (optional)</label>
             <select className="input-field" value={form.staffId} onChange={(e) => setForm({ ...form, staffId: e.target.value })}>
               <option value="">-- None --</option>
@@ -322,7 +336,7 @@ const Control = () => {
             </select>
           </div>
 
-          <div className="col-span-2">
+          <div className="col-span-1 md:col-span-2">
             <label className="label">Module Permissions</label>
             <p className="mb-2 text-xs text-ocean-400">
               Tick the actions a user may perform in each module. A module with no ticked actions = no access.
@@ -362,7 +376,7 @@ const Control = () => {
             </div>
           </div>
 
-          <div className="col-span-2">
+          <div className="col-span-1 md:col-span-2">
             <button type="submit" className="btn-accent w-full">
               {editingId ? "Update User & Access" : "Create User"}
             </button>

@@ -444,7 +444,7 @@ const Attendance = () => {
 
       {/* Main Content Area */}
       <div className="grid gap-6 lg:grid-cols-3">
-        <div className="lg:col-span-2">
+        <div className="lg:col-span-1 md:col-span-2">
           <div className="card overflow-hidden !p-0">
             <div className="border-b border-ocean-100 bg-ocean-50/50 px-5 py-4">
               <h3 className="font-bold text-ocean-900">{isSingleDay ? `Daily Attendance Log — ${range[0]}` : "Attendance Records"}</h3>

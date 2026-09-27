@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Plus } from "lucide-react";
+import { Plus, Trash2 } from "lucide-react";
 import Table from "../../components/common/Table";
 import Badge from "../../components/common/Badge";
 import { useAuth } from "../../context/AuthContext";
@@ -42,6 +42,7 @@ const Bookings = () => {
 
   const canCreate = can("bookings", "create");
   const canEdit = can("bookings", "edit");
+  const canDelete = can("bookings", "delete");
 
   const load = () =>
     api.get("/bookings", { params: { source: source || undefined } }).then(({ data }) => {
@@ -64,6 +65,16 @@ const Bookings = () => {
   const handleStatusChange = async (id, status) => {
     await api.patch(`/bookings/${id}/status`, { status });
     load();
+  };
+
+  const handleDelete = async (id) => {
+    if (!window.confirm("Are you sure you want to permanently delete this booking?")) return;
+    try {
+      await api.delete(`/bookings/${id}`);
+      load();
+    } catch (err) {
+      alert(err.response?.data?.message || "Failed to delete booking");
+    }
   };
 
   const columns = [
@@ -94,6 +105,21 @@ const Bookings = () => {
         ) : (
           <Badge color={statusColors[row.status] || "gray"}>{row.status.replace("_", " ")}</Badge>
         ),
+    },
+    {
+      key: "actions",
+      label: "",
+      render: (row) => (
+        canDelete ? (
+          <button
+            onClick={() => handleDelete(row._id)}
+            title="Delete Permanently"
+            className="btn-secondary border-coral-200 py-1.5 text-xs text-coral-600 hover:bg-coral-50"
+          >
+            <Trash2 size={14} />
+          </button>
+        ) : null
+      )
     },
   ];
 
@@ -151,7 +177,7 @@ const Bookings = () => {
             <label className="label">Event Time</label>
             <input className="input-field" required placeholder="4:00 PM - 7:00 PM" value={form.eventTime} onChange={(e) => setForm({ ...form, eventTime: e.target.value })} />
           </div>
-          <div className="col-span-2">
+          <div className="col-span-1 md:col-span-2">
             <label className="label">Package Details</label>
             <input className="input-field" value={form.packageDetails} onChange={(e) => setForm({ ...form, packageDetails: e.target.value })} />
           </div>
@@ -163,7 +189,7 @@ const Bookings = () => {
             <label className="label">Decoration Requirements</label>
             <input className="input-field" value={form.decorationRequirements} onChange={(e) => setForm({ ...form, decorationRequirements: e.target.value })} />
           </div>
-          <div className="col-span-2">
+          <div className="col-span-1 md:col-span-2">
             <label className="label">Additional Activities</label>
             <input className="input-field" value={form.additionalActivities} onChange={(e) => setForm({ ...form, additionalActivities: e.target.value })} />
           </div>
@@ -175,7 +201,7 @@ const Bookings = () => {
             <label className="label">Advance Paid</label>
             <input type="number" className="input-field" value={form.advancePaid} onChange={(e) => setForm({ ...form, advancePaid: e.target.value })} />
           </div>
-          <div className="col-span-2">
+          <div className="col-span-1 md:col-span-2">
             <button type="submit" className="btn-accent w-full">Create Booking</button>
           </div>
         </form>

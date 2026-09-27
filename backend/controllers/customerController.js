@@ -133,6 +133,26 @@ const markFollowUp = asyncHandler(async (req, res) => {
   res.json({ success: true, data: customer });
 });
 
+// @desc  Delete a customer and all their associated records
+// @route DELETE /api/customers/:id
+const deleteCustomer = asyncHandler(async (req, res) => {
+  const customer = await Customer.findById(req.params.id);
+  if (!customer) {
+    res.status(404);
+    throw new Error("Customer not found");
+  }
+
+  // Import models here to avoid circular dependencies if any
+  const Bill = require("../models/Bill");
+  const WristTag = require("../models/WristTag");
+
+  await WristTag.deleteMany({ customer: customer._id });
+  await Bill.deleteMany({ customer: customer._id });
+  await customer.deleteOne();
+
+  res.json({ success: true, message: "Customer and all associated records deleted permanently." });
+});
+
 module.exports = {
   getCustomers,
   lookupByMobile,
@@ -141,4 +161,5 @@ module.exports = {
   updateCustomer,
   getFollowUpList,
   markFollowUp,
+  deleteCustomer,
 };

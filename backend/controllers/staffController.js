@@ -100,6 +100,18 @@ const deactivateStaff = asyncHandler(async (req, res) => {
   res.json({ success: true, data: staff });
 });
 
+const deleteStaff = asyncHandler(async (req, res) => {
+  const staff = await Staff.findById(req.params.id);
+  if (!staff) {
+    res.status(404);
+    throw new Error("Staff member not found");
+  }
+  await User.deleteOne({ staff: staff._id });
+  await Attendance.deleteMany({ staff: staff._id });
+  await staff.deleteOne();
+  res.json({ success: true, message: "Staff member permanently deleted" });
+});
+
 // @desc  Register a face descriptor for face-login at the register
 // @route POST /api/staff/:id/face
 const registerFace = asyncHandler(async (req, res) => {
@@ -177,4 +189,4 @@ const monthlySummary = asyncHandler(async (req, res) => {
   res.json({ success: true, data: { month, rows } });
 });
 
-module.exports = { getStaff, getStaffMember, createStaff, updateStaff, deactivateStaff, registerFace, clearFace, monthlySummary };
+module.exports = { getStaff, getStaffMember, createStaff, updateStaff, deactivateStaff, deleteStaff, registerFace, clearFace, monthlySummary };

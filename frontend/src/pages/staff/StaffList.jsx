@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Plus, CheckCircle2, ScanFace, Camera } from "lucide-react";
+import { Plus, CheckCircle2, ScanFace, Camera, Trash2 } from "lucide-react";
 import Table from "../../components/common/Table";
 import Badge from "../../components/common/Badge";
 import FaceCaptureModal from "../../components/face/FaceCaptureModal";
@@ -23,6 +23,7 @@ const StaffList = () => {
   const [monthly, setMonthly] = useState({}); // staffId -> monthly totals
 
   const canCreate = can("staff", "create");
+  const canDelete = can("staff", "delete");
 
   const load = () => api.get("/staff").then(({ data }) => setStaff(data.data));
 
@@ -70,6 +71,16 @@ const StaffList = () => {
     await api.delete(`/staff/${row._id}/face`);
     setFaceMsg(`Face removed for ${row.name}.`);
     load();
+  };
+
+  const handleDelete = async (row) => {
+    if (!window.confirm(`Permanently delete the staff member "${row.name}"?`)) return;
+    try {
+      await api.delete(`/staff/${row._id}`);
+      load();
+    } catch (err) {
+      alert(err.response?.data?.message || "Failed to delete");
+    }
   };
 
   const fmtDob = (row) => {
@@ -123,6 +134,11 @@ const StaffList = () => {
           {row.faceRegistered && (
             <button onClick={() => handleClearFace(row)} className="btn-secondary py-1.5 text-xs text-coral-600" title="Remove face">
               Clear
+            </button>
+          )}
+          {canDelete && (
+            <button onClick={() => handleDelete(row)} className="btn-secondary py-1.5 text-xs border-coral-200 text-coral-600 hover:bg-coral-50" title="Delete Permanently">
+              <Trash2 size={13} />
             </button>
           )}
         </div>
@@ -187,8 +203,14 @@ const StaffList = () => {
             <input className="input-field" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
           </div>
           <div>
-            <label className="label">Designation</label>
-            <input className="input-field" required value={form.designation} onChange={(e) => setForm({ ...form, designation: e.target.value })} />
+            <label className="label">Designation (Role)</label>
+            <select className="input-field" required value={form.designation} onChange={(e) => setForm({ ...form, designation: e.target.value })}>
+              <option value="">Select Role</option>
+              <option value="billing_staff">Billing Staff</option>
+              <option value="admin">Admin</option>
+              <option value="cashier">Cashier</option>
+              <option value="super_admin">Super Admin</option>
+            </select>
           </div>
           <div>
             <label className="label">Date of Birth (used as login password)</label>
@@ -209,7 +231,7 @@ const StaffList = () => {
             <label className="label">Salary Amount (₹)</label>
             <input type="number" className="input-field" required value={form.salaryAmount} onChange={(e) => setForm({ ...form, salaryAmount: e.target.value })} />
           </div>
-          <div className="col-span-2">
+          <div className="col-span-1 md:col-span-2">
             <button type="submit" className="btn-accent w-full">Add Staff Member</button>
           </div>
         </form>

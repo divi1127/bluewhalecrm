@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Pencil, Plus } from "lucide-react";
+import { Pencil, Plus, Trash2 } from "lucide-react";
 import Table from "../../components/common/Table";
 import Badge from "../../components/common/Badge";
 import { useAuth } from "../../context/AuthContext";
@@ -53,11 +53,21 @@ const Packages = () => {
 
   const handleToggleActive = async (pkg) => {
     if (pkg.active) {
-      await api.delete(`/packages/${pkg._id}`);
+      await api.put(`/packages/${pkg._id}`, { active: false });
     } else {
       await api.put(`/packages/${pkg._id}`, { active: true });
     }
     load();
+  };
+
+  const handleDelete = async (id) => {
+    if (!window.confirm("Are you sure you want to permanently delete this package?")) return;
+    try {
+      await api.delete(`/packages/${id}`);
+      load();
+    } catch (err) {
+      alert(err.response?.data?.message || "Failed to delete");
+    }
   };
 
   const columns = [
@@ -79,9 +89,14 @@ const Packages = () => {
                     <Pencil size={14} />
                   </button>
                 )}
-                {canDelete && (
+                {canEdit && (
                   <button onClick={() => handleToggleActive(row)} className="btn-secondary py-1.5 text-xs">
                     {row.active ? "Deactivate" : "Activate"}
+                  </button>
+                )}
+                {canDelete && (
+                  <button onClick={() => handleDelete(row._id)} className="btn-secondary py-1.5 text-xs text-red-600 border-red-200 hover:bg-red-50" title="Delete Permanently">
+                    <Trash2 size={14} />
                   </button>
                 )}
               </div>
@@ -127,11 +142,11 @@ const Packages = () => {
               <option value="hours">Hours</option>
             </select>
           </div>
-          <div className="col-span-2">
+          <div className="col-span-1 md:col-span-2">
             <label className="label">Description</label>
             <input className="input-field" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
           </div>
-          <div className="col-span-2">
+          <div className="col-span-1 md:col-span-2">
             <button type="submit" className="btn-accent w-full">
               {editingId ? "Update Package" : "Create Package"}
             </button>

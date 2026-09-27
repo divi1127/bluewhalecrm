@@ -21,6 +21,6 @@ router.post("/", access("staff", "create", "super_admin", "admin", "hr_manager")
 router.put("/:id", access("staff", "edit", "super_admin", "admin", "hr_manager"), updateStaff);
 router.post("/:id/face", access("staff", "edit", "super_admin", "admin", "hr_manager"), registerFace);
 router.delete("/:id/face", access("staff", "edit", "super_admin", "admin", "hr_manager"), clearFace);
-router.delete("/:id", access("staff", "delete", "super_admin", "admin", "hr_manager"), deactivateStaff);
+router.delete("/:id", access("staff", "delete", "super_admin", "admin", "hr_manager"), require("../controllers/staffController").deleteStaff);
 
 module.exports = router;

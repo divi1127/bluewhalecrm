@@ -19,6 +19,7 @@ router.get("/lookup/:mobile", requirePermission("customers", "view"), lookupByMo
 router.get("/:id", requirePermission("customers", "view"), getCustomer);
 router.post("/", requirePermission("customers", "create"), createCustomer);
 router.put("/:id", requirePermission("customers", "edit"), updateCustomer);
+router.delete("/:id", requirePermission("customers", "delete"), require("../controllers/customerController").deleteCustomer);
 router.post("/:id/followup", requirePermission("customers", "edit"), markFollowUp);
 
 module.exports = router;

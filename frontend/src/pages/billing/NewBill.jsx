@@ -44,29 +44,27 @@ const NewBill = () => {
   const [custSearchResults, setCustSearchResults] = useState([]);
   const [custSearching, setCustSearching] = useState(false);
 
+  const [parents, setParents] = useState(0);
+  const PARENT_PRICE = 200;
+
   const canCreate = can("billing", "create");
 
   useEffect(() => {
     api.get("/packages?active=true").then(({ data }) => setPackages(data.data));
   }, []);
 
-  // Auto-detect below5 package: package with the lowest price / that has a below5Price set
-  const below5Package = packages.find(
-    (p) => p.below5Price > 0 && p._id !== packageId
-  ) || null;
-
-  // When below5 count changes and there's a below5-specific package, show it
-  const below5Count2 = Number(below5) || 0;
-
+  const below5Package = packages.find((p) => p.below5Price > 0 && p._id !== packageId) || null;
   const selectedPackage = packages.find((p) => p._id === packageId);
   const below5Count = Number(below5) || 0;
   const adultCount = Number(adults) || 0;
   const childCount = Number(children) || 0;
+  const parentCount = Number(parents) || 0;
   const totalPersons = adultCount + childCount + below5Count;
   const adultChildAmount = selectedPackage ? (adultCount + childCount) * selectedPackage.price : 0;
   const below5Amount = selectedPackage ? below5Count * (selectedPackage.below5Price || 0) : 0;
+  const parentsAmount = parentCount * PARENT_PRICE;
   const socksAmount = socks ? totalPersons * SOCKS_PRICE : 0;
-  const baseAmount = adultChildAmount + below5Amount + socksAmount;
+  const baseAmount = adultChildAmount + below5Amount + socksAmount + parentsAmount;
 
   const handleScanCoupon = (code) => {
     setCouponCode(String(code).trim().toUpperCase());
@@ -95,11 +93,7 @@ const NewBill = () => {
   // Extension timing functions
   const handleExtSearch = async () => {
     const q = extSearchQuery.trim();
-    if (!q) {
-      setExtMessage({ type: "error", text: "Customer name or mobile number is required to search." });
-      return;
-    }
-    if (q.length < 2) {
+    if (q.length === 1) {
       setExtMessage({ type: "error", text: "Please enter at least 2 characters to search." });
       return;
     }
@@ -136,7 +130,6 @@ const NewBill = () => {
   const handleLookup = async (manualMobile) => {
     const targetMobile = (typeof manualMobile === "string" ? manualMobile : form.mobile).trim();
     if (!targetMobile) {
-      // If mobile is empty, open the customer search modal
       setCustSearchOpen(true);
       return;
     }
@@ -205,6 +198,7 @@ const NewBill = () => {
     setAdults(1);
     setChildren(0);
     setBelow5(0);
+    setParents(0);
     setSocks(true);
     setCouponCode("");
     setCouponCheck(null);
@@ -229,6 +223,8 @@ const NewBill = () => {
         adults,
         children,
         below5,
+        parents: parentCount,
+        parentPrice: PARENT_PRICE,
         socks,
         socksPrice: SOCKS_PRICE,
         paymentMode,
@@ -502,7 +498,7 @@ const NewBill = () => {
             </select>
           </div>
 
-          <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-4">
             <div>
               <label className="label">Adults</label>
               <input type="number" min={0} className="input-field" value={adults} onChange={(e) => setAdults(e.target.value)} />
@@ -514,6 +510,11 @@ const NewBill = () => {
             <div>
               <label className="label">Below 5 Years</label>
               <input type="number" min={0} className="input-field" value={below5} onChange={(e) => setBelow5(e.target.value)} />
+            </div>
+            <div>
+              <label className="label">Non-playing Parents</label>
+              <input type="number" min={0} className="input-field" value={parents} onChange={(e) => setParents(e.target.value)} />
+              <p className="text-[10px] text-ocean-400 mt-1">₹{PARENT_PRICE} each</p>
             </div>
           </div>
 
@@ -629,6 +630,12 @@ const NewBill = () => {
                     <span className="font-medium">₹{couponCheck.offer.below5Amount}</span>
                   </div>
                 )}
+                {parentCount > 0 && (
+                  <div className="flex justify-between">
+                    <span>Non-playing Parents × {parentCount} (₹{PARENT_PRICE} each)</span>
+                    <span className="font-medium">₹{parentsAmount}</span>
+                  </div>
+                )}
                 {socks && totalPersons > 0 && (
                   <div className="flex justify-between">
                     <span>🧦 Socks × {totalPersons} (₹{SOCKS_PRICE} each)</span>
@@ -676,6 +683,12 @@ const NewBill = () => {
                     Below-5 × {below5Count} @ ₹{selectedPackage.below5Price || 0} each
                   </span>
                   <span className="font-semibold">₹{below5Amount}</span>
+                </div>
+              )}
+              {parentCount > 0 && (
+                <div className="mt-1 flex items-center justify-between">
+                  <span>Non-playing Parents × {parentCount} @ ₹{PARENT_PRICE} each</span>
+                  <span className="font-semibold">₹{parentsAmount}</span>
                 </div>
               )}
               {socks && totalPersons > 0 && (
@@ -738,7 +751,7 @@ const NewBill = () => {
 
             <div className="space-y-4">
               <p className="text-xs text-ocean-400">
-                Search for a customer by name or mobile number to find their active wrist tags and extend session time.
+                Search by name/mobile, or leave blank and click Search to fetch active customers from the last 2 hours. Extending costs ₹300 per session.
               </p>
 
               <div className="flex gap-2">
@@ -746,11 +759,10 @@ const NewBill = () => {
                   <UserSearch size={14} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-ocean-400" />
                   <input
                     className="input-field !pl-9"
-                    placeholder="Search by name or mobile number... *"
+                    placeholder="Search name/mobile (leave blank for recent)"
                     value={extSearchQuery}
                     onChange={(e) => setExtSearchQuery(e.target.value)}
                     onKeyDown={(e) => e.key === "Enter" && handleExtSearch()}
-                    required
                     autoFocus
                   />
                 </div>

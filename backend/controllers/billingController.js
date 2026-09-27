@@ -20,6 +20,8 @@ const createBill = asyncHandler(async (req, res) => {
     adults = 1,
     children = 0,
     below5 = 0,
+    parents = 0,
+    parentPrice = 200,
     socks = true,
     socksPrice = 50,
     paymentMode = "cash",
@@ -62,17 +64,20 @@ const createBill = asyncHandler(async (req, res) => {
   const adultCount = Number(adults) || 0;
   const childCount = Number(children) || 0;
   const below5Count = Number(below5) || 0;
+  const parentCount = Number(parents) || 0;
   const totalPersons = adultCount + childCount + below5Count;
 
   // 2. Bill amount = per-person pricing.
   //    Adults and children each pay the full package price.
   //    Below-5 children pay a separate (usually lower) rate per package.
+  //    Non-playing parents pay a flat entry fee.
   //    Socks charge is ₹50 per person (default on).
   const adultChildAmount = (adultCount + childCount) * pkg.price;
   const below5Amount = below5Count * (pkg.below5Price || 0);
+  const parentsAmount = parentCount * Number(parentPrice);
   const socksEnabled = socks !== false && socks !== "false";
   const socksCharge = socksEnabled ? totalPersons * (Number(socksPrice) || 50) : 0;
-  const baseAmount = adultChildAmount + below5Amount + socksCharge;
+  const baseAmount = adultChildAmount + below5Amount + parentsAmount + socksCharge;
 
   // 3. Apply coupon if provided
   let discount = 0;
@@ -123,6 +128,9 @@ const createBill = asyncHandler(async (req, res) => {
     adults: adultCount,
     children: childCount,
     below5: below5Count,
+    parents: parentCount,
+    parentPrice: Number(parentPrice),
+    parentAmount: parentsAmount,
     socks: socksEnabled,
     socksPrice: Number(socksPrice) || 50,
     socksAmount: socksCharge,
@@ -341,4 +349,27 @@ const getCustomerHistory = asyncHandler(async (req, res) => {
   res.json({ success: true, data: bills });
 });
 
-module.exports = { createBill, verifyCoupon, getBill, getBills, getCustomerHistory };
+// @desc  Delete a bill and its associated wrist tags (Super Admin only)
+// @route DELETE /api/billing/:id
+const deleteBill = asyncHandler(async (req, res) => {
+  const bill = await Bill.findById(req.params.id);
+  if (!bill) {
+    res.status(404);
+    throw new Error("Bill not found");
+  }
+
+  // Deduct from customer spending
+  const customer = await Customer.findById(bill.customer);
+  if (customer) {
+    customer.totalSpending -= bill.finalAmount;
+    customer.totalVisits -= 1;
+    await customer.save();
+  }
+
+  await WristTag.deleteMany({ bill: bill._id });
+  await bill.deleteOne();
+
+  res.json({ success: true, message: "Bill deleted successfully" });
+});
+
+module.exports = { createBill, verifyCoupon, getBill, getBills, getCustomerHistory, deleteBill };

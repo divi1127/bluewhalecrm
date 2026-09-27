@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Plus, QrCode, Printer, CheckSquare, Pencil, Trash2 } from "lucide-react";
+import { Plus, QrCode, Printer, CheckSquare, Pencil, Trash2, Power } from "lucide-react";
 import Table from "../../components/common/Table";
 import Badge from "../../components/common/Badge";
 import { useAuth } from "../../context/AuthContext";
@@ -31,6 +31,7 @@ const Coupons = () => {
 
   const canCreate = can("coupons", "create");
   const canEdit = can("coupons", "edit");
+  const canDelete = can("coupons", "delete");
 
   const load = () => api.get("/coupons").then(({ data }) => setCoupons(data.data));
 
@@ -81,6 +82,16 @@ const Coupons = () => {
   const handleToggleActive = async (row) => {
     await api.put(`/coupons/${row._id}`, { active: !row.active });
     load();
+  };
+
+  const handleDelete = async (row) => {
+    if (!window.confirm(`Permanently delete the campaign "${row.campaignName}" and ALL generated codes?`)) return;
+    try {
+      await api.delete(`/coupons/${row._id}`);
+      load();
+    } catch (err) {
+      alert(err.response?.data?.message || "Failed to delete");
+    }
   };
 
   const handleGenerateCodes = async (coupon, amount = count) => {
@@ -159,7 +170,16 @@ const Coupons = () => {
               title={row.active ? "Deactivate" : "Activate"}
               className="btn-secondary py-1.5 text-xs"
             >
-              <Trash2 size={14} className={row.active ? "text-coral-500" : "text-teal-500"} />
+              <Power size={14} className={row.active ? "text-coral-500" : "text-teal-500"} />
+            </button>
+          )}
+          {canDelete && (
+            <button
+              onClick={() => handleDelete(row)}
+              title="Delete Permanently"
+              className="btn-secondary border-coral-200 py-1.5 text-xs text-coral-600 hover:bg-coral-50"
+            >
+              <Trash2 size={14} />
             </button>
           )}
         </div>
@@ -230,7 +250,7 @@ const Coupons = () => {
               onChange={(e) => setForm({ ...form, generateCount: e.target.value })}
             />
           </div>
-          <div className="col-span-2">
+          <div className="col-span-1 md:col-span-2">
             <button type="submit" className="btn-accent w-full">
               {editingId ? "Update Campaign" : "Create Campaign"}
             </button>

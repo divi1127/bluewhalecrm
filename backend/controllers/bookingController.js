@@ -85,4 +85,14 @@ const updateBookingStatus = asyncHandler(async (req, res) => {
   res.json({ success: true, data: booking });
 });
 
-module.exports = { getBookings, getCalendar, getBooking, createBooking, createOnlineBooking, updateBooking, updateBookingStatus };
+const deleteBooking = asyncHandler(async (req, res) => {
+  const booking = await Booking.findById(req.params.id);
+  if (!booking) {
+    res.status(404);
+    throw new Error("Booking not found");
+  }
+  await booking.deleteOne();
+  res.json({ success: true, message: "Booking permanently deleted" });
+});
+
+module.exports = { getBookings, getCalendar, getBooking, createBooking, createOnlineBooking, updateBooking, updateBookingStatus, deleteBooking };

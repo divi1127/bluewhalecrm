@@ -21,5 +21,6 @@ router.get("/:id", requirePermission("bookings", "view"), getBooking);
 router.post("/", requirePermission("bookings", "create"), createBooking);
 router.put("/:id", requirePermission("bookings", "edit"), updateBooking);
 router.patch("/:id/status", requirePermission("bookings", "edit"), updateBookingStatus);
+router.delete("/:id", requirePermission("bookings", "delete"), require("../controllers/bookingController").deleteBooking);
 
 module.exports = router;

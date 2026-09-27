@@ -19,7 +19,7 @@ router.get("/", requirePermission("users", "view"), getUsers);
 router.get("/:id", requirePermission("users", "view"), getUser);
 router.post("/", requirePermission("users", "create"), createUser);
 router.put("/:id", requirePermission("users", "edit"), updateUser);
-router.delete("/:id", requirePermission("users", "delete"), deactivateUser);
+router.delete("/:id", requirePermission("users", "delete"), require("../controllers/userController").deleteUser);
 router.post("/:id/reset-password", requirePermission("users", "edit"), resetPassword);
 router.post("/:id/link-staff", requirePermission("users", "edit"), linkStaff);
 

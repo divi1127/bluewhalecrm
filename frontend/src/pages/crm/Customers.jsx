@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { Search, History, MapPin, Phone, Wallet, Repeat, CalendarCheck } from "lucide-react";
+import { Search, History, MapPin, Phone, Wallet, Repeat, CalendarCheck, Trash2 } from "lucide-react";
+import { useAuth } from "../../context/AuthContext";
 import Table from "../../components/common/Table";
 import Badge from "../../components/common/Badge";
 import StatCard from "../../components/common/StatCard";
@@ -11,7 +12,10 @@ const Customers = () => {
   const [customers, setCustomers] = useState([]);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
-  const [history, setHistory] = useState(null); // { customer, bills }
+  const [history, setHistory] = useState(null);
+
+  const { can } = useAuth();
+  const canDelete = can("customer_crm", "delete");
 
   const load = async (q = "") => {
     setLoading(true);
@@ -37,6 +41,16 @@ const Customers = () => {
     setHistory({ customer: custRes.data.data, bills: billsRes.data.data });
   };
 
+  const handleDelete = async (id) => {
+    if (!window.confirm("Are you sure you want to permanently delete this customer and all their bills?")) return;
+    try {
+      await api.delete(`/customers/${id}`);
+      load(search);
+    } catch (err) {
+      alert(err.response?.data?.message || "Failed to delete");
+    }
+  };
+
   const columns = [
     { key: "name", label: "Name" },
     { key: "mobile", label: "Mobile" },
@@ -56,9 +70,16 @@ const Customers = () => {
       key: "actions",
       label: "",
       render: (row) => (
-        <button onClick={() => handleHistory(row)} className="btn-secondary py-1.5 text-xs">
-          <History size={14} /> History
-        </button>
+        <div className="flex items-center gap-2">
+          <button onClick={() => handleHistory(row)} className="btn-secondary py-1.5 text-xs">
+            <History size={14} /> History
+          </button>
+          {canDelete && (
+            <button onClick={() => handleDelete(row._id)} className="btn-secondary py-1.5 text-xs text-red-600 border-red-200 hover:bg-red-50" title="Delete Permanently">
+              <Trash2 size={14} />
+            </button>
+          )}
+        </div>
       ),
     },
   ];

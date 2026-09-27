@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Search, MessageSquare, Trash2, Eye } from "lucide-react";
 import Table from "../../components/common/Table";
 import Badge from "../../components/common/Badge";
+import { useAuth } from "../../context/AuthContext";
 import api from "../../api/axios";
 
 const statusColors = { new: "coral", contacted: "teal", closed: "gray" };
@@ -14,6 +15,9 @@ const Enquiries = () => {
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState(null);
   const [note, setNote] = useState("");
+
+  const { can } = useAuth();
+  const canDelete = can("enquiries", "delete");
 
   const load = async (q = "", st = "") => {
     setLoading(true);
@@ -90,13 +94,15 @@ const Enquiries = () => {
           <button onClick={() => open(row)} className="btn-secondary py-1.5 text-xs">
             <Eye size={14} /> View
           </button>
-          <button
-            onClick={() => handleDelete(row)}
-            className="btn-secondary border-coral-200 py-1.5 text-xs text-coral-600 hover:bg-coral-50"
-            title="Delete enquiry"
-          >
-            <Trash2 size={14} />
-          </button>
+          {canDelete && (
+            <button
+              onClick={() => handleDelete(row)}
+              className="btn-secondary border-coral-200 py-1.5 text-xs text-coral-600 hover:bg-coral-50"
+              title="Delete enquiry"
+            >
+              <Trash2 size={14} />
+            </button>
+          )}
         </div>
       ),
     },

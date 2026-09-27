@@ -101,4 +101,19 @@ const getCouponPerformance = asyncHandler(async (req, res) => {
   res.json({ success: true, data: { coupon, issued, used, unused: issued - used, revenue } });
 });
 
-module.exports = { createCoupon, getCoupons, updateCoupon, generateCodes, verifyCode, getCouponPerformance };
+// @desc  Delete a coupon campaign and all its generated codes
+// @route DELETE /api/coupons/:id
+const deleteCoupon = asyncHandler(async (req, res) => {
+  const coupon = await Coupon.findById(req.params.id);
+  if (!coupon) {
+    res.status(404);
+    throw new Error("Coupon campaign not found");
+  }
+
+  await CouponCode.deleteMany({ coupon: coupon._id });
+  await coupon.deleteOne();
+
+  res.json({ success: true, message: "Coupon campaign and codes deleted permanently" });
+});
+
+module.exports = { createCoupon, getCoupons, updateCoupon, generateCodes, verifyCode, getCouponPerformance, deleteCoupon };

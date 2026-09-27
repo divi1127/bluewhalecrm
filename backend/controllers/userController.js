@@ -100,9 +100,9 @@ const updateUser = asyncHandler(async (req, res) => {
   res.json({ success: true, data: updated });
 });
 
-// @desc  Deactivate a user (revokes login access). Super admin cannot deactivate themselves.
+// @desc  Deactivate a user (revokes login access) or permanently delete. Super admin cannot target themselves.
 // @route DELETE /api/users/:id
-const deactivateUser = asyncHandler(async (req, res) => {
+const deleteUser = asyncHandler(async (req, res) => {
   const user = await User.findById(req.params.id);
   if (!user) {
     res.status(404);
@@ -110,8 +110,14 @@ const deactivateUser = asyncHandler(async (req, res) => {
   }
   if (user._id.toString() === req.user._id.toString()) {
     res.status(400);
-    throw new Error("You cannot deactivate your own account");
+    throw new Error("You cannot deactivate or delete your own account");
   }
+
+  if (req.query.permanent === "true") {
+    await user.deleteOne();
+    return res.json({ success: true, message: "User deleted permanently" });
+  }
+
   user.active = false;
   await user.save();
   res.json({ success: true, data: { _id: user._id, active: false } });
@@ -154,4 +160,4 @@ const linkStaff = asyncHandler(async (req, res) => {
   res.json({ success: true, data: await User.findById(user._id).select(USER_FIELDS).populate("staff", "staffId name designation") });
 });
 
-module.exports = { getUsers, getUser, createUser, updateUser, deactivateUser, resetPassword, linkStaff };
+module.exports = { getUsers, getUser, createUser, updateUser, deleteUser, resetPassword, linkStaff };

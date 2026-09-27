@@ -400,9 +400,18 @@ const getTagStatus = asyncHandler(async (req, res) => {
 // @route GET /api/entry/extend-search?q=
 const searchCustomerForExtension = asyncHandler(async (req, res) => {
   const { q } = req.query;
+
   if (!q || q.trim().length < 2) {
-    res.status(400);
-    throw new Error("Search query must be at least 2 characters");
+    // If no query, fetch active tags from the last 2 hours
+    const twoHoursAgo = new Date(Date.now() - 2 * 60 * 60 * 1000);
+    const recentTags = await WristTag.find({
+      status: { $in: ["active", "INSIDE", "expired", "EXITED"] },
+      createdAt: { $gte: twoHoursAgo }
+    })
+      .populate("customer", "name mobile")
+      .populate("package", "name durationMinutes")
+      .sort({ createdAt: -1 });
+    return res.json({ success: true, data: recentTags });
   }
 
   const searchRegex = new RegExp(q.trim(), "i");
@@ -417,7 +426,7 @@ const searchCustomerForExtension = asyncHandler(async (req, res) => {
   const customerIds = customers.map((c) => c._id);
   const activeTags = await WristTag.find({
     customer: { $in: customerIds },
-    status: "active",
+    status: { $in: ["active", "INSIDE", "expired", "EXITED"] },
   })
     .populate("customer", "name mobile")
     .populate("package", "name durationMinutes");
@@ -448,22 +457,63 @@ const extendSession = asyncHandler(async (req, res) => {
     throw new Error("Wrist tag not found");
   }
 
-  if (wristTag.status !== "active") {
+  if (!["active", "INSIDE", "expired", "EXITED"].includes(wristTag.status)) {
     res.status(400);
-    throw new Error(`Cannot extend — tag status is "${wristTag.status}". Only active tags can be extended.`);
+    throw new Error(`Cannot extend — tag status is "${wristTag.status}".`);
   }
 
   const currentExpiry = new Date(wristTag.expiryTime);
   const now = new Date();
-  // Extend from now or from current expiry, whichever is later
   const baseTime = currentExpiry > now ? currentExpiry : now;
   wristTag.expiryTime = new Date(baseTime.getTime() + additionalMinutes * 60000);
+  
+  // If the tag was expired or exited, we make it active again so they can play
+  if (["expired", "EXITED"].includes(wristTag.status)) {
+    wristTag.status = "active";
+    if (wristTag.indoorStatus === "EXITED") wristTag.indoorStatus = "active";
+    if (wristTag.outdoorStatus === "EXITED") wristTag.outdoorStatus = "active";
+  }
+  
   await wristTag.save();
+
+  // Create extension bill for 300 RS
+  const year = new Date().getFullYear();
+  const lastBill = await Bill.findOne({ billNumber: new RegExp(`^BW-${year}`) }).sort({ createdAt: -1 });
+  let seq = 1;
+  if (lastBill) {
+    const lastSeq = parseInt(lastBill.billNumber.replace(`BW-${year}`, ''), 10);
+    if (!isNaN(lastSeq)) seq = lastSeq + 1;
+  }
+  const billNumber = `BW-${year}${String(seq).padStart(4, '0')}`;
+
+  const extensionAmount = 300;
+
+  await Bill.create({
+    billNumber,
+    customer: wristTag.customer._id,
+    package: wristTag.package._id,
+    adults: 0,
+    children: 0,
+    below5: 0,
+    parents: 0,
+    socks: false,
+    socksPrice: 0,
+    socksAmount: 0,
+    baseAmount: extensionAmount,
+    discount: 0,
+    finalAmount: extensionAmount,
+    paymentMode: "cash",
+    notes: `Session Extended by ${additionalMinutes} mins for tag ${tagId}`,
+    createdBy: req.user ? req.user._id : undefined,
+  });
+
+  wristTag.customer.totalSpending += extensionAmount;
+  await wristTag.customer.save();
 
   res.json({
     success: true,
     data: wristTag,
-    message: `Session extended by ${additionalMinutes} minutes for ${wristTag.customer.name}. New expiry: ${wristTag.expiryTime.toLocaleTimeString("en-IN")}`,
+    message: `Session extended by ${additionalMinutes} mins for ${wristTag.customer.name} (₹300 Charged). New expiry: ${wristTag.expiryTime.toLocaleTimeString("en-IN")}`,
   });
 });
 

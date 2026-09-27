@@ -18,5 +18,6 @@ router.get("/:id/performance", requirePermission("coupons", "view"), getCouponPe
 router.post("/", access("coupons", "create", "super_admin", "admin"), createCoupon);
 router.put("/:id", access("coupons", "edit", "super_admin", "admin"), updateCoupon);
 router.post("/:id/generate-codes", access("coupons", "create", "super_admin", "admin"), generateCodes);
+router.delete("/:id", requirePermission("coupons", "delete"), require("../controllers/couponController").deleteCoupon);
 
 module.exports = router;
