@@ -540,25 +540,25 @@ const NewBill = () => {
             </label>
           </div>
 
-          {/* Below-5 auto-detect notice */}
+          {/* Below-10 auto-detect notice */}
           {below5Count > 0 && selectedPackage && (
             <div className="flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm">
               <span className="mt-0.5 text-lg">👶</span>
               <div>
                 <p className="font-semibold text-amber-800">
-                  Below-5 rate detected: ₹{selectedPackage.below5Price || 0} × {below5Count} child(ren) = ₹{(selectedPackage.below5Price || 0) * below5Count}
+                  Below-10 rate detected: ₹{selectedPackage.below5Price || 0} × {below5Count} child(ren) = ₹{(selectedPackage.below5Price || 0) * below5Count}
                 </p>
                 <p className="text-xs text-amber-600 mt-0.5">
-                  Automatically applied from <strong>{selectedPackage.name}</strong>. Each below-5 child gets their own wrist tag.
+                  Automatically applied from <strong>{selectedPackage.name}</strong>. Each below-10 child gets their own wrist tag.
                 </p>
               </div>
             </div>
           )}
           {below5Count > 0 && !selectedPackage && (
-            <p className="text-xs text-amber-600">⚠ Select a package first to see the below-5 rate.</p>
+            <p className="text-xs text-amber-600">⚠ Select a package first to see the below-10 rate.</p>
           )}
           <p className="text-xs text-ocean-400">
-            Each adult/child is charged the package price individually. Below-5 children use a separate rate. Every person gets their own wrist tag.
+            Each adult/child is charged the package price individually. Below-10 children use a separate rate. Every person gets their own wrist tag.
           </p>
 
           <div>
@@ -626,7 +626,7 @@ const NewBill = () => {
                 </div>
                 {couponCheck.offer.below5Count > 0 && (
                   <div className="flex justify-between">
-                    <span>Below-5 × {couponCheck.offer.below5Count} (₹{couponCheck.offer.package.below5Price} each)</span>
+                    <span>Below-10 × {couponCheck.offer.below5Count} (₹{couponCheck.offer.package.below5Price} each)</span>
                     <span className="font-medium">₹{couponCheck.offer.below5Amount}</span>
                   </div>
                 )}
@@ -680,7 +680,7 @@ const NewBill = () => {
               {below5Count > 0 && (
                 <div className="mt-1 flex items-center justify-between">
                   <span>
-                    Below-5 × {below5Count} @ ₹{selectedPackage.below5Price || 0} each
+                    Below-10 × {below5Count} @ ₹{selectedPackage.below5Price || 0} each
                   </span>
                   <span className="font-semibold">₹{below5Amount}</span>
                 </div>
@@ -710,7 +710,7 @@ const NewBill = () => {
                 </span>
               </div>
               <p className="mt-2 text-xs text-ocean-400">
-                {adultCount} adult(s) + {childCount} child(ren) + {below5Count} below-5 = {totalPersons} wrist tag{totalPersons === 1 ? "" : "s"}{socks ? ` + ${totalPersons} socks` : ""}
+                {adultCount} adult(s) + {childCount} child(ren) + {below5Count} below-10 = {totalPersons} wrist tag{totalPersons === 1 ? "" : "s"}{socks ? ` + ${totalPersons} socks` : ""}
               </p>
             </div>
           )}
