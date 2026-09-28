@@ -450,7 +450,7 @@ const extendSession = asyncHandler(async (req, res) => {
   }
 
   const wristTag = await WristTag.findOne({ tagId })
-    .populate("customer", "name mobile")
+    .populate("customer", "name mobile totalSpending")
     .populate("package", "name durationMinutes");
 
   if (!wristTag) {
@@ -520,7 +520,7 @@ const extendSession = asyncHandler(async (req, res) => {
     createdBy: req.user ? req.user._id : undefined,
   });
 
-  wristTag.customer.totalSpending += extensionAmount;
+  wristTag.customer.totalSpending = (wristTag.customer.totalSpending || 0) + extensionAmount;
   await wristTag.customer.save();
 
   res.json({
