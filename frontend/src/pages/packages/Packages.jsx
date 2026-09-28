@@ -74,7 +74,7 @@ const Packages = () => {
     { key: "name", label: "Name" },
     { key: "description", label: "Description" },
     { key: "price", label: "Price", render: (row) => `₹${row.price}` },
-    { key: "below5Price", label: "Below-5 Price", render: (row) => (row.below5Price ? `₹${row.below5Price}` : "Free") },
+    { key: "below5Price", label: "Below-10 Price", render: (row) => (row.below5Price ? `₹${row.below5Price}` : "Free") },
     { key: "durationMinutes", label: "Duration", render: (row) => formatDuration(row) },
     { key: "active", label: "Status", render: (row) => <Badge color={row.active ? "green" : "gray"}>{row.active ? "Active" : "Inactive"}</Badge> },
     ...((canEdit || canDelete)

@@ -53,6 +53,12 @@ const NewBill = () => {
     api.get("/packages?active=true").then(({ data }) => setPackages(data.data));
   }, []);
 
+  useEffect(() => {
+    if (showExtension) {
+      handleExtSearch();
+    }
+  }, [showExtension]);
+
   const below5Package = packages.find((p) => p.below5Price > 0 && p._id !== packageId) || null;
   const selectedPackage = packages.find((p) => p._id === packageId);
   const below5Count = Number(below5) || 0;
@@ -797,8 +803,6 @@ const NewBill = () => {
                       <option value={30}>30 min</option>
                       <option value={45}>45 min</option>
                       <option value={60}>60 min</option>
-                      <option value={90}>90 min</option>
-                      <option value={120}>2 hours</option>
                     </select>
                   </div>
 

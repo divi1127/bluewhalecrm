@@ -225,7 +225,7 @@ const Control = () => {
     {
       key: "role",
       label: "Role",
-      render: (row) => <Badge color={ROLE_COLORS[row.role] || "gray"}>{ROLE_LABELS[row.role] || row.role}</Badge>,
+      render: (row) => <Badge color={ROLE_COLORS[row.role] || "gray"}>{row.staff?.designation || ROLE_LABELS[row.role] || row.role}</Badge>,
     },
     {
       key: "staff",

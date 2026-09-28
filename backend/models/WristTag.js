@@ -46,6 +46,7 @@ const wristTagSchema = new mongoose.Schema(
     exitTime: { type: Date },
     indoorEntryTime: { type: Date },
     indoorExitTime: { type: Date },
+    extendedMinutes: { type: Number, default: 0 },
     outdoorEntryTime: { type: Date },
     outdoorExitTime: { type: Date },
     outdoorGamesPlayed: [

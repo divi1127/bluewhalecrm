@@ -178,7 +178,8 @@ const scanEntry = asyncHandler(async (req, res) => {
   wristTag.status = "INSIDE";
 
   if (wristTag.package && wristTag.package.durationMinutes) {
-    wristTag.expiryTime = new Date(now.getTime() + wristTag.package.durationMinutes * 60000);
+    const totalMinutes = wristTag.package.durationMinutes + (wristTag.extendedMinutes || 0);
+    wristTag.expiryTime = new Date(now.getTime() + totalMinutes * 60000);
   }
 
   await wristTag.save();
@@ -405,7 +406,7 @@ const searchCustomerForExtension = asyncHandler(async (req, res) => {
     // If no query, fetch active tags from the last 2 hours
     const twoHoursAgo = new Date(Date.now() - 2 * 60 * 60 * 1000);
     const recentTags = await WristTag.find({
-      status: { $in: ["active", "INSIDE", "expired", "EXITED"] },
+      status: { $in: ["active", "INSIDE", "expired", "EXITED", "NOT_ENTERED", "unused"] },
       createdAt: { $gte: twoHoursAgo }
     })
       .populate("customer", "name mobile")
@@ -426,7 +427,7 @@ const searchCustomerForExtension = asyncHandler(async (req, res) => {
   const customerIds = customers.map((c) => c._id);
   const activeTags = await WristTag.find({
     customer: { $in: customerIds },
-    status: { $in: ["active", "INSIDE", "expired", "EXITED"] },
+    status: { $in: ["active", "INSIDE", "expired", "EXITED", "NOT_ENTERED", "unused"] },
   })
     .populate("customer", "name mobile")
     .populate("package", "name durationMinutes");
@@ -457,15 +458,27 @@ const extendSession = asyncHandler(async (req, res) => {
     throw new Error("Wrist tag not found");
   }
 
-  if (!["active", "INSIDE", "expired", "EXITED"].includes(wristTag.status)) {
+  if (!["active", "INSIDE", "expired", "EXITED", "NOT_ENTERED", "unused"].includes(wristTag.status)) {
     res.status(400);
     throw new Error(`Cannot extend — tag status is "${wristTag.status}".`);
   }
 
-  const currentExpiry = new Date(wristTag.expiryTime);
   const now = new Date();
-  const baseTime = currentExpiry > now ? currentExpiry : now;
+  let baseTime = now;
+  if (wristTag.expiryTime) {
+    const currentExpiry = new Date(wristTag.expiryTime);
+    if (currentExpiry > now) {
+      baseTime = currentExpiry;
+    }
+  } else if (wristTag.package && wristTag.package.durationMinutes) {
+    // If not entered yet, base time is now + their default package duration
+    baseTime = new Date(now.getTime() + wristTag.package.durationMinutes * 60000);
+  }
+  
   wristTag.expiryTime = new Date(baseTime.getTime() + additionalMinutes * 60000);
+  
+  // Track extended minutes so it doesn't get wiped out if they scan entry later
+  wristTag.extendedMinutes = (wristTag.extendedMinutes || 0) + additionalMinutes;
   
   // If the tag was expired or exited, we make it active again so they can play
   if (["expired", "EXITED"].includes(wristTag.status)) {
