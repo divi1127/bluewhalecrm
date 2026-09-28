@@ -45,6 +45,7 @@ const NewBill = () => {
   const [custSearching, setCustSearching] = useState(false);
 
   const [parents, setParents] = useState(0);
+  const [extensionDraft, setExtensionDraft] = useState(null);
   const PARENT_PRICE = 200;
 
   const canCreate = can("billing", "create");
@@ -118,19 +119,9 @@ const NewBill = () => {
     }
   };
 
-  const handleExtend = async (tagId) => {
-    setExtLoading(true);
-    setExtMessage(null);
-    try {
-      const { data } = await api.post("/entry/extend", { tagId, additionalMinutes: Number(extMinutes) });
-      setExtMessage({ type: "success", text: data.message });
-      // Refresh search results
-      handleExtSearch();
-    } catch (err) {
-      setExtMessage({ type: "error", text: err.response?.data?.message || "Extension failed" });
-    } finally {
-      setExtLoading(false);
-    }
+  const handleDraftExtension = (tag) => {
+    setExtensionDraft({ tag, minutes: Number(extMinutes) });
+    setShowExtension(false);
   };
 
   const handleLookup = async (manualMobile) => {
@@ -209,6 +200,7 @@ const NewBill = () => {
     setCouponCode("");
     setCouponCheck(null);
     setPaymentMode("cash");
+    setExtensionDraft(null);
     setResult(null);
     setPrintTarget(null);
   };
@@ -217,6 +209,26 @@ const NewBill = () => {
     e.preventDefault();
     setError(null);
     setSubmitting(true);
+    
+    if (extensionDraft) {
+      try {
+        const { data } = await api.post("/entry/extend", { 
+          tagId: extensionDraft.tag.tagId, 
+          additionalMinutes: extensionDraft.minutes,
+          paymentMode 
+        });
+        setResult({
+          bill: data.data.bill,
+          wristTags: [data.data.wristTag],
+          customer: data.data.wristTag.customer
+        });
+      } catch (err) {
+        setError(err.response?.data?.message || "Failed to extend session");
+      } finally {
+        setSubmitting(false);
+      }
+      return;
+    }
     try {
       const payload = {
         customerId: customer?._id,
@@ -377,7 +389,68 @@ const NewBill = () => {
           </button>
         </div>
 
-        <div className="mb-5 rounded-xl border border-ocean-100 bg-ocean-50/40 p-4">
+        {extensionDraft ? (
+          <form onSubmit={handleSubmit} className="mx-auto w-full space-y-6">
+            <h2 className="text-lg font-bold text-ocean-900 flex items-center gap-2">
+               <Timer size={20} className="text-amber-500" /> Confirm Session Extension
+            </h2>
+            <div className="rounded-xl border border-amber-200 bg-amber-50 p-4">
+              <p className="text-sm font-semibold text-amber-800">
+                Extending {extensionDraft.tag.customer?.name} ({extensionDraft.tag.tagId})
+              </p>
+              <p className="text-sm text-amber-700 mt-1">
+                Additional Time: {extensionDraft.minutes} minutes
+              </p>
+            </div>
+            
+            <div>
+              <label className="label">Payment Mode</label>
+              <select className="input-field" value={paymentMode} onChange={(e) => setPaymentMode(e.target.value)}>
+                <option value="cash">Cash</option>
+                <option value="card">Card</option>
+                <option value="upi">UPI</option>
+                <option value="wallet">Wallet</option>
+              </select>
+            </div>
+
+            <div className="rounded-xl border border-ocean-100 bg-gradient-to-br from-ocean-50 to-white px-4 py-4 text-sm text-ocean-700">
+              <p className="mb-2 text-[11px] font-bold uppercase tracking-wider text-ocean-400">Bill Summary — Extension</p>
+              <div className="flex items-center justify-between">
+                <span>Session Extension (+{extensionDraft.minutes} min)</span>
+                <span className="font-semibold">₹300</span>
+              </div>
+              <div className="mt-2 flex items-center justify-between rounded-lg bg-ocean-900 px-3 py-2 text-white">
+                <span className="font-bold">Bill Total</span>
+                <span className="font-display text-base font-extrabold">₹300</span>
+              </div>
+            </div>
+
+            {error && <p className="text-sm font-medium text-coral-500">{error}</p>}
+
+            {!canCreate ? (
+              <p className="text-sm font-medium text-coral-600">You do not have permission to create bills.</p>
+            ) : (
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => setExtensionDraft(null)}
+                  className="btn-secondary flex-1"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={submitting}
+                  className="btn-primary flex-1 py-3 text-base"
+                >
+                  {submitting ? "Processing..." : "Confirm & Bill ₹300"}
+                </button>
+              </div>
+            )}
+          </form>
+        ) : (
+          <>
+            <div className="mb-5 rounded-xl border border-ocean-100 bg-ocean-50/40 p-4">
           <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
             <h3 className="flex items-center gap-2 text-sm font-bold uppercase tracking-wide text-ocean-700">
               {customer ? <UserCheck size={16} className="text-teal-500" /> : <UserPlus size={16} className="text-teal-500" />}
@@ -734,6 +807,8 @@ const NewBill = () => {
             </button>
           )}
         </form>
+        </>
+        )}
       </div>
 
       {scannerOpen && <QrScanner onScan={handleScanCoupon} onClose={() => setScannerOpen(false)} />}
@@ -822,7 +897,7 @@ const NewBill = () => {
                         </div>
                         <button
                           type="button"
-                          onClick={() => handleExtend(tag.tagId)}
+                          onClick={() => handleDraftExtension(tag)}
                           disabled={extLoading}
                           className="btn-accent shrink-0 px-3 py-1.5 text-xs font-semibold"
                         >

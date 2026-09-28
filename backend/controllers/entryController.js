@@ -438,7 +438,7 @@ const searchCustomerForExtension = asyncHandler(async (req, res) => {
 // @desc  Extend an active wrist tag's session by additional minutes
 // @route POST /api/entry/extend
 const extendSession = asyncHandler(async (req, res) => {
-  const { tagId, additionalMinutes } = req.body;
+  const { tagId, additionalMinutes, paymentMode } = req.body;
 
   if (!tagId) {
     res.status(400);
@@ -501,7 +501,7 @@ const extendSession = asyncHandler(async (req, res) => {
 
   const extensionAmount = 300;
 
-  await Bill.create({
+  const bill = await Bill.create({
     billNumber,
     customer: wristTag.customer._id,
     package: wristTag.package._id,
@@ -515,7 +515,7 @@ const extendSession = asyncHandler(async (req, res) => {
     baseAmount: extensionAmount,
     discount: 0,
     finalAmount: extensionAmount,
-    paymentMode: "cash",
+    paymentMode: paymentMode || "cash",
     notes: `Session Extended by ${additionalMinutes} mins for tag ${tagId}`,
     createdBy: req.user ? req.user._id : undefined,
   });
@@ -525,7 +525,7 @@ const extendSession = asyncHandler(async (req, res) => {
 
   res.json({
     success: true,
-    data: wristTag,
+    data: { wristTag, bill },
     message: `Session extended by ${additionalMinutes} mins for ${wristTag.customer.name} (₹300 Charged). New expiry: ${wristTag.expiryTime.toLocaleTimeString("en-IN")}`,
   });
 });
