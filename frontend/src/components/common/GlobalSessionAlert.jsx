@@ -170,7 +170,7 @@ const GlobalSessionAlert = () => {
               <div className="mt-2 flex flex-wrap gap-2 text-xs text-ocean-200">
                 {cust.adults > 0 && <span className="bg-ocean-800/80 px-2 py-0.5 rounded">Adults: {cust.adults}</span>}
                 {cust.children > 0 && <span className="bg-ocean-800/80 px-2 py-0.5 rounded">Children: {cust.children}</span>}
-                {cust.below5 > 0 && <span className="bg-ocean-800/80 px-2 py-0.5 rounded">Below 5: {cust.below5}</span>}
+                {cust.below5 > 0 && <span className="bg-ocean-800/80 px-2 py-0.5 rounded">Below 10: {cust.below5}</span>}
               </div>
 
               <div className="mt-2 text-[11px] text-ocean-400 flex flex-wrap gap-1">

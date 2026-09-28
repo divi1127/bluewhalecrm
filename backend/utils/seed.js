@@ -54,9 +54,9 @@ const wipe = async () => {
 
 const seedPackages = async () => {
   await Package.insertMany([
-    { name: "General Entry", price: 600, below5Price: 350, durationValue: 1, durationUnit: "hours", durationMinutes: 60, description: "General Entry - ₹600 per person, Kids Below 5 Years ₹350 per child" },
+    { name: "General Entry", price: 600, below5Price: 400, durationValue: 1, durationUnit: "hours", durationMinutes: 60, description: "General Entry - ₹600 per person, Kids Below 10 Years ₹400 per child" },
   ]);
-  log(`Packages: 1 created (General Entry ₹600, Below-5 ₹350).`);
+  log(`Packages: 1 created (General Entry ₹600, Below-10 ₹400).`);
   return Package.find();
 };
 

@@ -508,7 +508,7 @@ const NewBill = () => {
               <input type="number" min={0} className="input-field" value={children} onChange={(e) => setChildren(e.target.value)} />
             </div>
             <div>
-              <label className="label">Below 5 Years</label>
+              <label className="label">Below 10 Years</label>
               <input type="number" min={0} className="input-field" value={below5} onChange={(e) => setBelow5(e.target.value)} />
             </div>
             <div>

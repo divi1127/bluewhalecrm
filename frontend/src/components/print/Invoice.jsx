@@ -68,7 +68,7 @@ const Invoice = ({ bill, pkg, customer, wristTag, wristTags }) => {
               <td className="px-4 py-3">
                 <p className="font-semibold">{pkg?.name}</p>
                 <p className="text-xs text-ocean-400">
-                  {bill.adults} Adult{bill.adults === 1 ? "" : "s"} · {bill.children} Child{bill.children === 1 ? "" : "ren"} · {below5Count} Below 5 ·{" "}
+                  {bill.adults} Adult{bill.adults === 1 ? "" : "s"} · {bill.children} Child{bill.children === 1 ? "" : "ren"} · {below5Count} Below 10 ·{" "}
                   {formatDuration(pkg)}
                 </p>
               </td>
@@ -79,8 +79,8 @@ const Invoice = ({ bill, pkg, customer, wristTag, wristTags }) => {
             {below5Count > 0 && (
               <tr className="border-t border-ocean-50 text-ocean-800">
                 <td className="px-4 py-3">
-                  <p className="font-semibold">Below-5 Child</p>
-                  <p className="text-xs text-ocean-400">{below5Count} child(ren) below 5 years</p>
+                  <p className="font-semibold">Below-10 Child</p>
+                  <p className="text-xs text-ocean-400">{below5Count} child(ren) below 10 years</p>
                 </td>
                 <td className="px-4 py-3">{below5Count}</td>
                 <td className="px-4 py-3 text-right">₹{pkg?.below5Price || 0}</td>

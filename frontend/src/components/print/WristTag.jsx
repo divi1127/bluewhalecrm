@@ -23,7 +23,7 @@ const WristTag = ({
 }) => {
   const durationLabel = formatDuration({ durationMinutes, durationUnit });
   const personLabel =
-    personType === "below5" ? "Below 5 Yrs" : personType === "child" ? "Child" : "Adult";
+    personType === "below5" ? "Below 10 Yrs" : personType === "child" ? "Child" : "Adult";
   const colors = personColors[personType] || personColors.adult;
   const indoorQr = indoorQrCodeDataUrl || qrCodeDataUrl;
   const outdoorQr = outdoorQrCodeDataUrl || qrCodeDataUrl;

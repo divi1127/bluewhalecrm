@@ -147,7 +147,7 @@ const TagLookup = () => {
                   fallback.guests ||
                   (data.personType
                     ? data.personType === "below5"
-                      ? "Below 5 yrs"
+                      ? "Below 10 yrs"
                       : data.personType === "child"
                         ? "Child"
                         : "Adult"

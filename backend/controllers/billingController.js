@@ -167,7 +167,7 @@ const createBill = asyncHandler(async (req, res) => {
     const personType = personLabels[i] || "adult";
     const tagId = generateTagId();
     const label =
-      personType === "below5" ? "Below 5" : personType === "child" ? "Child" : "Adult";
+      personType === "below5" ? "Below 10" : personType === "child" ? "Child" : "Adult";
     
     // Separate QR payloads for Indoor and Outdoor zone single-use scanning with unique values
     const indoorQrPayload = `${baseUrl}/scan-tag/${tagId}-IND?zone=indoor&${new URLSearchParams({

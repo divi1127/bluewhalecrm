@@ -329,8 +329,8 @@ function Pricing() {
       note: 'Valid for full day entry',
     },
     {
-      title: 'Kids Below 5 Years',
-      price: '350',
+      title: 'Kids Below 10 Years',
+      price: '400',
       period: 'per child',
       icon: Baby,
       iconBg: 'bg-emerald-100 dark:bg-emerald-500/20',

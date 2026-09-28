@@ -14,7 +14,7 @@ const seedPackages = async () => {
         name: "General Entry",
         description: "Full day access to all zones",
         price: 600,
-        below5Price: 350,
+        below5Price: 400,
         durationValue: 24, // Assuming full day is essentially a large duration or maybe 8 hours
         durationUnit: "hours",
         durationMinutes: 24 * 60,
@@ -24,7 +24,7 @@ const seedPackages = async () => {
     } else {
       console.log("General Entry package already exists.");
       // Optional: update it just in case
-      await Package.updateOne({ name: "General Entry" }, { price: 600, below5Price: 350 });
+      await Package.updateOne({ name: "General Entry" }, { price: 600, below5Price: 400 });
       console.log("Updated General Entry package prices.");
     }
     

@@ -44,18 +44,18 @@ const resetDatabase = async () => {
   console.log("✓ Cleared: Bills, WristTags, Customers, CRM follow-ups, Coupons, Bookings, Attendance, and old Packages.");
 
   // Create only the requested default package
-  console.log("Creating default package: General Entry (₹600) / Kids Below 5 Years (₹350)...");
+  console.log("Creating default package: General Entry (₹600) / Kids Below 10 Years (₹400)...");
   const defaultPackage = await Package.create({
     name: "General Entry",
     price: 600,
-    below5Price: 350,
+    below5Price: 400,
     durationValue: 1,
     durationUnit: "hours",
     durationMinutes: 60,
-    description: "General Entry - ₹600 per person, Kids Below 5 Years ₹350 per child",
+    description: "General Entry - ₹600 per person, Kids Below 10 Years ₹400 per child",
     active: true,
   });
-  console.log(`✓ Package created: ${defaultPackage.name} (Adult/Child: ₹${defaultPackage.price}, Below-5: ₹${defaultPackage.below5Price})`);
+  console.log(`✓ Package created: ${defaultPackage.name} (Adult/Child: ₹${defaultPackage.price}, Below-10: ₹${defaultPackage.below5Price})`);
 
   // Verify or seed staff & admin accounts if not already present
   const userCount = await User.countDocuments();
