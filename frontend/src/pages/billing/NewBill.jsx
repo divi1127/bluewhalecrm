@@ -219,8 +219,8 @@ const NewBill = () => {
         });
         setResult({
           bill: data.data.bill,
-          wristTags: [data.data.wristTag],
-          customer: data.data.wristTag.customer
+          wristTags: [],
+          customer: data.data.wristTag?.customer || data.data.bill?.customer
         });
       } catch (err) {
         setError(err.response?.data?.message || "Failed to extend session");
