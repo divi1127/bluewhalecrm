@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { LogIn, LogOut, UserCircle2, MapPin, AlertTriangle } from "lucide-react";
+import { LogIn, LogOut, UserCircle2, MapPin, AlertTriangle, IndianRupee, CalendarDays } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import Table from "../../components/common/Table";
 import Badge from "../../components/common/Badge";
@@ -34,11 +34,20 @@ const MyAttendance = () => {
   const [settings, setSettings] = useState(null);
   const [pendingAction, setPendingAction] = useState(null); // "checkin" | "checkout"
   const [gpsNote, setGpsNote] = useState(null);
+  const [monthSummary, setMonthSummary] = useState(null);
+  const [monthSalary, setMonthSalary] = useState(null);
 
   const load = async () => {
     try {
       const { data } = await api.get("/attendance/me");
       setData(data.data);
+      if (data.data?.staff?._id) {
+        const month = new Date().toISOString().slice(0, 7);
+        api.get(`/attendance/salary/${data.data.staff._id}?month=${month}`)
+          .then(res => setMonthSalary(res.data.data)).catch(() => {});
+        api.get(`/attendance/summary?staffId=${data.data.staff._id}&from=${month}-01&to=${month}-31`)
+          .then(res => setMonthSummary(res.data.data?.[0])).catch(() => {});
+      }
       setError(null);
     } catch (err) {
       setError(err.response?.data?.message || "Could not load your attendance");
@@ -213,6 +222,35 @@ const MyAttendance = () => {
           )}
         </div>
       </div>
+
+      {(monthSummary || monthSalary) && (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl">
+          {monthSummary && (
+            <div className="card flex items-center gap-4">
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-teal-100 text-teal-600">
+                <CalendarDays size={24} />
+              </div>
+              <div>
+                <p className="text-xs font-semibold text-ocean-400">This Month's Days</p>
+                <p className="text-xl font-bold text-ocean-900">{monthSummary.presentDays} Present / {monthSummary.totalRecords} Marked</p>
+                <p className="text-xs text-ocean-500">{monthSummary.lateDays} Late Days, {monthSummary.leaveDays} Leaves</p>
+              </div>
+            </div>
+          )}
+          {monthSalary && (
+            <div className="card flex items-center gap-4">
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-ocean-100 text-ocean-600">
+                <IndianRupee size={24} />
+              </div>
+              <div>
+                <p className="text-xs font-semibold text-ocean-400">This Month's Salary (Est.)</p>
+                <p className="text-xl font-bold text-teal-600">₹{monthSalary.netSalary?.toLocaleString("en-IN")}</p>
+                <p className="text-xs text-ocean-500">Base: ₹{monthSalary.baseSalary} | Deductions: ₹{monthSalary.deductionAmount}</p>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
 
       <div>
         <h3 className="mb-3 text-lg font-bold text-ocean-900">Recent Attendance</h3>

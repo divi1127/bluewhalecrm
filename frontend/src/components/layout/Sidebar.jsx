@@ -26,8 +26,8 @@ import logoImg from "../../assets/logo.jpeg";
 const staffRoles = ["billing_staff", "cashier", "outdoor_staff", "indoor_staff", "entry_staff", "exit_staff"];
 
 const navItems = [
-  { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard, roles: ["super_admin", "admin"], module: "dashboard" },
-  { to: "/attendance/my", label: "Dashboard (My Attendance)", icon: CalendarClock, roles: staffRoles, module: null },
+  { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard, roles: ["super_admin", "admin", ...staffRoles], module: "dashboard" },
+  { to: "/attendance/my", label: "My Attendance", icon: CalendarClock, roles: staffRoles, module: null },
   { to: "/billing", label: "Billing", icon: Receipt, roles: ["super_admin", "admin", "billing_staff", "cashier"], module: "billing" },
   { to: "/billing/history", label: "Bill History", icon: Receipt, roles: ["super_admin", "admin", "billing_staff", "cashier"], module: "billing_history" },
   { to: "/entry", label: "Entry Scan", icon: ScanLine, roles: ["super_admin", "admin", "entry_staff"], module: "entry" },

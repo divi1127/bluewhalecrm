@@ -19,20 +19,23 @@ const BillList = () => {
   const canDelete = can("billing", "delete");
 
   useEffect(() => {
-    api.get("/billing").then(({ data }) => setBills(data.data)).finally(() => setLoading(false));
-  }, []);
+    let url = "/billing";
+    if (dateFilter) {
+      const from = `${dateFilter}T00:00:00.000Z`;
+      const to = `${dateFilter}T23:59:59.999Z`;
+      url += `?from=${from}&to=${to}&limit=1000`;
+    } else {
+      url += `?limit=100`; // Just get recent 100 bills if no date
+    }
+    setLoading(true);
+    api.get(url).then(({ data }) => setBills(data.data)).finally(() => setLoading(false));
+  }, [dateFilter]);
 
   const filteredBills = bills.filter((b) => {
     const term = searchTerm.toLowerCase();
     const billMatch = b.billNumber?.toLowerCase().includes(term);
     const phoneMatch = b.customer?.mobile?.includes(term);
-    const textMatch = billMatch || phoneMatch;
-
-    if (dateFilter) {
-      const bDate = new Date(b.createdAt).toISOString().split('T')[0];
-      return textMatch && bDate === dateFilter;
-    }
-    return textMatch;
+    return billMatch || phoneMatch;
   });
 
   const handleView = async (id) => {

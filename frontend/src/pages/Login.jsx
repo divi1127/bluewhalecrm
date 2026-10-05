@@ -4,8 +4,7 @@ import { LogIn, ScanFace, Eye, EyeOff, ArrowLeft } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import logoImg from "../assets/logo.jpeg";
 
-const homeByRole = (role) =>
-  ["super_admin", "admin"].includes(role) ? "/dashboard" : "/attendance/my";
+const homeByRole = (role) => "/dashboard";
 
 const Login = () => {
   const { login, loading, error } = useAuth();

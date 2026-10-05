@@ -26,9 +26,10 @@ import {
   Tooltip,
   ResponsiveContainer,
   Legend,
-} from "recharts";
+import { useAuth } from "../context/AuthContext";
 import api from "../api/axios";
 import StatCard from "../components/common/StatCard";
+import MyAttendance from "./staff/MyAttendance";
 
 const PERIODS = [
   { key: "daily", label: "Daily" },
@@ -61,6 +62,7 @@ const tooltipStyle = {
 };
 
 const Dashboard = () => {
+  const { user } = useAuth();
   const [period, setPeriod] = useState("daily");
   const [customRange, setCustomRange] = useState({ from: "", to: "" });
   const [data, setData] = useState(null);
@@ -115,6 +117,12 @@ const Dashboard = () => {
   if (!data) return <p className="text-sm text-coral-500">Could not load dashboard data.</p>;
 
   const delta = (key) => pct(current[key] || 0, previous[key] || 0);
+
+  const isAdmin = ["super_admin", "admin"].includes(user?.role);
+  const isBillingCashier = ["billing_staff", "cashier"].includes(user?.role);
+  const isEntryExit = ["entry_staff", "exit_staff"].includes(user?.role);
+  const isIndoorOutdoor = ["indoor_staff", "outdoor_staff"].includes(user?.role);
+  const isStaff = !isAdmin;
 
   return (
     <div className="space-y-6">
@@ -175,25 +183,35 @@ const Dashboard = () => {
         </div>
       )}
 
+      {isStaff && (
+        <div className="mb-6">
+          <MyAttendance />
+        </div>
+      )}
+
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <StatCard label="Sales" value={money(current.sales)} icon={IndianRupee} accent="teal" delta={delta("sales")} />
-        <StatCard label="Bills" value={current.bills} icon={Receipt} accent="ocean" delta={delta("bills")} />
-        <StatCard label="Visitors / Walk-ins" value={current.visitors} icon={Users} accent="coral" delta={delta("visitors")} />
-        <StatCard label="Entries" value={current.entries} icon={TicketCheck} accent="teal" delta={delta("entries")} />
-        <StatCard label="New Customers" value={current.newCustomers} icon={UserPlus} accent="ocean" delta={delta("newCustomers")} />
-        <StatCard label="Repeat Customers" value={current.repeatCustomers} icon={Repeat} accent="coral" delta={delta("repeatCustomers")} />
-        <StatCard label="Coupons Redeemed" value={current.coupons} icon={TicketCheck} accent="teal" delta={delta("coupons")} />
-        <StatCard label="Party Bookings" value={current.bookings} icon={CalendarHeart} accent="coral" delta={delta("bookings")} />
-        <StatCard label="Active Customers" value={data.activeCustomers} icon={UserCheck} accent="ocean" />
-        <StatCard
-          label="Staff Present Today"
-          value={`${data.staffPresentToday} / ${data.staffTotal}`}
-          icon={ClipboardCheck}
-          accent="teal"
-        />
+        {isAdmin && <StatCard label="Sales" value={money(current.sales)} icon={IndianRupee} accent="teal" delta={delta("sales")} />}
+        {(isAdmin || isBillingCashier) && <StatCard label="Bills" value={current.bills} icon={Receipt} accent="ocean" delta={delta("bills")} />}
+        {(isAdmin || isBillingCashier || isIndoorOutdoor) && <StatCard label="Visitors / Walk-ins" value={current.visitors} icon={Users} accent="coral" delta={delta("visitors")} />}
+        {(isAdmin || isEntryExit || isBillingCashier || isIndoorOutdoor) && <StatCard label="Entries" value={current.entries} icon={TicketCheck} accent="teal" delta={delta("entries")} />}
+        {(isAdmin || isBillingCashier) && <StatCard label="New Customers" value={current.newCustomers} icon={UserPlus} accent="ocean" delta={delta("newCustomers")} />}
+        {(isAdmin || isBillingCashier) && <StatCard label="Repeat Customers" value={current.repeatCustomers} icon={Repeat} accent="coral" delta={delta("repeatCustomers")} />}
+        {(isAdmin || isBillingCashier) && <StatCard label="Coupons Redeemed" value={current.coupons} icon={TicketCheck} accent="teal" delta={delta("coupons")} />}
+        {(isAdmin || isBillingCashier) && <StatCard label="Party Bookings" value={current.bookings} icon={CalendarHeart} accent="coral" delta={delta("bookings")} />}
+        {(isAdmin) && <StatCard label="Active Customers" value={data.activeCustomers} icon={UserCheck} accent="ocean" />}
+        {(isAdmin) && (
+          <StatCard
+            label="Staff Present Today"
+            value={`${data.staffPresentToday} / ${data.staffTotal}`}
+            icon={ClipboardCheck}
+            accent="teal"
+          />
+        )}
       </div>
 
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+      {isAdmin && (
+        <>
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <ChartCard title="Revenue Trend" subtitle="vs previous equal period">
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={data.charts.salesTrend} margin={{ top: 5, right: 10, left: 0, bottom: 0 }}>
@@ -323,6 +341,8 @@ const Dashboard = () => {
           </ResponsiveContainer>
         </ChartCard>
       </div>
+      </>
+      )}
     </div>
   );
 };
