@@ -210,6 +210,10 @@ const StaffList = () => {
               <option value="admin">Admin</option>
               <option value="cashier">Cashier</option>
               <option value="super_admin">Super Admin</option>
+              <option value="outdoor_staff">Outdoor Staff</option>
+              <option value="indoor_staff">Indoor Staff</option>
+              <option value="entry_staff">Entry Staff</option>
+              <option value="exit_staff">Exit Staff</option>
             </select>
           </div>
           <div>

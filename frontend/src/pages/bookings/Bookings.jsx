@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Plus, Trash2 } from "lucide-react";
+import { Plus, Trash2, Edit } from "lucide-react";
 import Table from "../../components/common/Table";
 import Badge from "../../components/common/Badge";
 import { useAuth } from "../../context/AuthContext";
@@ -39,6 +39,7 @@ const Bookings = () => {
   const [form, setForm] = useState(emptyForm);
   const [loading, setLoading] = useState(true);
   const [source, setSource] = useState("");
+  const [editBooking, setEditBooking] = useState(null);
 
   const canCreate = can("bookings", "create");
   const canEdit = can("bookings", "edit");
@@ -56,10 +57,35 @@ const Bookings = () => {
 
   const handleCreate = async (e) => {
     e.preventDefault();
-    await api.post("/bookings", form);
+    if (editBooking) {
+      await api.patch(`/bookings/${editBooking}`, form);
+      setEditBooking(null);
+    } else {
+      await api.post("/bookings", form);
+    }
     setForm(emptyForm);
     setShowForm(false);
     load();
+  };
+
+  const handleEdit = (row) => {
+    setForm({
+      customerName: row.customerName || "",
+      customerMobile: row.customerMobile || "",
+      eventType: row.eventType || "",
+      eventDate: row.eventDate ? new Date(row.eventDate).toISOString().split('T')[0] : "",
+      eventTime: row.eventTime || "",
+      guestCount: row.guestCount || "",
+      packageDetails: row.packageDetails || "",
+      foodRequirements: row.foodRequirements || "",
+      decorationRequirements: row.decorationRequirements || "",
+      additionalActivities: row.additionalActivities || "",
+      totalAmount: row.totalAmount || "",
+      advancePaid: row.advancePaid || "",
+    });
+    setEditBooking(row._id);
+    setShowForm(true);
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const handleStatusChange = async (id, status) => {
@@ -79,6 +105,7 @@ const Bookings = () => {
 
   const columns = [
     { key: "customerName", label: "Customer" },
+    { key: "customerMobile", label: "Phone" },
     { key: "eventType", label: "Event Type" },
     { key: "eventDate", label: "Date", render: (row) => new Date(row.eventDate).toLocaleDateString("en-IN") },
     { key: "eventTime", label: "Time" },
@@ -110,15 +137,26 @@ const Bookings = () => {
       key: "actions",
       label: "",
       render: (row) => (
-        canDelete ? (
-          <button
-            onClick={() => handleDelete(row._id)}
-            title="Delete Permanently"
-            className="btn-secondary border-coral-200 py-1.5 text-xs text-coral-600 hover:bg-coral-50"
-          >
-            <Trash2 size={14} />
-          </button>
-        ) : null
+        <div className="flex items-center gap-2">
+          {canEdit && (
+            <button
+              onClick={() => handleEdit(row)}
+              title="Edit Booking"
+              className="btn-secondary py-1.5 text-xs"
+            >
+              <Edit size={14} />
+            </button>
+          )}
+          {canDelete && (
+            <button
+              onClick={() => handleDelete(row._id)}
+              title="Delete Permanently"
+              className="btn-secondary border-coral-200 py-1.5 text-xs text-coral-600 hover:bg-coral-50"
+            >
+              <Trash2 size={14} />
+            </button>
+          )}
+        </div>
       )
     },
   ];
@@ -144,7 +182,7 @@ const Bookings = () => {
             ))}
           </div>
           {canCreate && (
-            <button onClick={() => setShowForm((s) => !s)} className="btn-accent">
+            <button onClick={() => { setEditBooking(null); setForm(emptyForm); setShowForm((s) => !s); }} className="btn-accent">
               <Plus size={16} /> New Booking
             </button>
           )}
@@ -201,8 +239,11 @@ const Bookings = () => {
             <label className="label">Advance Paid</label>
             <input type="number" className="input-field" value={form.advancePaid} onChange={(e) => setForm({ ...form, advancePaid: e.target.value })} />
           </div>
-          <div className="col-span-1 md:col-span-2">
-            <button type="submit" className="btn-accent w-full">Create Booking</button>
+          <div className="col-span-1 md:col-span-2 flex gap-3">
+            <button type="submit" className="btn-accent w-full">{editBooking ? "Update Booking" : "Create Booking"}</button>
+            {editBooking && (
+              <button type="button" onClick={() => { setEditBooking(null); setShowForm(false); setForm(emptyForm); }} className="btn-secondary w-full">Cancel</button>
+            )}
           </div>
         </form>
       )}

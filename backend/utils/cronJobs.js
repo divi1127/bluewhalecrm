@@ -3,6 +3,23 @@ const Staff = require('../models/Staff');
 const Attendance = require('../models/Attendance');
 
 const initCronJobs = () => {
+  // Auto checkout at 22:15 (10:15 PM)
+  cron.schedule('15 22 * * *', async () => {
+    console.log("Running auto-checkout at 10:15 PM...");
+    try {
+      const today = new Date().toISOString().slice(0, 10);
+      const records = await Attendance.find({ date: today, checkIn: { $ne: null }, checkOut: null });
+      for (const record of records) {
+        record.checkOut = new Date();
+        record.notes = record.notes ? record.notes + " | Auto-checked out at 10:15 PM" : "Auto-checked out at 10:15 PM";
+        await record.save();
+      }
+      console.log(`Auto-checkout completed for ${records.length} staff.`);
+    } catch (err) {
+      console.error("Error in auto-checkout cron job:", err);
+    }
+  });
+
   // Run every day at 23:30 (11:30 PM)
   cron.schedule('30 23 * * *', async () => {
     console.log("Running attendance cron job at 11:30 PM...");

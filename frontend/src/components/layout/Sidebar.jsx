@@ -23,10 +23,11 @@ import {
 import { useAuth } from "../../context/AuthContext";
 import logoImg from "../../assets/logo.jpeg";
 
+const staffRoles = ["billing_staff", "cashier", "outdoor_staff", "indoor_staff", "entry_staff", "exit_staff"];
+
 const navItems = [
   { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard, roles: ["super_admin", "admin"], module: "dashboard" },
-  { to: "/staff-dashboard", label: "Staff Dashboard", icon: ScanFace, roles: ["billing_staff", "entry_staff", "hr_manager"], module: null },
-  { to: "/cashier-dashboard", label: "Cashier Dashboard", icon: Wallet, roles: ["cashier"], module: null },
+  { to: "/attendance/my", label: "Dashboard (My Attendance)", icon: CalendarClock, roles: staffRoles, module: null },
   { to: "/billing", label: "Billing", icon: Receipt, roles: ["super_admin", "admin", "billing_staff", "cashier"], module: "billing" },
   { to: "/billing/history", label: "Bill History", icon: Receipt, roles: ["super_admin", "admin", "billing_staff", "cashier"], module: "billing_history" },
   { to: "/entry", label: "Entry Scan", icon: ScanLine, roles: ["super_admin", "admin", "entry_staff"], module: "entry" },
@@ -37,7 +38,6 @@ const navItems = [
   { to: "/coupons", label: "Coupons", icon: Ticket, roles: ["super_admin", "admin", "billing_staff"], module: "coupons" },
   { to: "/bookings", label: "Party Bookings", icon: CalendarHeart, roles: null, module: "bookings" },
   { to: "/packages", label: "Packages", icon: Package, roles: ["super_admin", "admin"], module: "packages" },
-  { to: "/attendance/my", label: "My Attendance", icon: CalendarClock, roles: ["admin", "billing_staff", "cashier", "entry_staff", "hr_manager"], module: "attendance" },
   { to: "/staff", label: "Staff Master", icon: UserCog, roles: ["super_admin", "admin", "hr_manager"], module: "staff" },
   { to: "/staff/attendance", label: "Attendance", icon: CalendarClock, roles: ["super_admin", "admin", "hr_manager"], module: "attendance" },
   { to: "/salary", label: "Salary", icon: IndianRupee, roles: ["super_admin", "admin", "hr_manager"], module: "salary" },

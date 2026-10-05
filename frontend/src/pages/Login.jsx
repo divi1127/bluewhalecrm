@@ -5,9 +5,7 @@ import { useAuth } from "../context/AuthContext";
 import logoImg from "../assets/logo.jpeg";
 
 const homeByRole = (role) =>
-  role === "cashier" ? "/cashier-dashboard"
-  : ["billing_staff", "entry_staff", "hr_manager"].includes(role) ? "/staff-dashboard"
-  : "/dashboard";
+  ["super_admin", "admin"].includes(role) ? "/dashboard" : "/attendance/my";
 
 const Login = () => {
   const { login, loading, error } = useAuth();

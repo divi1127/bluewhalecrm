@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { LogIn, LogOut, UserCircle2, MapPin, AlertTriangle } from "lucide-react";
+import { useAuth } from "../../context/AuthContext";
 import Table from "../../components/common/Table";
 import Badge from "../../components/common/Badge";
 import FaceCapture from "../../components/common/FaceCapture";
@@ -26,6 +27,7 @@ const getPosition = () =>
   });
 
 const MyAttendance = () => {
+  const { user, logout } = useAuth();
   const [data, setData] = useState(null);
   const [error, setError] = useState(null);
   const [busy, setBusy] = useState(false);
@@ -64,7 +66,13 @@ const MyAttendance = () => {
       if (gps) payload.gps = gps;
 
       if (scope === "checkin") await api.post("/attendance/me/checkin", payload);
-      else await api.post("/attendance/me/checkout", payload);
+      else {
+        await api.post("/attendance/me/checkout", payload);
+        if (user?.role !== "super_admin") {
+          logout();
+          return;
+        }
+      }
       setPendingAction(null);
       load();
     } catch (err) {

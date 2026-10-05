@@ -13,6 +13,7 @@ const BillList = () => {
   const [detail, setDetail] = useState(null);
   const [printTarget, setPrintTarget] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [dateFilter, setDateFilter] = useState("");
 
   const { can } = useAuth();
   const canDelete = can("billing", "delete");
@@ -25,7 +26,13 @@ const BillList = () => {
     const term = searchTerm.toLowerCase();
     const billMatch = b.billNumber?.toLowerCase().includes(term);
     const phoneMatch = b.customer?.mobile?.includes(term);
-    return billMatch || phoneMatch;
+    const textMatch = billMatch || phoneMatch;
+
+    if (dateFilter) {
+      const bDate = new Date(b.createdAt).toISOString().split('T')[0];
+      return textMatch && bDate === dateFilter;
+    }
+    return textMatch;
   });
 
   const handleView = async (id) => {
@@ -111,13 +118,22 @@ const BillList = () => {
     <div className="space-y-4">
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
         <h2 className="text-lg font-bold text-ocean-900">Recent Bills</h2>
-        <input
-          type="text"
-          placeholder="Search Bill No or Mobile..."
-          className="w-full sm:w-64 rounded-xl border border-ocean-200 bg-white px-4 py-2 text-sm text-ocean-900 outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-        />
+        <div className="flex flex-wrap items-center gap-3">
+          <input
+            type="date"
+            className="rounded-xl border border-ocean-200 bg-white px-4 py-2 text-sm text-ocean-900 outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30"
+            value={dateFilter}
+            onChange={(e) => setDateFilter(e.target.value)}
+            title="Search by Date"
+          />
+          <input
+            type="text"
+            placeholder="Search Bill No or Mobile..."
+            className="w-full sm:w-64 rounded-xl border border-ocean-200 bg-white px-4 py-2 text-sm text-ocean-900 outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
       </div>
       {loading ? (
         <p className="text-sm text-ocean-400">Loading...</p>
