@@ -81,39 +81,60 @@
 }
 
 /* ==========================================================================
-   Wrist tag bands — printed 3 per A4 landscape sheet.
-   Band size: 250mm long × 25mm wide · QR area 20×20 mm · print area ≈230×20 mm
+   Wrist tag bands — 1 tag per sheet (size: 245mm × 25.4mm)
+   Band size: 245mm long × 25.4mm wide · Left tab 25mm · Right tab 27mm · Middle print area 193mm × 25.4mm
    ========================================================================== */
 
 /* Screen preview wrapper — scales the 1:1 band down so it fits the app layout */
 .wrist-tag-preview {
   --wrist-scale: 0.45;
   display: inline-block;
-  width: calc(250mm * var(--wrist-scale));
-  height: calc(25mm * var(--wrist-scale));
+  width: calc(245mm * var(--wrist-scale));
+  height: calc(25.4mm * var(--wrist-scale));
 }
 .wrist-tag-preview .wrist-band {
   transform: scale(var(--wrist-scale));
   transform-origin: top left;
 }
 
-/* The physical 250×25 mm band */
+/* The physical 245×25.4 mm band */
 .wrist-band {
-  width: 250mm;
-  height: 25mm;
+  width: 245mm;
+  height: 25.4mm;
   box-sizing: border-box;
   overflow: hidden;
   background: #fff;
   border: 0.3mm solid #94a3b8;
   border-radius: 1.5mm;
   flex-shrink: 0;
+  display: flex;
+  align-items: center;
+}
+.wrist-band-tab-left {
+  width: 25mm;
+  height: 100%;
+  flex-shrink: 0;
+  box-sizing: border-box;
+  background: #fff;
+  border-right: 0.2mm solid #e2e8f0;
+}
+.wrist-band-tab-right {
+  width: 27mm;
+  height: 100%;
+  flex-shrink: 0;
+  box-sizing: border-box;
+  background: #fff;
+  border-left: 0.2mm solid #e2e8f0;
 }
 .wrist-band-inner {
-  display: flex;
-  align-items: stretch;
-  gap: 3mm;
+  width: 193mm;
   height: 100%;
-  padding: 2.5mm 4mm;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3mm;
+  padding: 1.5mm 3mm;
   box-sizing: border-box;
 }
 
@@ -294,7 +315,7 @@
   color: #0d9488;
 }
 
-/* Print page — groups 3 bands per A4 sheet, dashed cut guides between bands */
+/* Print page — 1 band per sheet (245mm × 25.4mm) */
 .wrist-page {
   display: flex;
   flex-direction: column;
@@ -312,28 +333,9 @@
   width: 100%;
   display: flex;
   justify-content: center;
-  padding: 2mm 0 3mm;
+  padding: 0;
   break-inside: avoid;
   page-break-inside: avoid;
-}
-.wrist-slot + .wrist-slot {
-  border-top: 0.4mm dashed #b0bec5;
-  padding-top: 3mm;
-}
-.wrist-slot + .wrist-slot::before {
-  content: "CUT HERE";
-  position: absolute;
-  top: -1.2mm;
-  left: 50%;
-  transform: translateX(-50%);
-  background: #fff;
-  padding: 0 2mm;
-  color: #94a3b8;
-  font-size: 2mm;
-  font-weight: 700;
-  letter-spacing: 0.2em;
-  white-space: nowrap;
-  z-index: 1;
 }
 
 @media print {
@@ -360,6 +362,29 @@
     box-shadow: none !important;
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
+  }
+  .wrist-page {
+    width: 245mm;
+    height: 25.4mm;
+    margin: 0 auto;
+    padding: 0;
+    break-after: page;
+    page-break-after: always;
+    overflow: hidden;
+  }
+  .wrist-page:last-child {
+    break-after: auto;
+    page-break-after: auto;
+  }
+  .wrist-slot {
+    width: 245mm;
+    height: 25.4mm;
+    margin: 0;
+    padding: 0;
+  }
+  .wrist-band-tab-left,
+  .wrist-band-tab-right {
+    border: none !important;
   }
   .coupon-sheet {
     width: 190mm;

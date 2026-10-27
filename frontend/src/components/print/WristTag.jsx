@@ -37,7 +37,8 @@ const WristTag = ({
 
   return (
     <div className="wrist-band">
-      <div className="wrist-band-inner" style={{ justifyContent: 'center', gap: '5mm', padding: '2.5mm' }}>
+      <div className="wrist-band-tab-left" />
+      <div className="wrist-band-inner" style={{ justifyContent: 'center', gap: '5mm', padding: '1.5mm 2.5mm' }}>
         
         {/* Indoor QR */}
         <div className="wrist-qr wrist-qr--indoor">
@@ -79,6 +80,7 @@ const WristTag = ({
         </div>
 
       </div>
+      <div className="wrist-band-tab-right" />
     </div>
   );
 };

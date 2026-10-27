@@ -111,11 +111,6 @@ const BillList = () => {
     }, 250);
   };
 
-  const tagPages = tags.reduce((acc, t, i) => {
-    const pageIdx = Math.floor(i / 3);
-    (acc[pageIdx] = acc[pageIdx] || []).push(t);
-    return acc;
-  }, []);
 
   return (
     <div className="space-y-4">
@@ -148,14 +143,12 @@ const BillList = () => {
         <>
           {printTarget === "wrist-tags" && (
             <PrintSheet>
-              <style>{`@page { size: A4 landscape; margin: 8mm; }`}</style>
-              {tagPages.map((pageTags, pageIdx) => (
-                <div key={pageIdx} className="wrist-page">
-                  {pageTags.map((wristTag) => (
-                    <div key={wristTag._id} className="wrist-slot">
-                      {renderWristTag(wristTag)}
-                    </div>
-                  ))}
+              <style>{`@page { size: 245mm 25.4mm; margin: 0; }`}</style>
+              {tags.map((wristTag) => (
+                <div key={wristTag._id} className="wrist-page">
+                  <div className="wrist-slot">
+                    {renderWristTag(wristTag)}
+                  </div>
                 </div>
               ))}
             </PrintSheet>

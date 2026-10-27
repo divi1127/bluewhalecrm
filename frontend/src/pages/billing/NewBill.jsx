@@ -288,24 +288,17 @@ const NewBill = () => {
     const { bill, wristTags, customer: billedCustomer } = result;
     const pkg = selectedPackage;
     const tags = wristTags && wristTags.length ? wristTags : [];
-    const tagPages = tags.reduce((acc, t, i) => {
-      const pageIdx = Math.floor(i / 3);
-      (acc[pageIdx] = acc[pageIdx] || []).push(t);
-      return acc;
-    }, []);
     return (
       <>
-        {/* PRINT SHEET — WRIST TAGS ONLY (3 per A4 landscape page), no bill */}
+        {/* PRINT SHEET — WRIST TAGS ONLY (1 tag per sheet: 245mm × 25.4mm), no bill */}
         {printTarget === "wrist-tags" && (
           <PrintSheet>
-            <style>{`@page { size: A4 landscape; margin: 8mm; }`}</style>
-            {tagPages.map((pageTags, pageIdx) => (
-              <div key={pageIdx} className="wrist-page">
-                {pageTags.map((wristTag) => (
-                  <div key={wristTag._id} className="wrist-slot">
-                    {renderWristTag(wristTag)}
-                  </div>
-                ))}
+            <style>{`@page { size: 245mm 25.4mm; margin: 0; }`}</style>
+            {tags.map((wristTag) => (
+              <div key={wristTag._id} className="wrist-page">
+                <div className="wrist-slot">
+                  {renderWristTag(wristTag)}
+                </div>
               </div>
             ))}
           </PrintSheet>
@@ -329,7 +322,7 @@ const NewBill = () => {
                 <CheckCircle2 size={20} className="text-teal-500" /> Bill & Wrist Tags Generated
               </h2>
               <p className="text-sm text-ocean-400">
-                {bill.billNumber} · {tags.length} wrist tag(s) · {totalPersons} person(s) · 3 per print page
+                {bill.billNumber} · {tags.length} wrist tag(s) · {totalPersons} person(s) · 1 per print sheet
               </p>
             </div>
             <div className="flex flex-wrap gap-3">
@@ -352,7 +345,7 @@ const NewBill = () => {
           {tags.length > 0 && (
             <div className="space-y-3">
               <p className="text-xs font-bold uppercase tracking-widest text-ocean-500">
-                Wrist Tags ({tags.length}) — printed 3 per page, no bill
+                Wrist Tags ({tags.length}) — printed 1 per sheet, no bill
               </p>
               {tags.map((wristTag) => (
                 <div key={wristTag._id} className="flex justify-center">
