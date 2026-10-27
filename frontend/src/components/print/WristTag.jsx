@@ -43,8 +43,10 @@ const WristTag = ({
         {/* Indoor QR */}
         <div className="wrist-qr wrist-qr--indoor">
           <img src={indoorQr} alt={`Indoor QR ${indoorId}`} />
-          <span className="wrist-qr-label">IND</span>
-          <span className="wrist-qr-id">{indoorId}</span>
+          <div className="wrist-qr-meta">
+            <span className="wrist-qr-label">IND</span>
+            <span className="wrist-qr-id">{indoorId}</span>
+          </div>
         </div>
 
         {/* Center: Brand + Package Info */}
@@ -69,8 +71,10 @@ const WristTag = ({
         {/* Outdoor QR */}
         <div className="wrist-qr wrist-qr--outdoor">
           <img src={outdoorQr} alt={`Outdoor QR ${outdoorId}`} />
-          <span className="wrist-qr-label">OUT</span>
-          <span className="wrist-qr-id">{outdoorId}</span>
+          <div className="wrist-qr-meta">
+            <span className="wrist-qr-label">OUT</span>
+            <span className="wrist-qr-id">{outdoorId}</span>
+          </div>
         </div>
 
         {/* Bill No & Date (next to outdoor QR) */}

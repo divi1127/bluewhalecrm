@@ -140,9 +140,7 @@ const ScanEntry = () => {
   const handleCameraScan = (decodedText) => {
     setScannerOpen(false);
     setTagId(decodedText);
-    setTimeout(() => {
-      handleScanDirect(decodedText);
-    }, 150);
+    handleScanDirect(decodedText);
   };
 
   const handleScanDirect = async (scannedId) => {

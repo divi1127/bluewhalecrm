@@ -138,21 +138,21 @@
   box-sizing: border-box;
 }
 
-/* QR area 20×20 mm each — indoor (IND) & outdoor (OUT) */
+/* QR area each — indoor (IND) & outdoor (OUT) */
 .wrist-qr {
-  width: 20mm;
-  height: 20mm;
+  width: 27mm;
+  height: 23.6mm;
   flex-shrink: 0;
   box-sizing: border-box;
-  border: 0.3mm solid #5eead4;
+  border: 0.35mm solid #5eead4;
   border-radius: 1mm;
   background: #fff;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 0.8mm;
-  padding: 1mm;
+  gap: 0.5mm;
+  padding: 0.5mm 0.8mm;
 }
 .wrist-qr--indoor {
   border-color: #5eead4;
@@ -161,22 +161,32 @@
   border-color: #93c5fd;
 }
 .wrist-qr img {
-  width: 12.5mm;
-  height: 12.5mm;
+  width: 18.5mm;
+  height: 18.5mm;
   object-fit: contain;
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
+  image-rendering: pixelated;
+}
+.wrist-qr-meta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.8mm;
+  width: 100%;
 }
 .wrist-qr-label {
-  font-size: 1.7mm;
+  font-size: 1.8mm;
   font-weight: 800;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.08em;
   line-height: 1;
-  padding: 0.3mm 1.2mm;
-  border-radius: 1mm;
+  padding: 0.3mm 0.9mm;
+  border-radius: 0.6mm;
 }
 .wrist-qr-id {
   font-family: 'Courier New', Consolas, monospace;
-  font-size: 1.6mm;
-  font-weight: 700;
+  font-size: 2.2mm;
+  font-weight: 800;
   line-height: 1;
   white-space: nowrap;
 }
@@ -235,9 +245,9 @@
 }
 .wrist-tagid {
   font-family: 'Courier New', Consolas, monospace;
-  font-size: 2.8mm;
-  font-weight: 700;
-  letter-spacing: 0.06em;
+  font-size: 3.4mm;
+  font-weight: 800;
+  letter-spacing: 0.08em;
   color: #bae6fd;
 }
 

@@ -102,9 +102,11 @@ const TagLookup = () => {
         </div>
 
         <div className="card">
-          {loading && <p className="py-10 text-center text-sm text-ocean-400">Loading ticket details...</p>}
+          {loading && !data && !fallback.name && !tagId && (
+            <p className="py-10 text-center text-sm text-ocean-400">Loading ticket details...</p>
+          )}
 
-          {error && !loading && (
+          {error && !loading && !data && !fallback.name && (
             <div className="py-6 text-center">
               <XCircle className="mx-auto mb-3 text-coral-500" size={40} />
               <p className="font-semibold text-ocean-900">Ticket not found</p>
@@ -112,18 +114,24 @@ const TagLookup = () => {
             </div>
           )}
 
-          {data && !loading && (
+          {(data || fallback.name || tagId) && (
             <>
               <div className="mb-3 flex items-center justify-between">
-                <p className="font-mono text-xs font-bold tracking-[0.2em] text-ocean-800">{data.tagId}</p>
-                {meta && (
+                <p className="font-mono text-xs font-bold tracking-[0.2em] text-ocean-800">
+                  {data?.tagId || tagId}
+                </p>
+                {loading ? (
+                  <span className="rounded-full bg-teal-50 px-2.5 py-1 text-[10px] font-bold tracking-wider text-teal-600 animate-pulse">
+                    VERIFYING...
+                  </span>
+                ) : meta ? (
                   <span className={`rounded-full px-2.5 py-1 text-[10px] font-bold tracking-wider ${meta.cls}`}>
                     {meta.label}
                   </span>
-                )}
+                ) : null}
               </div>
 
-              {data.status === "active" && remaining !== null && (
+              {data?.status === "active" && remaining !== null && (
                 <div className="mb-3 rounded-xl bg-emerald-50 px-4 py-3 text-center">
                   <p className="text-[10px] font-semibold uppercase tracking-wide text-emerald-600">
                     Session valid for
@@ -145,13 +153,13 @@ const TagLookup = () => {
                 value={
                   fallback.person ||
                   fallback.guests ||
-                  (data.personType
+                  (data?.personType
                     ? data.personType === "below5"
                       ? "Below 10 yrs"
                       : data.personType === "child"
                         ? "Child"
                         : "Adult"
-                    : `${data.adults || 0}A / ${data.children || 0}C`)
+                    : `${data?.adults || 0}A / ${data?.children || 0}C`)
                 }
               />
               <DetailRow
@@ -159,29 +167,33 @@ const TagLookup = () => {
                 label="Bill"
                 value={bill.billNumber || fallback.bill || "—"}
               />
-              <DetailRow
-                icon={ShieldCheck}
-                label="Indoor Zone Status"
-                value={data.indoorStatus ? data.indoorStatus.toUpperCase() : "UNUSED"}
-                valueClass={data.indoorStatus === "exited" ? "text-coral-500" : "text-teal-600"}
-              />
-              <DetailRow
-                icon={ShieldCheck}
-                label="Outdoor Zone Status"
-                value={data.outdoorStatus ? data.outdoorStatus.toUpperCase() : "UNUSED"}
-                valueClass={data.outdoorStatus === "exited" ? "text-coral-500" : "text-blue-600"}
-              />
-              <DetailRow
-                icon={ShieldCheck}
-                label="First Entry Time"
-                value={fmtDateTime(data.entryTime)}
-              />
-              <DetailRow
-                icon={Clock}
-                label="Expires At"
-                value={fmtDateTime(data.expiryTime)}
-                valueClass={data.status === "expired" ? "text-coral-500" : undefined}
-              />
+              {data && (
+                <>
+                  <DetailRow
+                    icon={ShieldCheck}
+                    label="Indoor Zone Status"
+                    value={data.indoorStatus ? data.indoorStatus.toUpperCase() : "UNUSED"}
+                    valueClass={data.indoorStatus === "exited" ? "text-coral-500" : "text-teal-600"}
+                  />
+                  <DetailRow
+                    icon={ShieldCheck}
+                    label="Outdoor Zone Status"
+                    value={data.outdoorStatus ? data.outdoorStatus.toUpperCase() : "UNUSED"}
+                    valueClass={data.outdoorStatus === "exited" ? "text-coral-500" : "text-blue-600"}
+                  />
+                  <DetailRow
+                    icon={ShieldCheck}
+                    label="First Entry Time"
+                    value={fmtDateTime(data.entryTime)}
+                  />
+                  <DetailRow
+                    icon={Clock}
+                    label="Expires At"
+                    value={fmtDateTime(data.expiryTime)}
+                    valueClass={data.status === "expired" ? "text-coral-500" : undefined}
+                  />
+                </>
+              )}
             </>
           )}
         </div>

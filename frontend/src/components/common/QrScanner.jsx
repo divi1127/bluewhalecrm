@@ -68,15 +68,23 @@ const QrScanner = ({ onScan, onClose }) => {
     setStatus(null);
 
     try {
-      const s = new Html5Qrcode(CAMERA_DIV_ID, { verbose: false });
+      const s = new Html5Qrcode(CAMERA_DIV_ID, {
+        verbose: false,
+        experimentalFeatures: {
+          useBarCodeDetectorIfSupported: true,
+        },
+      });
       scannerRef.current = s;
 
       await s.start(
         cameraConstraint,
         {
-          fps: 15,
-          // Wider box → easier to aim at a physical printed QR
-          qrbox: { width: 260, height: 200 },
+          fps: 25,
+          qrbox: (viewfinderWidth, viewfinderHeight) => {
+            const minEdge = Math.min(viewfinderWidth, viewfinderHeight);
+            const qrSize = Math.floor(minEdge * 0.85);
+            return { width: qrSize, height: qrSize };
+          },
           aspectRatio: 1.333,
         },
         (decodedText) => {
