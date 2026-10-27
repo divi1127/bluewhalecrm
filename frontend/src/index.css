@@ -144,8 +144,6 @@
   height: 23.6mm;
   flex-shrink: 0;
   box-sizing: border-box;
-  border: 0.35mm solid #5eead4;
-  border-radius: 1mm;
   background: #fff;
   display: flex;
   flex-direction: column;
@@ -153,12 +151,6 @@
   justify-content: center;
   gap: 0.5mm;
   padding: 0.5mm 0.8mm;
-}
-.wrist-qr--indoor {
-  border-color: #5eead4;
-}
-.wrist-qr--outdoor {
-  border-color: #93c5fd;
 }
 .wrist-qr img {
   width: 18.5mm;
